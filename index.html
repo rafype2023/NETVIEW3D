@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>NetVisio 3D Studio — Diagramador 3D de Infraestructura, Redes, Storage & Seguridad</title>
+  <title>NetVisio 3D Studio — Diagramador 3D de Infraestructura, Virtualización, Redes, Storage & Seguridad</title>
   <link rel="stylesheet" href="./styles.css" />
   <script type="importmap">
     {
@@ -21,7 +21,7 @@
       <div class="brand-cube" aria-hidden="true">3D</div>
       <div>
         <div class="brand-title">NetVisio 3D Studio</div>
-        <div class="brand-subtitle">Diagramador 3D en 3 Ejes • Datacenter CAD</div>
+        <div class="brand-subtitle">Diagramador 3D en 3 Ejes • Datacenter & Virtualización</div>
       </div>
     </div>
 
@@ -62,16 +62,18 @@
         <span aria-hidden="true">⟳</span> Auto-Órbita
       </button>
       <button id="btn-load-demo" class="tool-btn" title="Cargar Arquitectura Datacenter de Referencia">
-        <span aria-hidden="true">🏛️</span> Demo Datacenter
+        <span aria-hidden="true">🏛️</span> Demo
       </button>
       <button id="btn-clear-scene" class="tool-btn" title="Limpiar Diagrama">
         <span aria-hidden="true">🗑️</span> Limpiar
       </button>
       <div class="toolbar-divider"></div>
+      <button id="btn-export-png" class="tool-btn btn-highlight-png" title="Exportar Diagrama 3D a Imagen PNG">
+        <span aria-hidden="true">📸</span> Exportar PNG
+      </button>
       <button id="btn-export-json" class="tool-btn" title="Guardar Proyecto JSON">Guardar JSON</button>
       <button id="btn-import-json" class="tool-btn" title="Abrir Proyecto JSON">Abrir</button>
       <input type="file" id="file-import-json" accept=".json" hidden />
-      <button id="btn-export-png" class="tool-btn" title="Capturar Imagen PNG">PNG</button>
       <button id="btn-export-bom" class="tool-btn" title="Exportar Inventario BOM en CSV">BOM CSV</button>
     </div>
   </header>
@@ -86,7 +88,7 @@
           type="search"
           id="catalog-search"
           class="search-box"
-          placeholder="Buscar Synergy, Nutanix, Alletra, Pure, Nexus 9508, 9410, FortiGate..."
+          placeholder="Buscar Virtual, Windows, Red Hat, Synergy, Alletra, 9508, 9410, FortiGate..."
           aria-label="Buscar equipo en la librería"
         />
       </div>
@@ -98,7 +100,7 @@
     <section class="viewport-wrapper" aria-label="Lienzo de Diagrama 3D">
       <div id="connect-mode-banner" class="connect-banner" hidden></div>
 
-      <!-- Vistas Rápidas de Cámara en los 3 Ejes -->
+      <!-- Vistas Rápidas de Cámara en los 3 Ejes + Captura Rápida PNG -->
       <div class="cam-presets-bar" role="group" aria-label="Vistas de cámara 3D">
         <button class="tool-btn" data-cam-preset="iso">Isométrica 3D</button>
         <button class="tool-btn" data-cam-preset="front">Frontal (Z+)</button>
@@ -106,6 +108,9 @@
         <button class="tool-btn" data-cam-preset="left">Lateral Izq (X-)</button>
         <button class="tool-btn" data-cam-preset="right">Lateral Der (X+)</button>
         <button class="tool-btn" data-cam-preset="top">Planta Superior (Y+)</button>
+        <button id="btn-quick-png" class="tool-btn btn-highlight-png" title="Captura directa en PNG">
+          <span aria-hidden="true">📸</span> Captura PNG
+        </button>
       </div>
 
       <!-- Control Interactivo de Rotación del Diagrama en los 3 Ejes (X, Y, Z) -->
@@ -140,10 +145,61 @@
     </aside>
   </main>
 
+  <!-- Modal de Exportación PNG de Alta Resolución -->
+  <dialog id="png-export-dialog" class="export-dialog" aria-labelledby="export-dialog-title">
+    <div class="export-dialog-header">
+      <h3 id="export-dialog-title">📸 Exportar Diagrama 3D a PNG</h3>
+      <button id="btn-close-png-dialog" class="btn-close-modal" aria-label="Cerrar ventana">✕</button>
+    </div>
+    <div class="export-dialog-body">
+      <div class="export-preview-box">
+        <img id="png-preview-img" alt="Vista previa del diagrama 3D en PNG" />
+      </div>
+      <div class="export-controls">
+        <label class="insp-label">Título del Diagrama en el PNG</label>
+        <input
+          type="text"
+          id="png-title-input"
+          class="insp-input"
+          value="Arquitectura Data Center 3D — Core, Virtualización, Storage & Seguridad"
+        />
+
+        <div class="insp-grid-2" style="margin-top:8px;">
+          <div>
+            <label class="insp-label">Resolución de Salida</label>
+            <select id="png-scale-select" class="insp-input">
+              <option value="2" selected>Ultra HD (2x Alta Densidad)</option>
+              <option value="1">Estándar (1x Pantalla)</option>
+            </select>
+          </div>
+          <div>
+            <label class="insp-label">Fondo del PNG</label>
+            <select id="png-bg-select" class="insp-input">
+              <option value="dark" selected>Oscuro CAD Original</option>
+              <option value="transparent">Transparente (Sin Fondo)</option>
+              <option value="light">Blanco / Impresión</option>
+            </select>
+          </div>
+        </div>
+
+        <label class="export-checkbox-row">
+          <input type="checkbox" id="png-include-header" checked />
+          <span>Incluir cintillo superior con título, fecha y conteo de equipos</span>
+        </label>
+      </div>
+    </div>
+    <div class="export-dialog-footer">
+      <button id="btn-cancel-png" class="btn-secondary">Cancelar</button>
+      <button id="btn-download-png-confirm" class="tool-btn btn-highlight-png" style="padding:8px 18px; font-size:13px;">
+        ⬇️ Descargar Archivo PNG
+      </button>
+    </div>
+  </dialog>
+
   <!-- Barra de Estado Inferior -->
   <footer class="status-bar">
     <div id="status-counts">Cargando escena 3D...</div>
-    <div>Arrastra equipos desde la librería hacia un Rack 42U (auto-snap por U) o a cualquier punto del plano 3D</div>
+    <div>Arrastra Servidores Virtuales (Windows / Red Hat / Appliance), Synergy, Alletra, Nexus 9508, 9410R o FortiGate al lienzo 3D</div>
   </footer>
 
   <div id="toast-notification" class="toast" role="status" aria-live="polite"></div>
@@ -151,4 +207,3 @@
   <script type="module" src="./js/app.js"></script>
 </body>
 </html>
-

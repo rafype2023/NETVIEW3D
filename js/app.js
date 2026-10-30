@@ -9,12 +9,12 @@ const DEG2RAD = Math.PI / 180;
 
 class NetVisio3DApp {
   constructor() {
-    this.nodes = new Map(); // id -> { id, spec, group, data }
-    this.links = new Map(); // id -> { id, fromId, toId, fromPort, toPort, cableType, routeStyle, mesh, pulses }
+    this.nodes = new Map();
+    this.links = new Map();
     this.selectedNodeId = null;
     this.selectedLinkId = null;
 
-    this.interactionMode = 'select'; // 'select' | 'connect'
+    this.interactionMode = 'select';
     this.connectSourceNodeId = null;
     this.activeCategory = 'all';
     this.searchQuery = '';
@@ -33,17 +33,21 @@ class NetVisio3DApp {
     this.viewportEl = document.getElementById('viewport-container');
     this.scene = new THREE.Scene();
     this.scene.background = new THREE.Color(0x0b101b);
-    this.scene.fog = new THREE.FogExp2(0x0b101b, 0.012);
+    this.scene.fog = new THREE.FogExp2(0x0b101b, 0.011);
 
     this.camera = new THREE.PerspectiveCamera(
-      46,
+      45,
       this.viewportEl.clientWidth / this.viewportEl.clientHeight,
       0.1,
       300
     );
-    this.camera.position.set(11.5, 9.2, 15.5);
+    this.camera.position.set(11.5, 9.2, 16.5);
 
-    this.renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
+    this.renderer = new THREE.WebGLRenderer({
+      antialias: true,
+      alpha: true,
+      preserveDrawingBuffer: true
+    });
     this.renderer.setSize(this.viewportEl.clientWidth, this.viewportEl.clientHeight);
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     this.renderer.shadowMap.enabled = true;
@@ -54,9 +58,9 @@ class NetVisio3DApp {
     this.orbit = new OrbitControls(this.camera, this.renderer.domElement);
     this.orbit.enableDamping = true;
     this.orbit.dampingFactor = 0.06;
-    this.orbit.minPolarAngle = 0; // Allow full vertical rotation
-    this.orbit.maxPolarAngle = Math.PI; // Allow looking from underneath too
-    this.orbit.target.set(0, 1.8, 0);
+    this.orbit.minPolarAngle = 0;
+    this.orbit.maxPolarAngle = Math.PI;
+    this.orbit.target.set(-0.5, 1.8, 0.8);
 
     // TransformControls for 3-axis Translation, 3-axis Rotation (X, Y, Z), and Scaling
     this.transformControl = new TransformControls(this.camera, this.renderer.domElement);
@@ -82,30 +86,30 @@ class NetVisio3DApp {
     this.scene.add(this.transformControl);
 
     // Lighting
-    const hemiLight = new THREE.HemisphereLight(0xdbeafe, 0x0f172a, 1.15);
+    const hemiLight = new THREE.HemisphereLight(0xe0f2fe, 0x0f172a, 1.25);
     this.scene.add(hemiLight);
 
-    const dirLight1 = new THREE.DirectionalLight(0xffffff, 1.5);
+    const dirLight1 = new THREE.DirectionalLight(0xffffff, 1.55);
     dirLight1.position.set(14, 24, 18);
     dirLight1.castShadow = true;
     dirLight1.shadow.mapSize.set(2048, 2048);
-    dirLight1.shadow.camera.left = -20;
-    dirLight1.shadow.camera.right = 20;
-    dirLight1.shadow.camera.top = 20;
-    dirLight1.shadow.camera.bottom = -20;
+    dirLight1.shadow.camera.left = -22;
+    dirLight1.shadow.camera.right = 22;
+    dirLight1.shadow.camera.top = 22;
+    dirLight1.shadow.camera.bottom = -22;
     this.scene.add(dirLight1);
 
-    const rimLight = new THREE.DirectionalLight(0x38bdf8, 0.65);
-    rimLight.position.set(-16, 10, -14);
+    const rimLight = new THREE.DirectionalLight(0x38bdf8, 0.75);
+    rimLight.position.set(-16, 12, -14);
     this.scene.add(rimLight);
 
     // Datacenter Raised Floor Grid + 3-Axis Reference Lines
-    this.gridHelper = new THREE.GridHelper(36, 36, 0x0ea5e9, 0x1e293b);
+    this.gridHelper = new THREE.GridHelper(38, 38, 0x0ea5e9, 0x1e293b);
     this.gridHelper.position.y = 0;
     this.scene.add(this.gridHelper);
 
     this.axesHelper = new THREE.AxesHelper(3.5);
-    this.axesHelper.position.set(-17.5, 0.02, -17.5);
+    this.axesHelper.position.set(-18.5, 0.02, -18.5);
     this.scene.add(this.axesHelper);
 
     // Selection Box Helper
@@ -113,7 +117,6 @@ class NetVisio3DApp {
     this.selectionBox.visible = false;
     this.scene.add(this.selectionBox);
 
-    // Raycaster & Pointer Events
     this.raycaster = new THREE.Raycaster();
     this.pointer = new THREE.Vector2();
     this.floorPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
@@ -130,11 +133,11 @@ class NetVisio3DApp {
 
     this.renderer.domElement.addEventListener('pointerup', (e) => {
       const dist = Math.hypot(e.clientX - pointerDownPos.x, e.clientY - pointerDownPos.y);
-      if (dist > 6) return; // Ignore camera orbit drags
+      if (dist > 6) return;
       this.handleCanvasClick(e);
     });
 
-    // Drag & Drop from Stencil Library onto 3D Floor / Racks
+    // Drag & Drop from Stencil Library onto 3D Floor / Racks / Hypervisor
     this.viewportEl.addEventListener('dragover', (e) => {
       e.preventDefault();
       e.dataTransfer.dropEffect = 'copy';
@@ -150,14 +153,41 @@ class NetVisio3DApp {
       this.pointer.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
       this.raycaster.setFromCamera(this.pointer, this.camera);
 
+      const spec = HARDWARE_CATALOG.find((s) => s.id === specId);
+      if (!spec) return;
+
+      // If dropping a Virtual Server Cube, check if dropped onto a Hypervisor or Physical Server
+      if (spec.isVirtualCube) {
+        const hostMeshes = [];
+        this.nodes.forEach((n) => {
+          if (n.spec.isHypervisor || n.spec.category === 'compute') hostMeshes.push(n.group);
+        });
+        const hostHits = this.raycaster.intersectObjects(hostMeshes, true);
+        if (hostHits.length > 0) {
+          const hitHost = this.findNodeFromObject(hostHits[0].object);
+          if (hitHost) {
+            const topY = hitHost.group.position.y + hitHost.spec.height / 2 + spec.height / 2 + 0.02;
+            const offsetX = Math.max(-0.75, Math.min(0.75, hostHits[0].point.x - hitHost.group.position.x));
+            const created = this.addHardwareNode(specId, {
+              position: [
+                Number((hitHost.group.position.x + offsetX).toFixed(2)),
+                Number(topY.toFixed(2)),
+                Number(hitHost.group.position.z.toFixed(2))
+              ]
+            });
+            this.selectNode(created.id);
+            this.showToast(`Desplegado ${spec.name} sobre ${hitHost.data.hostname}`);
+            return;
+          }
+        }
+      }
+
       // Check if dropped onto an existing 42U Rack
       const rackMeshes = [];
       this.nodes.forEach((n) => {
         if (n.spec.isRackContainer) rackMeshes.push(n.group);
       });
       const rackHits = this.raycaster.intersectObjects(rackMeshes, true);
-      const spec = HARDWARE_CATALOG.find((s) => s.id === specId);
-      if (!spec) return;
 
       if (rackHits.length > 0 && !spec.isRackContainer && !spec.isZone && spec.uHeight > 0) {
         const hitRackNode = this.findNodeFromObject(rackHits[0].object);
@@ -231,7 +261,6 @@ class NetVisio3DApp {
     const hits = this.raycaster.intersectObjects(pickables, true);
 
     if (hits.length > 0) {
-      // Prefer non-zone/non-rack if clicking inside a rack or on top of a zone
       let chosenNode = null;
       for (const hit of hits) {
         const candidate = this.findNodeFromObject(hit.object);
@@ -254,7 +283,6 @@ class NetVisio3DApp {
       }
     }
 
-    // Check if user clicked a 3D Cable Link
     const linkMeshes = [];
     this.links.forEach((l) => {
       if (l.mesh) linkMeshes.push(l.mesh);
@@ -319,14 +347,13 @@ class NetVisio3DApp {
       notes: customData.notes || spec.specs,
       customColor: customData.customColor || spec.badgeColor,
       position: customData.position ? [...customData.position] : [0, spec.height / 2, 0],
-      rotation: customData.rotation ? [...customData.rotation] : [0, 0, 0], // degrees [Rx, Ry, Rz]
+      rotation: customData.rotation ? [...customData.rotation] : [0, 0, 0],
       scale: customData.scale ? [...customData.scale] : [1, 1, 1]
     };
 
     const group = buildHardwareMesh(spec, data);
     group.userData.nodeId = id;
 
-    // If mounted inside a rack, compute exact world position from Rack U slot
     if (data.rackId && this.nodes.has(data.rackId)) {
       this.positionNodeInRack(group, spec, data);
     } else {
@@ -387,7 +414,6 @@ class NetVisio3DApp {
       Number(node.group.scale.z.toFixed(2))
     ];
 
-    // If this node is a 42U Rack container, move all equipment mounted in it!
     if (node.spec.isRackContainer) {
       this.nodes.forEach((child) => {
         if (child.data.rackId === node.id) {
@@ -402,7 +428,6 @@ class NetVisio3DApp {
     const p1 = fromNode.group.position.clone();
     const p2 = toNode.group.position.clone();
 
-    // Anchor slightly toward the rear/top of each device for realistic patching
     const start = p1.clone().add(new THREE.Vector3(0, fromNode.spec.height * 0.25, -fromNode.spec.depth * 0.35));
     const end = p2.clone().add(new THREE.Vector3(0, toNode.spec.height * 0.25, -toNode.spec.depth * 0.35));
 
@@ -413,10 +438,9 @@ class NetVisio3DApp {
       return new THREE.CatmullRomCurve3([start, c1, c2, end], false, 'catmullrom', 0.18);
     } else if (routeStyle === 'bezier') {
       const mid = start.clone().lerp(end, 0.5);
-      mid.y += Math.max(1.2, start.distanceTo(end) * 0.22);
+      mid.y += Math.max(1.0, start.distanceTo(end) * 0.22);
       return new THREE.QuadraticBezierCurve3(start, mid, end);
     } else {
-      // Visio 3D Orthogonal / Manhattan Routing along X, Y, Z axes
       const trayY = Math.max(start.y, end.y) + 0.65;
       const midZ = (start.z + end.z) / 2 - 0.45;
       const pts = [
@@ -451,7 +475,6 @@ class NetVisio3DApp {
     mesh.userData.linkId = linkId;
     this.scene.add(mesh);
 
-    // Animated traffic pulse spheres along the 3D cable
     const pulses = [];
     const pulseMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
     for (let i = 0; i < 2; i++) {
@@ -531,7 +554,6 @@ class NetVisio3DApp {
       this.scene.remove(node.group);
       this.nodes.delete(id);
 
-      // Remove attached links
       Array.from(this.links.values()).forEach((l) => {
         if (l.fromId === id || l.toId === id) {
           this.scene.remove(l.mesh);
@@ -565,7 +587,7 @@ class NetVisio3DApp {
     const dup = this.addHardwareNode(orig.spec.id, {
       hostname: `${orig.data.hostname}-COPY`,
       ip: orig.data.ip,
-      position: [orig.group.position.x + 2.3, orig.group.position.y, orig.group.position.z],
+      position: [orig.group.position.x + 1.4, orig.group.position.y, orig.group.position.z],
       rotation: [...orig.data.rotation],
       scale: [...orig.data.scale]
     });
@@ -607,7 +629,7 @@ class NetVisio3DApp {
   }
 
   setCameraPreset(preset) {
-    const target = new THREE.Vector3(0, 1.8, 0);
+    const target = new THREE.Vector3(-0.5, 1.8, 0.8);
     if (this.selectedNodeId && this.nodes.has(this.selectedNodeId)) {
       target.copy(this.nodes.get(this.selectedNodeId).group.position);
     }
@@ -616,7 +638,7 @@ class NetVisio3DApp {
     const dist = 16;
     switch (preset) {
       case 'iso':
-        this.camera.position.set(target.x + 11.5, target.y + 8.5, target.z + 14.5);
+        this.camera.position.set(target.x + 11.5, target.y + 8.5, target.z + 15.0);
         break;
       case 'front':
         this.camera.position.set(target.x, target.y + 1.2, target.z + dist);
@@ -637,7 +659,6 @@ class NetVisio3DApp {
     this.orbit.update();
   }
 
-  // Rotate the camera spherically around X, Y, Z axes via the 3-Axis Scene Orbit dials
   setCameraSphericalAngles(azimuthDeg, polarDeg, rollDeg) {
     const offset = this.camera.position.clone().sub(this.orbit.target);
     const radius = Math.max(4, offset.length());
@@ -654,7 +675,6 @@ class NetVisio3DApp {
   }
 
   initUI() {
-    // Render Category Pills
     const catContainer = document.getElementById('category-tabs');
     catContainer.innerHTML = CATEGORIES.map(
       (c) => `
@@ -671,14 +691,12 @@ class NetVisio3DApp {
       this.renderStencilCatalog();
     });
 
-    // Search input
     const searchInput = document.getElementById('catalog-search');
     searchInput.addEventListener('input', (e) => {
       this.searchQuery = e.target.value.trim().toLowerCase();
       this.renderStencilCatalog();
     });
 
-    // Populate Cable Types in Toolbar
     const cableSelect = document.getElementById('toolbar-cable-type');
     cableSelect.innerHTML = CABLE_TYPES.map(
       (c) => `<option value="${c.id}">${c.name}</option>`
@@ -709,7 +727,7 @@ class NetVisio3DApp {
         <div class="stencil-body">
           <div class="stencil-top">
             <span class="stencil-vendor" style="color:${item.badgeColor}">${item.vendor}</span>
-            <span class="stencil-u">${item.uHeight ? `${item.uHeight}U` : '3D'}</span>
+            <span class="stencil-u">${item.uHeight ? `${item.uHeight}U` : item.isVirtualCube ? 'VM 3D' : '3D'}</span>
           </div>
           <div class="stencil-title">${item.name}</div>
           <div class="stencil-specs">${item.specs}</div>
@@ -730,9 +748,9 @@ class NetVisio3DApp {
         e.stopPropagation();
         const specId = btn.dataset.addSpec;
         const spec = HARDWARE_CATALOG.find((s) => s.id === specId);
-        // If a 42U Rack is currently selected and user clicks + on a rackable device, mount it in the rack!
         const selectedNode = this.selectedNodeId ? this.nodes.get(this.selectedNodeId) : null;
-        if (selectedNode && selectedNode.spec.isRackContainer && !spec.isRackContainer && !spec.isZone) {
+
+        if (selectedNode && selectedNode.spec.isRackContainer && !spec.isRackContainer && !spec.isZone && spec.uHeight > 0) {
           const nextU = this.findNextAvailableUSlot(selectedNode.id, spec.uHeight || 1);
           const created = this.addHardwareNode(specId, {
             rackId: selectedNode.id,
@@ -740,6 +758,19 @@ class NetVisio3DApp {
           });
           this.selectNode(created.id);
           this.showToast(`Instalado ${spec.name} en ${selectedNode.data.hostname} (U${nextU})`);
+        } else if (selectedNode && (selectedNode.spec.isHypervisor || selectedNode.spec.category === 'compute') && spec.isVirtualCube) {
+          // Place Virtual Server Cube right on top of the selected Hypervisor or Server
+          const topY = selectedNode.group.position.y + selectedNode.spec.height / 2 + spec.height / 2 + 0.02;
+          const jitterX = (Math.random() - 0.5) * 1.1;
+          const created = this.addHardwareNode(specId, {
+            position: [
+              Number((selectedNode.group.position.x + jitterX).toFixed(2)),
+              Number(topY.toFixed(2)),
+              Number(selectedNode.group.position.z.toFixed(2))
+            ]
+          });
+          this.selectNode(created.id);
+          this.showToast(`Añadido ${spec.name} sobre ${selectedNode.data.hostname}`);
         } else {
           const jitterX = (Math.random() - 0.5) * 3;
           const jitterZ = (Math.random() - 0.5) * 3;
@@ -790,7 +821,6 @@ class NetVisio3DApp {
       btn.addEventListener('click', () => this.setCameraPreset(btn.dataset.camPreset));
     });
 
-    // 3-Axis Scene Camera Orbit Sliders (Eje X Pitch, Eje Y Yaw, Eje Z Roll)
     const sliderYaw = document.getElementById('scene-rot-y');
     const sliderPitch = document.getElementById('scene-rot-x');
     const sliderRoll = document.getElementById('scene-rot-z');
@@ -849,8 +879,171 @@ class NetVisio3DApp {
       document.getElementById('file-import-json')?.click();
     });
     document.getElementById('file-import-json')?.addEventListener('change', (e) => this.importDiagramJSON(e));
-    document.getElementById('btn-export-png')?.addEventListener('click', () => this.exportPNGSnapshot());
+
+    // Export to PNG Modal & Quick PNG Download
+    document.getElementById('btn-export-png')?.addEventListener('click', () => this.openPNGExportDialog());
+    document.getElementById('btn-quick-png')?.addEventListener('click', () => this.openPNGExportDialog());
+    document.getElementById('btn-close-png-dialog')?.addEventListener('click', () => {
+      document.getElementById('png-export-dialog')?.close();
+    });
+    document.getElementById('btn-cancel-png')?.addEventListener('click', () => {
+      document.getElementById('png-export-dialog')?.close();
+    });
+    document.getElementById('btn-download-png-confirm')?.addEventListener('click', () => {
+      this.downloadConfiguredPNG();
+    });
+
+    ['png-scale-select', 'png-bg-select', 'png-include-header', 'png-title-input'].forEach((id) => {
+      document.getElementById(id)?.addEventListener('input', () => this.refreshPNGDialogPreview());
+      document.getElementById(id)?.addEventListener('change', () => this.refreshPNGDialogPreview());
+    });
+
     document.getElementById('btn-export-bom')?.addEventListener('click', () => this.exportBOMCSV());
+  }
+
+  // ================= HIGH-RESOLUTION PNG EXPORT ENGINE =================
+  generateCompositePNGCanvas({ scale = 2, bgMode = 'dark', includeHeader = true, titleText = '' } = {}) {
+    const prevGizmoVisible = this.transformControl.visible;
+    const prevBoxVisible = this.selectionBox.visible;
+    const prevBg = this.scene.background;
+    const prevFog = this.scene.fog;
+    const prevPixelRatio = this.renderer.getPixelRatio();
+
+    // Hide gizmos during clean PNG render
+    this.transformControl.visible = false;
+    this.selectionBox.visible = false;
+
+    if (bgMode === 'transparent') {
+      this.scene.background = null;
+      this.scene.fog = null;
+    } else if (bgMode === 'light') {
+      this.scene.background = new THREE.Color(0xf8fafc);
+      this.scene.fog = null;
+    } else {
+      this.scene.background = new THREE.Color(0x0b101b);
+    }
+
+    this.renderer.setPixelRatio(scale);
+    this.renderer.render(this.scene, this.camera);
+
+    const glCanvas = this.renderer.domElement;
+    const headerH = includeHeader ? Math.round(68 * scale) : 0;
+    const outCanvas = document.createElement('canvas');
+    outCanvas.width = glCanvas.width;
+    outCanvas.height = glCanvas.height + headerH;
+    const ctx = outCanvas.getContext('2d');
+
+    if (bgMode === 'light') {
+      ctx.fillStyle = '#f8fafc';
+      ctx.fillRect(0, 0, outCanvas.width, outCanvas.height);
+    } else if (bgMode === 'dark') {
+      ctx.fillStyle = '#0b101b';
+      ctx.fillRect(0, 0, outCanvas.width, outCanvas.height);
+    }
+
+    if (includeHeader) {
+      ctx.fillStyle = '#0f172a';
+      ctx.fillRect(0, 0, outCanvas.width, headerH);
+      ctx.fillStyle = '#00e5ff';
+      ctx.fillRect(0, headerH - 3 * scale, outCanvas.width, 3 * scale);
+
+      ctx.fillStyle = '#ffffff';
+      ctx.font = `bold ${20 * scale}px system-ui, -apple-system, sans-serif`;
+      ctx.fillText(
+        titleText || 'NetVisio 3D Studio — Diagrama de Infraestructura 3D',
+        20 * scale,
+        28 * scale
+      );
+
+      const devCount = Array.from(this.nodes.values()).filter((n) => !n.spec.isZone).length;
+      const vmCount = Array.from(this.nodes.values()).filter((n) => n.spec.isVirtualCube).length;
+      const linkCount = this.links.size;
+      const dateStr = new Date().toLocaleDateString('es-ES');
+
+      ctx.fillStyle = '#94a3b8';
+      ctx.font = `600 ${13 * scale}px ui-monospace, SFMono-Regular, monospace`;
+      ctx.fillText(
+        `${devCount} Equipos Totales • ${vmCount} Servidores Virtuales • ${linkCount} Enlaces 3D • Exportado: ${dateStr}`,
+        20 * scale,
+        51 * scale
+      );
+    }
+
+    ctx.drawImage(glCanvas, 0, headerH);
+
+    // Restore scene & renderer state
+    this.renderer.setPixelRatio(prevPixelRatio);
+    this.scene.background = prevBg;
+    this.scene.fog = prevFog;
+    this.transformControl.visible = prevGizmoVisible;
+    this.selectionBox.visible = prevBoxVisible;
+    this.renderer.render(this.scene, this.camera);
+
+    return outCanvas;
+  }
+
+  openPNGExportDialog() {
+    const dialog = document.getElementById('png-export-dialog');
+    this.refreshPNGDialogPreview();
+    if (dialog && typeof dialog.showModal === 'function') {
+      dialog.showModal();
+    } else {
+      this.downloadConfiguredPNG();
+    }
+  }
+
+  refreshPNGDialogPreview() {
+    const previewImg = document.getElementById('png-preview-img');
+    if (!previewImg) return;
+    const bgMode = document.getElementById('png-bg-select')?.value || 'dark';
+    const includeHeader = document.getElementById('png-include-header')?.checked ?? true;
+    const titleText = document.getElementById('png-title-input')?.value || '';
+
+    const canvas = this.generateCompositePNGCanvas({
+      scale: 1,
+      bgMode,
+      includeHeader,
+      titleText
+    });
+    previewImg.src = canvas.toDataURL('image/png');
+  }
+
+  downloadConfiguredPNG() {
+    const scale = parseInt(document.getElementById('png-scale-select')?.value || '2', 10);
+    const bgMode = document.getElementById('png-bg-select')?.value || 'dark';
+    const includeHeader = document.getElementById('png-include-header')?.checked ?? true;
+    const titleText = document.getElementById('png-title-input')?.value || '';
+
+    const outCanvas = this.generateCompositePNGCanvas({
+      scale,
+      bgMode,
+      includeHeader,
+      titleText
+    });
+
+    const filename = `netview3d-diagrama-${Date.now()}.png`;
+    if (outCanvas.toBlob) {
+      outCanvas.toBlob((blob) => {
+        if (!blob) return;
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        setTimeout(() => URL.revokeObjectURL(url), 2000);
+        document.getElementById('png-export-dialog')?.close();
+        this.showToast(`Imagen PNG (${outCanvas.width}×${outCanvas.height}px) descargada`);
+      }, 'image/png');
+    } else {
+      const a = document.createElement('a');
+      a.href = outCanvas.toDataURL('image/png');
+      a.download = filename;
+      a.click();
+      document.getElementById('png-export-dialog')?.close();
+      this.showToast('Imagen PNG descargada');
+    }
   }
 
   updateInspectorTransformInputs(node) {
@@ -888,7 +1081,7 @@ class NetVisio3DApp {
       container.innerHTML = `
         <div class="insp-section">
           <div class="insp-badge" style="background:${spec.badgeColor}22; color:${spec.badgeColor}; border:1px solid ${spec.badgeColor}">
-            ${spec.vendor} • ${spec.uHeight ? `${spec.uHeight}U` : 'Topología 3D'}
+            ${spec.vendor} • ${spec.uHeight ? `${spec.uHeight}U` : spec.isVirtualCube ? 'Servidor Virtual 3D' : 'Topología 3D'}
           </div>
           <h3 class="insp-title">${spec.name}</h3>
           <p class="insp-sub">${spec.specs}</p>
@@ -896,7 +1089,7 @@ class NetVisio3DApp {
           <label class="insp-label">Hostname / Etiqueta 3D</label>
           <input type="text" id="inp-hostname" class="insp-input" value="${data.hostname}" />
 
-          <label class="insp-label">IP de Gestión / Subred / Rol</label>
+          <label class="insp-label">IP de Gestión / Sistema Operativo / Rol</label>
           <input type="text" id="inp-ip" class="insp-input" value="${data.ip}" />
         </div>
 
@@ -1138,19 +1331,18 @@ class NetVisio3DApp {
       return;
     }
 
-    // Default Inspector Summary when nothing is selected
     container.innerHTML = `
       <div class="insp-empty">
         <div class="insp-empty-icon">◈</div>
         <h3>Inspector 3D</h3>
-        <p>Selecciona cualquier servidor, switch, chassis Cisco, FortiGate, storage Pure/Alletra o cable 3D para editar sus propiedades, puertos o rotarlo en los <strong>3 ejes (X, Y, Z)</strong>.</p>
+        <p>Selecciona cualquier <strong>Servidor Virtual (Windows, Red Hat, Appliance)</strong>, <strong>HPE Synergy</strong>, <strong>Alletra</strong>, <strong>Cisco Nexus 9508</strong>, <strong>Catalyst 9410R</strong> o <strong>FortiGate</strong> para editar propiedades o rotarlo en los <strong>3 ejes (X, Y, Z)</strong>.</p>
         <div class="shortcut-list">
           <div><kbd>Clic + Arrastrar</kbd><span>Rotar diagrama 3D (3 ejes)</span></div>
           <div><kbd>Clic Derecho</kbd><span>Desplazar cámara (Pan)</span></div>
           <div><kbd>Scroll</kbd><span>Zoom 3D</span></div>
           <div><kbd>W</kbd> / <kbd>E</kbd> / <kbd>R</kbd><span>Mover / Rotar 3 Ejes / Escalar</span></div>
           <div><kbd>C</kbd><span>Conectar Cable 3D entre equipos</span></div>
-          <div><kbd>Supr</kbd><span>Eliminar objeto seleccionado</span></div>
+          <div><kbd>📸 Exportar PNG</kbd><span>Guardar imagen en Alta Resolución</span></div>
         </div>
       </div>
     `;
@@ -1171,90 +1363,130 @@ class NetVisio3DApp {
   loadEnterpriseSampleArchitecture() {
     this.clearScene();
 
-    // 1. Visio-style 3D Security / Core / Compute & Storage Zone Platforms
+    // 1. Visio-style 3D Security / Core / Virtualization / Compute & Storage Zone Platforms
     this.addHardwareNode('zone-platform', {
-      hostname: 'ZONA PERIMETRAL & SEGURIDAD FORTINET',
-      ip: 'VLAN 10 / DMZ / SD-WAN Edge',
+      hostname: 'ZONA PERIMETRAL FORTINET',
+      ip: 'FG-1800F HA + FG-600F + FG-200F',
       customColor: '#ee3124',
-      position: [-8.5, 0.04, 5.2],
-      scale: [0.95, 1, 0.85]
+      position: [-8.8, 0.04, 5.2],
+      scale: [0.92, 1, 0.85]
     });
 
     this.addHardwareNode('zone-platform', {
       hostname: 'ZONA CORE & DISTRIBUCIÓN CISCO',
       ip: 'Nexus 9508 Spine + Catalyst 9410R/9300',
       customColor: '#00bceb',
-      position: [0, 0.04, 5.2],
+      position: [-0.2, 0.04, 5.2],
       scale: [1.05, 1, 0.85]
     });
 
     this.addHardwareNode('zone-platform', {
-      hostname: 'ZONA CÓMPUTO SYNERGY, NUTANIX & STORAGE',
-      ip: 'HPE Synergy + Nutanix HCI + Alletra + Pure',
+      hostname: 'ZONA VIRTUALIZACIÓN 3D (WINDOWS / RHEL / APPLIANCE)',
+      ip: 'Cluster Hypervisor + Instancias Aisladas',
+      customColor: '#00b4ff',
+      position: [-7.2, 0.04, -2.8],
+      scale: [0.95, 1, 0.95]
+    });
+
+    this.addHardwareNode('zone-platform', {
+      hostname: 'ZONA SYNERGY, NUTANIX & STORAGE ALLETRA/PURE',
+      ip: 'HPE Synergy 12000 + Alletra 9000 + Pure Storage',
       customColor: '#01a982',
-      position: [4.2, 0.04, -3.2],
-      scale: [1.9, 1, 1.1]
+      position: [3.2, 0.04, -3.2],
+      scale: [1.75, 1, 1.05]
     });
 
     // External WAN Dark Fiber Cloud
     const wanCloud = this.addHardwareNode('cloud-wan', {
-      hostname: 'FIBRA OSCURA / WAN CARRIER',
+      hostname: 'RED / INTERNET WAN',
       ip: '100G Dark Fiber Ring',
-      position: [-12.5, 2.6, 5.2]
+      position: [-12.5, 2.8, 5.2]
+    });
+
+    // ================= VIRTUALIZATION STACK (MATCHING "Servidor Virtual.png") =================
+    const physHost = this.addHardwareNode('hpe-dl380-gen11', {
+      hostname: 'SERVIDOR-FISICO-HV01',
+      ip: '10.20.50.10 (Hardware Real 2U)',
+      position: [-7.2, 0.22, -2.8],
+      scale: [1.26, 1.25, 1.0]
+    });
+
+    const hypervisor = this.addHardwareNode('hypervisor-layer', {
+      hostname: 'HYPERVISOR-ESXI-AHV',
+      ip: 'Crea y gestiona servidores virtuales',
+      position: [-7.2, 0.62, -2.8]
+    });
+
+    const vmWin = this.addHardwareNode('vm-windows-server', {
+      hostname: 'Servidor Virtual 1',
+      ip: 'Windows Server • AD/SQL',
+      position: [-8.0, 1.22, -2.8]
+    });
+
+    const vmRhel = this.addHardwareNode('vm-linux-redhat', {
+      hostname: 'Servidor Virtual 2',
+      ip: 'Linux Red Hat (RHEL 9)',
+      position: [-7.2, 1.22, -2.8]
+    });
+
+    const vmApp = this.addHardwareNode('vm-appliance', {
+      hostname: 'Servidor Virtual 3',
+      ip: 'Virtual Appliance (vApp)',
+      position: [-6.4, 1.22, -2.8]
     });
 
     // ================= SECURITY PERIMETER (FORTIGATE 1800F, 600F, 200F) =================
     const fg1800A = this.addHardwareNode('fortigate-1800f', {
       hostname: 'FG-1800F-CORE-A',
       ip: '10.20.0.1 (HA Primary)',
-      position: [-8.5, 2.2, 6.2]
+      position: [-8.8, 2.2, 6.2]
     });
     const fg1800B = this.addHardwareNode('fortigate-1800f', {
       hostname: 'FG-1800F-CORE-B',
       ip: '10.20.0.2 (HA Secondary)',
-      position: [-8.5, 1.5, 6.2]
+      position: [-8.8, 1.5, 6.2]
     });
     const fg600 = this.addHardwareNode('fortigate-600f', {
       hostname: 'FG-600F-SEGMENT',
       ip: '10.20.0.11 (Internal FW)',
-      position: [-8.5, 0.9, 4.2]
+      position: [-8.8, 0.9, 4.2]
     });
     const fg200 = this.addHardwareNode('fortigate-200f', {
       hostname: 'FG-200F-SDWAN',
       ip: '10.20.0.21 (Branch/DMZ)',
-      position: [-8.5, 0.4, 4.2]
+      position: [-8.8, 0.4, 4.2]
     });
 
     // ================= CISCO CORE & SWITCHING (NEXUS 9508, CATALYST 9410R, 9300 48p/24p) =================
     const n9508 = this.addHardwareNode('cisco-nexus-9508', {
       hostname: 'CORE-NEXUS-9508',
       ip: '10.20.1.1 (Spine Core)',
-      position: [-1.4, 1.1, 5.2]
+      position: [-1.6, 1.1, 5.2]
     });
 
     const c9410 = this.addHardwareNode('cisco-catalyst-9410r', {
       hostname: 'DIST-CAT-9410R',
       ip: '10.20.2.1 (10-Slot Chassis)',
-      position: [1.6, 1.1, 5.2]
+      position: [1.4, 1.1, 5.2]
     });
 
     const c9300_48 = this.addHardwareNode('cisco-catalyst-9300-48p', {
       hostname: 'SW-C9300-48P-01',
       ip: '10.20.3.11 (48x PoE+)',
-      position: [1.6, 2.55, 5.2]
+      position: [1.4, 2.55, 5.2]
     });
 
     const c9300_24 = this.addHardwareNode('cisco-catalyst-9300-24t', {
       hostname: 'SW-C9300-24T-02',
       ip: '10.20.3.12 (24x RJ45)',
-      position: [1.6, 2.95, 5.2]
+      position: [1.4, 2.95, 5.2]
     });
 
     // ================= RACK 1: COMPUTE & HCI (HPE SYNERGY 12000 + NUTANIX + PROLIANT) =================
     const rackCompute = this.addHardwareNode('rack-42u', {
       hostname: 'RACK-COMPUTE-A01',
       ip: 'Fila A - Gabinete 01 (Synergy & HCI)',
-      position: [0.5, 3.1, -3.2]
+      position: [0.2, 3.1, -3.2]
     });
 
     const synergy = this.addHardwareNode('hpe-synergy-12000', {
@@ -1296,7 +1528,7 @@ class NetVisio3DApp {
     const rackStorage = this.addHardwareNode('rack-42u', {
       hostname: 'RACK-STORAGE-B01',
       ip: 'Fila B - Gabinete 02 (Alletra & Pure)',
-      position: [6.2, 3.1, -3.2]
+      position: [5.6, 3.1, -3.2]
     });
 
     const alletra9k = this.addHardwareNode('hpe-alletra-9000', {
@@ -1335,7 +1567,6 @@ class NetVisio3DApp {
     });
 
     // ================= 3D INTERCONNECTIONS (CABLES) =================
-    // Dark Fiber WAN to FortiGate 1800F HA Pair
     this.addCableLink({
       fromId: wanCloud.id,
       toId: fg1800A.id,
@@ -1344,7 +1575,6 @@ class NetVisio3DApp {
       cableType: 'os2-yellow',
       routeStyle: 'bezier'
     });
-    // HA Heartbeat between FG-1800F-A and FG-1800F-B
     this.addCableLink({
       fromId: fg1800A.id,
       toId: fg1800B.id,
@@ -1353,7 +1583,6 @@ class NetVisio3DApp {
       cableType: 'ha-red',
       routeStyle: 'manhattan'
     });
-    // FortiGate 1800F to Cisco Nexus 9508 Core
     this.addCableLink({
       fromId: fg1800A.id,
       toId: n9508.id,
@@ -1365,7 +1594,7 @@ class NetVisio3DApp {
     this.addCableLink({
       fromId: fg600.id,
       toId: c9410.id,
-      fromPort: 'port25-25G (Uplink)',
+      fromPort: 'X1-SFP+ (Uplink)',
       toPort: 'Sup5-40G-1',
       cableType: 'om4-aqua',
       routeStyle: 'manhattan'
@@ -1374,9 +1603,35 @@ class NetVisio3DApp {
       fromId: fg200.id,
       toId: fg600.id,
       fromPort: 'X1-10G',
-      toPort: 'X1-10G (FortiLink)',
+      toPort: 'X2-SFP+ (Uplink)',
       cableType: 'ha-red',
       routeStyle: 'manhattan'
+    });
+
+    // Virtualization cluster uplinks to Core Nexus 9508 and WAN
+    this.addCableLink({
+      fromId: physHost.id,
+      toId: n9508.id,
+      fromPort: 'OCP-25G-1',
+      toPort: 'LC4-25G-1',
+      cableType: 'om4-aqua',
+      routeStyle: 'manhattan'
+    });
+    this.addCableLink({
+      fromId: vmRhel.id,
+      toId: wanCloud.id,
+      fromPort: 'eth0 (vSwitch)',
+      toPort: 'Carrier-A (100G)',
+      cableType: 'om4-aqua',
+      routeStyle: 'overhead'
+    });
+    this.addCableLink({
+      fromId: vmApp.id,
+      toId: wanCloud.id,
+      fromPort: 'vPort-Data',
+      toPort: 'Carrier-B (100G)',
+      cableType: 'om4-aqua',
+      routeStyle: 'overhead'
     });
 
     // Nexus 9508 Core to Catalyst 9410R & Access Switches
@@ -1470,6 +1725,7 @@ class NetVisio3DApp {
 
   updateStatsBar() {
     const devCount = Array.from(this.nodes.values()).filter((n) => !n.spec.isZone).length;
+    const vmCount = Array.from(this.nodes.values()).filter((n) => n.spec.isVirtualCube).length;
     const linkCount = this.links.size;
     const totalU = Array.from(this.nodes.values())
       .filter((n) => !n.spec.isRackContainer && !n.spec.isZone)
@@ -1477,13 +1733,13 @@ class NetVisio3DApp {
 
     const el = document.getElementById('status-counts');
     if (el) {
-      el.textContent = `${devCount} Equipos 3D • ${linkCount} Enlaces • ${totalU}U instalados`;
+      el.textContent = `${devCount} Equipos 3D (${vmCount} VMs) • ${linkCount} Enlaces • ${totalU}U instalados`;
     }
   }
 
   exportDiagramJSON() {
     const payload = {
-      version: '1.0',
+      version: '1.1',
       exportedAt: new Date().toISOString(),
       nodes: Array.from(this.nodes.values()).map((n) => ({
         id: n.id,
@@ -1518,7 +1774,6 @@ class NetVisio3DApp {
       try {
         const data = JSON.parse(reader.result);
         this.clearScene();
-        // First add racks/zones, then mounted devices
         const sortedNodes = [...(data.nodes || [])].sort((a, b) => (a.rackId ? 1 : -1));
         sortedNodes.forEach((n) => this.addHardwareNode(n.specId, n));
         (data.links || []).forEach((l) => this.addCableLink(l));
@@ -1530,19 +1785,9 @@ class NetVisio3DApp {
     reader.readAsText(file);
   }
 
-  exportPNGSnapshot() {
-    this.renderer.render(this.scene, this.camera);
-    const url = this.renderer.domElement.toDataURL('image/png');
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `visio3d-captura-${Date.now()}.png`;
-    a.click();
-    this.showToast('Captura PNG de alta resolución descargada');
-  }
-
   exportBOMCSV() {
     const rows = [
-      ['Hostname', 'Fabricante', 'Modelo', 'Altura U', 'IP / Gestión', 'Rack Asignado', 'Slot U', 'Coordenadas 3D (X,Y,Z)']
+      ['Hostname', 'Fabricante', 'Modelo', 'Altura U / Tipo', 'IP / Gestión', 'Rack Asignado', 'Slot U', 'Coordenadas 3D (X,Y,Z)']
     ];
     this.nodes.forEach((n) => {
       if (n.spec.isZone) return;
@@ -1551,7 +1796,7 @@ class NetVisio3DApp {
         n.data.hostname,
         n.spec.vendor,
         n.spec.name,
-        n.spec.uHeight || 0,
+        n.spec.uHeight ? `${n.spec.uHeight}U` : 'Virtual / 3D',
         n.data.ip,
         rackName,
         n.data.rackId ? `U${n.data.uSlot}` : '-',
@@ -1600,4 +1845,3 @@ class NetVisio3DApp {
 window.addEventListener('DOMContentLoaded', () => {
   window.netVisioApp = new NetVisio3DApp();
 });
-

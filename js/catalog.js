@@ -1,12 +1,13 @@
-// Hardware Stencil Catalog for NetVisio 3D Studio
+// Hardware & Virtualization Stencil Catalog for NetVisio 3D Studio
 export const CATEGORIES = [
-  { id: 'all', name: 'Todos los Equipos', icon: '◈' },
-  { id: 'enclosures', name: 'Racks & Enclosures (Synergy)', icon: '▣' },
-  { id: 'compute', name: 'Servidores & HCI (Nutanix)', icon: '▤' },
+  { id: 'all', name: 'Todos', icon: '◈' },
+  { id: 'virtual', name: 'Servidores Virtuales (VM)', icon: '🧊' },
+  { id: 'enclosures', name: 'Racks & Synergy', icon: '▣' },
+  { id: 'compute', name: 'Servidores & Nutanix', icon: '▤' },
   { id: 'storage', name: 'Storage (Alletra / Pure)', icon: '▥' },
-  { id: 'network', name: 'Redes Cisco (Nexus / Catalyst)', icon: '⇄' },
+  { id: 'network', name: 'Cisco (Nexus / Catalyst)', icon: '⇄' },
   { id: 'security', name: 'Seguridad (FortiGate)', icon: '🛡️' },
-  { id: 'zones', name: 'Zonas & Topología Visio', icon: '⬡' }
+  { id: 'zones', name: 'Zonas & Topología', icon: '⬡' }
 ];
 
 export const CABLE_TYPES = [
@@ -18,9 +19,92 @@ export const CABLE_TYPES = [
   { id: 'dac-purple', name: 'QSFP-DD / DAC Twinax Trunk', color: '#d500f9', radius: 0.028, speed: '400G' }
 ];
 
-// Standard 19-inch rack width in scene units = 1.9, 1U height = 0.14, standard depth = 2.4 (switches shorter)
 export const HARDWARE_CATALOG = [
+  // ================= VIRTUAL SERVERS (3 VERSIONS + HYPERVISOR) =================
+  {
+    id: 'vm-windows-server',
+    name: 'Servidor Virtual — Windows Server',
+    vendor: 'Microsoft Windows',
+    category: 'virtual',
+    uHeight: 0,
+    width: 0.72,
+    height: 0.78,
+    depth: 0.72,
+    isVirtualCube: true,
+    vmType: 'windows',
+    badgeColor: '#00b4ff',
+    defaultHostname: 'VM-WIN-SRV01',
+    defaultIp: '10.20.50.11 (Windows Server 2025)',
+    specs: 'Instancia Virtual Aislada | Windows Server | Active Directory / IIS / SQL | vNIC 25G',
+    ports: ['vNIC-0 (VLAN 50)', 'vNIC-1 (Mgmt)', 'vHBA-SAN']
+  },
+  {
+    id: 'vm-linux-redhat',
+    name: 'Servidor Virtual — Linux Red Hat',
+    vendor: 'Red Hat Enterprise Linux',
+    category: 'virtual',
+    uHeight: 0,
+    width: 0.72,
+    height: 0.78,
+    depth: 0.72,
+    isVirtualCube: true,
+    vmType: 'redhat',
+    badgeColor: '#ee0000',
+    defaultHostname: 'VM-RHEL-APP01',
+    defaultIp: '10.20.50.12 (RHEL 9.4 Enterprise)',
+    specs: 'Instancia Virtual Aislada | Red Hat Enterprise Linux (RHEL) | OpenShift / Containers / DB',
+    ports: ['eth0 (vSwitch)', 'eth1 (Cluster)', 'vStorage']
+  },
+  {
+    id: 'vm-appliance',
+    name: 'Servidor Virtual — Virtual Appliance',
+    vendor: 'Virtual Appliance (vApp)',
+    category: 'virtual',
+    uHeight: 0,
+    width: 0.72,
+    height: 0.78,
+    depth: 0.72,
+    isVirtualCube: true,
+    vmType: 'appliance',
+    badgeColor: '#10b981',
+    defaultHostname: 'VM-VAPP-SEC01',
+    defaultIp: '10.20.50.15 (OVA Hardened Appliance)',
+    specs: 'Instancia Virtual Aislada | Virtual Appliance Preconfigurado (vCenter / FortiManager / NetScaler / Backup)',
+    ports: ['vPort-Mgmt', 'vPort-Data', 'vPort-HA']
+  },
+  {
+    id: 'hypervisor-layer',
+    name: 'Capa Hypervisor 3D (ESXi / AHV)',
+    vendor: 'Hypervisor',
+    category: 'virtual',
+    uHeight: 0,
+    width: 2.35,
+    height: 0.34,
+    depth: 1.55,
+    isHypervisor: true,
+    badgeColor: '#00d2ff',
+    defaultHostname: 'HYPERVISOR-CLUSTER-01',
+    defaultIp: 'VMware ESXi / Nutanix AHV',
+    specs: 'Plataforma Hypervisor Holográfica 3D | Crea y gestiona servidores virtuales sobre hardware físico',
+    ports: ['vSwitch-Uplink1', 'vSwitch-Uplink2', 'vMotion', 'vSAN']
+  },
+
   // ================= ENCLOSURES & RACKS =================
+  {
+    id: 'hpe-synergy-12000',
+    name: 'HPE Synergy 12000 Frame',
+    vendor: 'HPE',
+    category: 'enclosures',
+    uHeight: 10,
+    width: 1.9,
+    height: 1.45,
+    depth: 2.55,
+    badgeColor: '#01a982',
+    defaultHostname: 'SYN12K-FRAME01',
+    defaultIp: '10.20.10.10',
+    specs: '10U Composable Blade Enclosure | 12 Bahías Synergy 480 Compute | Dual Appliance Bay (OneView Composer)',
+    ports: ['ICM-1 (100G)', 'ICM-2 (100G)', 'ICM-3 (FC)', 'ICM-4 (FC)', 'FLM-Mgmt1', 'FLM-Mgmt2']
+  },
   {
     id: 'rack-42u',
     name: 'Rack Enterprise 42U',
@@ -36,21 +120,6 @@ export const HARDWARE_CATALOG = [
     defaultIp: 'Sala Principal - Fila A',
     specs: '42U Standard 19" Cabinet | Soporta montaje automático por U o rotación libre',
     ports: ['PDU-A', 'PDU-B', 'Top-Tray-L', 'Top-Tray-R']
-  },
-  {
-    id: 'hpe-synergy-12000',
-    name: 'HPE Synergy 12000 Frame',
-    vendor: 'HPE',
-    category: 'enclosures',
-    uHeight: 10,
-    width: 1.9,
-    height: 1.4,
-    depth: 2.55,
-    badgeColor: '#01a982',
-    defaultHostname: 'SYN12K-FRAME01',
-    defaultIp: '10.20.10.10',
-    specs: '10U Composable Blade Enclosure | 12 Compute Bays | Dual Composer2 + Virtual Connect SE 100Gb',
-    ports: ['ICM-1 (100G)', 'ICM-2 (100G)', 'ICM-3 (FC)', 'ICM-4 (FC)', 'FLM-Mgmt1', 'FLM-Mgmt2']
   },
 
   // ================= COMPUTE & HCI =================
@@ -143,7 +212,7 @@ export const HARDWARE_CATALOG = [
     badgeColor: '#01a982',
     defaultHostname: 'STR-ALLETRA9K-01',
     defaultIp: '10.20.40.10',
-    specs: '4U Mission-Critical All-NVMe Storage | 4 Controller Nodes | 48x NVMe SFF | 32G/64G FC + 100GbE',
+    specs: '4U Mission-Critical All-NVMe Storage | Bezel HPE Alletra con Chevrones Teal | 32G/64G FC + 100GbE',
     ports: ['N0-FC1', 'N0-FC2', 'N1-FC1', 'N1-FC2', 'N2-FC1', 'N3-FC1', 'RCIP-100G-1', 'RCIP-100G-2']
   },
   {
@@ -205,7 +274,7 @@ export const HARDWARE_CATALOG = [
     badgeColor: '#00bceb',
     defaultHostname: 'CORE-N9508-01',
     defaultIp: '10.20.1.1',
-    specs: '13U Modular Data Center Spine/Core | 8 Line Card Slots (100G/400G) | Dual Supervisor | 8x 3kW PSU',
+    specs: '13U Modular Spine/Core | 8 Line Card Slots (3.84 Tbps/slot) | 2 Sup Engines | 3kW PSUs + 3 Rear Fan Trays',
     ports: ['LC1-400G-1', 'LC1-400G-2', 'LC2-100G-1', 'LC2-100G-2', 'LC3-100G-1', 'LC4-25G-1', 'SUP1-Mgmt', 'SUP2-Mgmt']
   },
   {
@@ -220,7 +289,7 @@ export const HARDWARE_CATALOG = [
     badgeColor: '#049fd9',
     defaultHostname: 'DIST-C9410R-01',
     defaultIp: '10.20.2.1',
-    specs: '13U 10-Slot Modular Enterprise Chassis | Slots 5 & 6 Dual Supervisor Engine-2XL | 8 Line Cards (RJ45/SFP+) | 8x PSU',
+    specs: '13U 10-Slot Chassis | 8x PSUs Superiores | Slots 5 & 6 Dual Supervisor Engine-2XL | Asa Vertical Izquierda',
     ports: ['Sup5-40G-1', 'Sup5-40G-2', 'Sup6-40G-1', 'Sup6-40G-2', 'Slot1-Gi1/0/1', 'Slot2-Gi2/0/1', 'Slot7-Ten7/0/1', 'Slot8-Ten8/0/1']
   },
   {
@@ -282,23 +351,23 @@ export const HARDWARE_CATALOG = [
     badgeColor: '#ee3124',
     defaultHostname: 'FW-FG1800F-01',
     defaultIp: '10.20.0.1',
-    specs: '2U Hyperscale Data Center NGFW | NP7 Hardware Acceleration | 4x 100G/40G QSFP28 + 12x 25G/10G SFP28 + 16x SFP+',
+    specs: '2U White Chassis Data Center NGFW | Rejillas Hexagonales Superiores | 4x 100G/40G QSFP28 + 12x 25G SFP28',
     ports: ['port37-100G', 'port38-100G', 'port39-40G', 'port40-40G', 'port25-25G', 'port26-25G', 'HA1', 'HA2', 'MGMT1']
   },
   {
     id: 'fortigate-600f',
-    name: 'FortiGate 600F (1U Enterprise)',
+    name: 'FortiGate 600F / 600E (1U Enterprise)',
     vendor: 'Fortinet',
     category: 'security',
     uHeight: 1,
     width: 1.9,
-    height: 0.14,
+    height: 0.15,
     depth: 1.50,
     badgeColor: '#ee3124',
     defaultHostname: 'FW-FG600F-01',
     defaultIp: '10.20.0.11',
-    specs: '1U Enterprise Edge/Internal Segmentation NGFW | 4x 25G SFP28 + 4x 10G SFP+ + 16x GE RJ45 + 8x GE SFP',
-    ports: ['port25-25G (Uplink)', 'port26-25G (Uplink)', 'X1-10G (FortiLink)', 'X2-10G (FortiLink)', 'port1-WAN1', 'port2-WAN2', 'HA']
+    specs: '1U White Chassis Enterprise NGFW | 4x 25G/10G SFP28/SFP+ + 8x GE SFP + 8x RJ45 + Dual USB/Console',
+    ports: ['X1-SFP+ (Uplink)', 'X2-SFP+ (Uplink)', 'S1-SFP', 'S2-SFP', 'port1-RJ45', 'port2-RJ45', 'HA', 'MGMT']
   },
   {
     id: 'fortigate-200f',
@@ -307,12 +376,12 @@ export const HARDWARE_CATALOG = [
     category: 'security',
     uHeight: 1,
     width: 1.9,
-    height: 0.14,
+    height: 0.15,
     depth: 1.25,
     badgeColor: '#ee3124',
     defaultHostname: 'FW-FG200F-01',
     defaultIp: '10.20.0.21',
-    specs: '1U Mid-Range NGFW & SD-WAN | 4x 10GE SFP+ FortiLink + 16x GE RJ45 + 8x GE SFP + Dual Power',
+    specs: '1U White Chassis NGFW & SD-WAN | 4x 10GE SFP+ FortiLink + 16x GE RJ45 + 8x GE SFP',
     ports: ['X1-10G', 'X2-10G', 'X3-10G', 'X4-10G', 'WAN1', 'WAN2', 'HA1', 'HA2', 'DMZ']
   },
   {
@@ -364,4 +433,3 @@ export const HARDWARE_CATALOG = [
     ports: ['Carrier-A (100G)', 'Carrier-B (100G)', 'DarkFiber-1', 'DarkFiber-2']
   }
 ];
-
