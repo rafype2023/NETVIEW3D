@@ -2,7 +2,12 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { TransformControls } from 'three/addons/controls/TransformControls.js';
 import { CATEGORIES, CABLE_TYPES, HARDWARE_CATALOG } from './catalog.js';
-import { buildHardwareMesh, createDeviceLabelSprite } from './models3d.js';
+import {
+  buildHardwareMesh,
+  createDeviceLabelSprite,
+  createTitle3DTexture,
+  createProcessPanelTexture
+} from './models3d.js';
 
 const RAD2DEG = 180 / Math.PI;
 const DEG2RAD = Math.PI / 180;
@@ -966,6 +971,33 @@ class NetVisio3DApp {
     document.getElementById('btn-mode-select')?.addEventListener('click', () => this.setInteractionMode('select'));
     document.getElementById('btn-mode-connect')?.addEventListener('click', () => this.setInteractionMode('connect'));
 
+    // Quick-Add Toolbar Buttons for 3D Title, 3D Process Text Panel, and 3D Flow Arrow
+    document.getElementById('btn-add-title3d')?.addEventListener('click', () => {
+      const node = this.addHardwareNode('title-3d-banner', {
+        position: [0, 5.4, -5.2]
+      });
+      this.selectNode(node.id);
+      this.showToast('Título 3D añadido — Puedes arrastrarlo, rotarlo o editar su texto en el Inspector');
+    });
+
+    document.getElementById('btn-add-textpanel')?.addEventListener('click', () => {
+      const jitterX = Math.round((Math.random() - 0.5) * 6 * 2) / 2;
+      const node = this.addHardwareNode('text-panel-3d', {
+        position: [jitterX, 2.8, 2.2]
+      });
+      this.selectNode(node.id);
+      this.showToast('Panel de Proceso 3D añadido — Edita el texto multilínea en el Inspector derecho');
+    });
+
+    document.getElementById('btn-add-arrow3d')?.addEventListener('click', () => {
+      const jitterX = Math.round((Math.random() - 0.5) * 4 * 2) / 2;
+      const node = this.addHardwareNode('arrow-3d-straight', {
+        position: [jitterX, 1.8, 3.2]
+      });
+      this.selectNode(node.id);
+      this.showToast('Flecha de Flujo 3D añadida — Usa E para rotarla o elige otras formas en la librería');
+    });
+
     document.querySelectorAll('[data-transform-mode]').forEach((btn) => {
       btn.addEventListener('click', () => {
         this.setInteractionMode('select');
@@ -1242,22 +1274,46 @@ class NetVisio3DApp {
           <h3 class="insp-title">${spec.name}</h3>
           <p class="insp-sub">${spec.specs}</p>
 
-          <label class="insp-label">Hostname / Etiqueta 3D</label>
+          <label class="insp-label">${
+            spec.isTitle3D
+              ? 'Texto del Título Principal 3D'
+              : spec.isTextPanel3D
+              ? 'Encabezado del Panel de Proceso'
+              : spec.isFlowArrow
+              ? 'Etiqueta de la Flecha de Flujo'
+              : 'Hostname / Etiqueta 3D'
+          }</label>
           <input type="text" id="inp-hostname" class="insp-input" value="${data.hostname}" />
 
-          <label class="insp-label">IP de Gestión / Sistema Operativo / Rol</label>
-          <input type="text" id="inp-ip" class="insp-input" value="${data.ip}" />
+          ${
+            spec.isTextPanel3D
+              ? `
+          <label class="insp-label">Explicación del Proceso / Pasos (Multilínea)</label>
+          <textarea id="inp-ip" class="insp-input" rows="5" style="resize:vertical; font-family:inherit; line-height:1.4;">${data.ip}</textarea>`
+              : `
+          <label class="insp-label">${
+            spec.isTitle3D
+              ? 'Subtítulo del Diagrama 3D'
+              : spec.isFlowArrow
+              ? 'Detalle / Protocolo del Flujo'
+              : 'IP de Gestión / Sistema Operativo / Rol'
+          }</label>
+          <input type="text" id="inp-ip" class="insp-input" value="${data.ip}" />`
+          }
         </div>
 
         ${
-          spec.isZone
+          spec.isZone || spec.isTitle3D || spec.isTextPanel3D || spec.isFlowArrow
             ? `
         <div class="insp-section">
-          <div class="insp-section-title">Color de la Zona 3D (Azul / Rojo / Verde)</div>
-          <div class="quick-rot-row">
+          <div class="insp-section-title">Color 3D (Azul / Rojo / Verde / Cian / Ámbar / Morado)</div>
+          <div class="quick-rot-row" style="flex-wrap:wrap;">
+            <button class="btn-mini" data-zone-color="#00e5ff" style="border-color:#00e5ff; color:#67e8f9;">💎 Cian</button>
             <button class="btn-mini" data-zone-color="#2979ff" style="border-color:#2979ff; color:#60a5fa;">🟦 Azul</button>
             <button class="btn-mini" data-zone-color="#ee3124" style="border-color:#ee3124; color:#f87171;">🟥 Rojo</button>
             <button class="btn-mini" data-zone-color="#00c853" style="border-color:#00c853; color:#4ade80;">🟩 Verde</button>
+            <button class="btn-mini" data-zone-color="#ffab00" style="border-color:#ffab00; color:#fcd34d;">🟨 Ámbar</button>
+            <button class="btn-mini" data-zone-color="#d500f9" style="border-color:#d500f9; color:#e879f9;">🟪 Morado</button>
           </div>
         </div>`
             : ''
@@ -1361,9 +1417,42 @@ class NetVisio3DApp {
       `;
 
       const refreshLabel = () => {
+        const accent = node.data.customColor || spec.badgeColor;
+
+        // If 3D Title Banner, update its front and back 3D canvas textures
+        if (spec.isTitle3D) {
+          const newTex = createTitle3DTexture(node.data.hostname, node.data.ip, accent);
+          ['title3DFaceFront', 'title3DFaceBack'].forEach((faceName) => {
+            const face = node.group.getObjectByName(faceName);
+            if (face && face.material) {
+              face.material.map = newTex;
+              face.material.needsUpdate = true;
+            }
+          });
+          return;
+        }
+
+        // If 3D Process Explanation Panel, update its multi-line canvas texture
+        if (spec.isTextPanel3D) {
+          const newTex = createProcessPanelTexture(node.data.hostname, node.data.ip, accent);
+          ['processPanelFront', 'processPanelBack'].forEach((faceName) => {
+            const face = node.group.getObjectByName(faceName);
+            if (face && face.material) {
+              face.material.map = newTex;
+              face.material.needsUpdate = true;
+            }
+          });
+          return;
+        }
+
         const oldSprite = node.group.getObjectByName('deviceLabelSprite');
         if (oldSprite) node.group.remove(oldSprite);
-        const newSprite = createDeviceLabelSprite(node.data.hostname, node.data.ip, spec.vendor, spec.badgeColor);
+        const newSprite = createDeviceLabelSprite(
+          node.data.hostname,
+          node.data.ip,
+          spec.isFlowArrow ? 'Flujo 3D' : spec.vendor,
+          accent
+        );
         newSprite.position.set(0, spec.height / 2 + (spec.isRackContainer ? 0.42 : 0.36), 0);
         newSprite.visible = this.showLabels;
         node.group.add(newSprite);
@@ -1376,6 +1465,7 @@ class NetVisio3DApp {
 
       document.getElementById('inp-ip')?.addEventListener('input', (e) => {
         node.data.ip = e.target.value;
+        node.data.notes = e.target.value;
         refreshLabel();
       });
 
@@ -1384,10 +1474,13 @@ class NetVisio3DApp {
           const newCol = btn.dataset.zoneColor;
           node.data.customColor = newCol;
           node.group.traverse((child) => {
-            if (child.isMesh && child.material) {
+            if (child.isLineSegments && child.material) {
               child.material.color.set(newCol);
-            } else if (child.isLineSegments && child.material) {
+            } else if (child.isMesh && child.material && (spec.isZone || spec.isFlowArrow)) {
               child.material.color.set(newCol);
+              if (child.material.emissive) {
+                child.material.emissive.set(newCol).multiplyScalar(0.32);
+              }
             }
           });
           refreshLabel();
@@ -1547,6 +1640,51 @@ class NetVisio3DApp {
 
   loadEnterpriseSampleArchitecture() {
     this.clearScene();
+
+    // 0. Título 3D Flotante (Relocalizable) + Paneles de Explicación de Procesos + Flechas de Flujo 3D
+    this.addHardwareNode('title-3d-banner', {
+      hostname: 'ARQUITECTURA DATA CENTER & REDES 3D',
+      ip: 'Seguridad Perimetral FortiGate • Core Cisco • Virtualización • Synergy & Storage NVMe',
+      customColor: '#00e5ff',
+      position: [-0.8, 6.8, -5.8]
+    });
+
+    this.addHardwareNode('text-panel-3d', {
+      hostname: 'ETAPA 1: INGRESO & SEGURIDAD',
+      ip: '1. Tráfico WAN entra por Fibra Oscura 100G\n2. Inspección NGFW en Cluster FortiGate 1800F HA\n3. Balanceo SSL/WAF en Kemp LoadMaster X3',
+      customColor: '#ee3124',
+      position: [-8.8, 4.2, 5.2]
+    });
+
+    this.addHardwareNode('text-panel-3d', {
+      hostname: 'ETAPA 2: PROCESAMIENTO & SAN',
+      ip: '1. Distribución Core Nexus 9508 & Catalyst 9410R\n2. Cómputo en VMs (Windows/RHEL) y HPE Synergy\n3. Almacenamiento NVMe en Alletra 9000 y Pure X90',
+      customColor: '#00c853',
+      position: [3.2, 7.1, -3.2]
+    });
+
+    // Flechas 3D explicando el flujo entre zonas
+    this.addHardwareNode('arrow-3d-straight', {
+      hostname: '1. FLUJO INSPECCIONADO ➔',
+      ip: '100G hacia Core Cisco',
+      customColor: '#ff1744',
+      position: [-5.2, 2.2, 5.5]
+    });
+
+    this.addHardwareNode('arrow-3d-curved', {
+      hostname: '2. TRÁFICO A CÓMPUTO & VMs ↷',
+      ip: 'Fabric 100G / vSwitch',
+      customColor: '#00e5ff',
+      position: [-3.5, 3.2, 1.2],
+      rotation: [0, -55, 0]
+    });
+
+    this.addHardwareNode('arrow-3d-double', {
+      hostname: '3. REPLICACIÓN SAN ACTIVA ⟷',
+      ip: '64G Fibre Channel / NVMe-oF',
+      customColor: '#00e676',
+      position: [2.9, 3.8, -1.2]
+    });
 
     // 1. Zonas 3D en ROJO, AZUL y VERDE
     this.addHardwareNode('zone-platform-red', {

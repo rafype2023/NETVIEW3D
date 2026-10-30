@@ -1,6 +1,7 @@
-// Hardware, Endpoints, Load Balancers & Virtualization Stencil Catalog for NetVisio 3D Studio
+// Hardware, Endpoints, Annotations, Flow Arrows & Virtualization Stencil Catalog for NetVisio 3D Studio
 export const CATEGORIES = [
   { id: 'all', name: 'Todos', icon: '◈' },
+  { id: 'annotations', name: 'Títulos, Texto & Flechas 3D', icon: '🪧' },
   { id: 'endpoints', name: 'ATMs, All-in-One & KEMP', icon: '🏧' },
   { id: 'virtual', name: 'Servidores Virtuales (VM)', icon: '🧊' },
   { id: 'enclosures', name: 'Racks & Synergy', icon: '▣' },
@@ -21,7 +22,126 @@ export const CABLE_TYPES = [
 ];
 
 export const HARDWARE_CATALOG = [
-  // ================= NEW ENDPOINTS, ATMS, KEMP LB & RACK SERVER =================
+  // ================= 3D TITLES, PROCESS TEXT PANELS & 3D FLOW ARROWS =================
+  {
+    id: 'title-3d-banner',
+    name: 'Título 3D Flotante (Relocalizable)',
+    vendor: '3D Diagram Title',
+    category: 'annotations',
+    uHeight: 0,
+    width: 6.2,
+    height: 1.25,
+    depth: 0.18,
+    isTitle3D: true,
+    badgeColor: '#00e5ff',
+    defaultHostname: 'ARQUITECTURA DATA CENTER & REDES 3D',
+    defaultIp: 'Topología de Alta Disponibilidad • Core, Virtualización, Storage & Seguridad',
+    specs: 'Letrero de Título 3D libremente móvil y rotable en los 3 ejes (X, Y, Z) con subtítulo y color personalizable',
+    ports: []
+  },
+  {
+    id: 'text-panel-3d',
+    name: 'Panel de Texto / Explicación de Proceso',
+    vendor: 'Process Callout 3D',
+    category: 'annotations',
+    uHeight: 0,
+    width: 2.6,
+    height: 1.35,
+    depth: 0.08,
+    isTextPanel3D: true,
+    badgeColor: '#38bdf8',
+    defaultHostname: 'PASO 1: FLUJO DE TRANSACCIÓN',
+    defaultIp: '1. Ingreso seguro por FortiGate HA\n2. Balanceo SSL en Kemp LoadMaster\n3. Procesamiento en VMs y Storage NVMe',
+    specs: 'Panel 3D estilo tarjeta de proceso con texto multilínea para documentar flujos, pasos o notas técnicas en el diagrama',
+    ports: ['Anchor']
+  },
+  {
+    id: 'arrow-3d-straight',
+    name: 'Flecha 3D Recta (Flujo Directo ➔)',
+    vendor: 'Flow Arrow 3D',
+    category: 'annotations',
+    uHeight: 0,
+    width: 2.2,
+    height: 0.28,
+    depth: 0.45,
+    isFlowArrow: true,
+    arrowShape: 'straight',
+    badgeColor: '#00e676',
+    defaultHostname: 'FLUJO DE DATOS ➔',
+    defaultIp: 'Tráfico Primario',
+    specs: 'Flecha 3D volumétrica recta para indicar dirección de tráfico o secuencia de proceso (rotable en X, Y, Z)',
+    ports: []
+  },
+  {
+    id: 'arrow-3d-l-turn',
+    name: 'Flecha 3D en "L" (Esquina 90° ↳)',
+    vendor: 'Flow Arrow 3D',
+    category: 'annotations',
+    uHeight: 0,
+    width: 2.0,
+    height: 0.28,
+    depth: 2.0,
+    isFlowArrow: true,
+    arrowShape: 'l-turn',
+    badgeColor: '#00e5ff',
+    defaultHostname: 'CAMBIO DE CAPA ↳',
+    defaultIp: 'Enrutamiento Inter-Zona',
+    specs: 'Flecha 3D ortogonal en ángulo de 90° para explicar flujos que doblan entre zonas o gabinetes',
+    ports: []
+  },
+  {
+    id: 'arrow-3d-curved',
+    name: 'Flecha 3D Curva / Arco (Salto ↷)',
+    vendor: 'Flow Arrow 3D',
+    category: 'annotations',
+    uHeight: 0,
+    width: 2.4,
+    height: 1.1,
+    depth: 0.45,
+    isFlowArrow: true,
+    arrowShape: 'curved',
+    badgeColor: '#ffab00',
+    defaultHostname: 'SALTO / REPLICACIÓN ↷',
+    defaultIp: 'Flujo Aéreo / DRP',
+    specs: 'Flecha 3D en arco elevado para ilustrar saltos entre nubes, replicación o flujos sobre equipos',
+    ports: []
+  },
+  {
+    id: 'arrow-3d-double',
+    name: 'Flecha 3D Bidireccional (Sync ⟷)',
+    vendor: 'Flow Arrow 3D',
+    category: 'annotations',
+    uHeight: 0,
+    width: 2.4,
+    height: 0.28,
+    depth: 0.45,
+    isFlowArrow: true,
+    arrowShape: 'double',
+    badgeColor: '#ff1744',
+    defaultHostname: 'SINCRONIZACIÓN HA ⟷',
+    defaultIp: 'Activo / Activo',
+    specs: 'Flecha 3D de doble punta para explicar sincronización bidireccional, clusters HA o replicación síncrona',
+    ports: []
+  },
+  {
+    id: 'arrow-3d-chevrons',
+    name: 'Flecha 3D Triple Chevron (Pipeline »»)',
+    vendor: 'Flow Arrow 3D',
+    category: 'annotations',
+    uHeight: 0,
+    width: 2.2,
+    height: 0.28,
+    depth: 0.55,
+    isFlowArrow: true,
+    arrowShape: 'chevrons',
+    badgeColor: '#d500f9',
+    defaultHostname: 'PIPELINE DE PROCESO »»',
+    defaultIp: 'Secuencia Continua',
+    specs: 'Secuencia de 3 chevrones 3D luminosos para destacar flujos de alta velocidad o etapas consecutivas',
+    ports: []
+  },
+
+  // ================= ENDPOINTS, ATMS, KEMP LB & RACK SERVER =================
   {
     id: 'atm-kiosk-24-7',
     name: 'ATM 24/7 Kiosk (Bank Your Way)',

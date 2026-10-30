@@ -478,9 +478,265 @@ export function createDeviceLabelSprite(hostname, ip, vendor, badgeColor) {
   return sprite;
 }
 
+// Create High-Res Texture for 3D Relocatable Title Sign
+export function createTitle3DTexture(title, subtitle, accentColor = '#00e5ff') {
+  const canvas = document.createElement('canvas');
+  canvas.width = 1400;
+  canvas.height = 280;
+  const ctx = canvas.getContext('2d');
+
+  const grad = ctx.createLinearGradient(0, 0, 1400, 280);
+  grad.addColorStop(0, 'rgba(10, 17, 30, 0.95)');
+  grad.addColorStop(0.5, 'rgba(17, 28, 48, 0.96)');
+  grad.addColorStop(1, 'rgba(10, 17, 30, 0.95)');
+  ctx.fillStyle = grad;
+  ctx.beginPath();
+  ctx.roundRect(10, 10, 1380, 260, 28);
+  ctx.fill();
+
+  ctx.lineWidth = 6;
+  ctx.strokeStyle = accentColor;
+  ctx.stroke();
+
+  // Left and Right glowing accent bars
+  ctx.fillStyle = accentColor;
+  ctx.beginPath();
+  ctx.roundRect(28, 30, 16, 220, 8);
+  ctx.roundRect(1356, 30, 16, 220, 8);
+  ctx.fill();
+
+  // Main 3D Title Text
+  ctx.save();
+  ctx.shadowColor = accentColor;
+  ctx.shadowBlur = 16;
+  ctx.fillStyle = '#ffffff';
+  ctx.textAlign = 'center';
+  ctx.font = '900 62px system-ui, -apple-system, sans-serif';
+  ctx.fillText((title || 'TÍTULO DEL DIAGRAMA 3D').slice(0, 44), 700, 132);
+  ctx.restore();
+
+  // Subtitle Text
+  ctx.fillStyle = '#93c5fd';
+  ctx.textAlign = 'center';
+  ctx.font = '600 34px system-ui, -apple-system, sans-serif';
+  ctx.fillText((subtitle || '').slice(0, 75), 700, 206);
+
+  const tex = new THREE.CanvasTexture(canvas);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  tex.needsUpdate = true;
+  return tex;
+}
+
+// Create High-Res Multi-Line Process Explanation Panel Texture (similar to device callouts)
+export function createProcessPanelTexture(headerTitle, bodyText, accentColor = '#38bdf8') {
+  const canvas = document.createElement('canvas');
+  canvas.width = 768;
+  canvas.height = 400;
+  const ctx = canvas.getContext('2d');
+
+  ctx.fillStyle = 'rgba(12, 18, 30, 0.93)';
+  ctx.beginPath();
+  ctx.roundRect(8, 8, 752, 384, 24);
+  ctx.fill();
+
+  ctx.lineWidth = 5;
+  ctx.strokeStyle = accentColor;
+  ctx.stroke();
+
+  // Top Header Strip
+  ctx.fillStyle = accentColor;
+  ctx.beginPath();
+  ctx.roundRect(20, 22, 12, 54, 6);
+  ctx.fill();
+
+  ctx.fillStyle = '#ffffff';
+  ctx.font = 'bold 34px system-ui, -apple-system, sans-serif';
+  ctx.fillText((headerTitle || 'PROCESO / NOTA TÉCNICA').slice(0, 34), 46, 60);
+
+  // Divider line
+  ctx.strokeStyle = 'rgba(148, 163, 184, 0.35)';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(24, 92);
+  ctx.lineTo(744, 92);
+  ctx.stroke();
+
+  // Multi-line Word-Wrapped Process Body Text
+  ctx.fillStyle = '#e2e8f0';
+  ctx.font = '500 26px system-ui, -apple-system, sans-serif';
+  const rawLines = String(bodyText || '').split('\n');
+  const wrappedLines = [];
+  const maxWidth = 700;
+
+  rawLines.forEach((rawLine) => {
+    const words = rawLine.split(' ');
+    let currentLine = '';
+    words.forEach((word) => {
+      const testLine = currentLine ? `${currentLine} ${word}` : word;
+      if (ctx.measureText(testLine).width > maxWidth && currentLine) {
+        wrappedLines.push(currentLine);
+        currentLine = word;
+      } else {
+        currentLine = testLine;
+      }
+    });
+    if (currentLine) wrappedLines.push(currentLine);
+  });
+
+  wrappedLines.slice(0, 7).forEach((line, idx) => {
+    ctx.fillText(line, 30, 138 + idx * 38);
+  });
+
+  const tex = new THREE.CanvasTexture(canvas);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  tex.needsUpdate = true;
+  return tex;
+}
+
 export function buildHardwareMesh(spec, instanceData = {}) {
   const root = new THREE.Group();
   const { width: w, height: h, depth: d, id } = spec;
+
+  // ================= 0A. 3D RELOCATABLE DIAGRAM TITLE BANNER =================
+  if (spec.isTitle3D) {
+    const accent = instanceData.customColor || spec.badgeColor || '#00e5ff';
+    const titleText = instanceData.hostname || spec.defaultHostname;
+    const subText = instanceData.ip || spec.defaultIp;
+
+    const frameMat = new THREE.MeshStandardMaterial({
+      color: 0x0f172a,
+      roughness: 0.25,
+      metalness: 0.75
+    });
+    const backing = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), frameMat);
+    backing.castShadow = true;
+    root.add(backing);
+
+    const edges = new THREE.EdgesGeometry(new THREE.BoxGeometry(w + 0.02, h + 0.02, d + 0.02));
+    root.add(new THREE.LineSegments(edges, new THREE.LineBasicMaterial({ color: new THREE.Color(accent) })));
+
+    const tex = createTitle3DTexture(titleText, subText, accent);
+    const faceMat = new THREE.MeshBasicMaterial({ map: tex, transparent: true });
+    const frontFace = new THREE.Mesh(new THREE.PlaneGeometry(w * 0.98, h * 0.95), faceMat);
+    frontFace.name = 'title3DFaceFront';
+    frontFace.position.set(0, 0, d / 2 + 0.008);
+
+    const backFace = new THREE.Mesh(new THREE.PlaneGeometry(w * 0.98, h * 0.95), faceMat);
+    backFace.name = 'title3DFaceBack';
+    backFace.rotation.y = Math.PI;
+    backFace.position.set(0, 0, -d / 2 - 0.008);
+
+    root.add(frontFace, backFace);
+    return root;
+  }
+
+  // ================= 0B. 3D PROCESS EXPLANATION TEXT PANEL =================
+  if (spec.isTextPanel3D) {
+    const accent = instanceData.customColor || spec.badgeColor || '#38bdf8';
+    const headerTitle = instanceData.hostname || spec.defaultHostname;
+    const bodyText = instanceData.notes || instanceData.ip || spec.defaultIp;
+
+    const cardMat = new THREE.MeshStandardMaterial({
+      color: 0x0b1324,
+      roughness: 0.2,
+      metalness: 0.6
+    });
+    const cardBody = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), cardMat);
+    cardBody.castShadow = true;
+    root.add(cardBody);
+
+    const edges = new THREE.EdgesGeometry(new THREE.BoxGeometry(w + 0.015, h + 0.015, d + 0.015));
+    root.add(new THREE.LineSegments(edges, new THREE.LineBasicMaterial({ color: new THREE.Color(accent) })));
+
+    const tex = createProcessPanelTexture(headerTitle, bodyText, accent);
+    const faceMat = new THREE.MeshBasicMaterial({ map: tex, transparent: true });
+    const frontFace = new THREE.Mesh(new THREE.PlaneGeometry(w * 0.98, h * 0.96), faceMat);
+    frontFace.name = 'processPanelFront';
+    frontFace.position.set(0, 0, d / 2 + 0.006);
+
+    const backFace = new THREE.Mesh(new THREE.PlaneGeometry(w * 0.98, h * 0.96), faceMat);
+    backFace.name = 'processPanelBack';
+    backFace.rotation.y = Math.PI;
+    backFace.position.set(0, 0, -d / 2 - 0.006);
+
+    root.add(frontFace, backFace);
+    return root;
+  }
+
+  // ================= 0C. 3D FLOW ARROWS (5 SHAPES) =================
+  if (spec.isFlowArrow) {
+    const colHex = instanceData.customColor || spec.badgeColor || '#00e676';
+    const arrowColor = new THREE.Color(colHex);
+    const arrowMat = new THREE.MeshStandardMaterial({
+      color: arrowColor,
+      emissive: arrowColor.clone().multiplyScalar(0.35),
+      roughness: 0.25,
+      metalness: 0.45
+    });
+
+    const shapeType = spec.arrowShape || 'straight';
+
+    if (shapeType === 'straight') {
+      const shaftLen = w * 0.68;
+      const headLen = w * 0.32;
+      const shaft = new THREE.Mesh(new THREE.BoxGeometry(shaftLen, h * 0.48, d * 0.42), arrowMat);
+      shaft.position.set(-headLen / 2, 0, 0);
+      const head = new THREE.Mesh(new THREE.ConeGeometry(d * 0.55, headLen, 16), arrowMat);
+      head.rotation.z = -Math.PI / 2;
+      head.position.set(shaftLen / 2, 0, 0);
+      root.add(shaft, head);
+    } else if (shapeType === 'double') {
+      const shaftLen = w * 0.56;
+      const headLen = w * 0.24;
+      const shaft = new THREE.Mesh(new THREE.BoxGeometry(shaftLen, h * 0.48, d * 0.40), arrowMat);
+      const headR = new THREE.Mesh(new THREE.ConeGeometry(d * 0.52, headLen, 16), arrowMat);
+      headR.rotation.z = -Math.PI / 2;
+      headR.position.set(shaftLen / 2 + headLen / 2 - 0.02, 0, 0);
+      const headL = new THREE.Mesh(new THREE.ConeGeometry(d * 0.52, headLen, 16), arrowMat);
+      headL.rotation.z = Math.PI / 2;
+      headL.position.set(-shaftLen / 2 - headLen / 2 + 0.02, 0, 0);
+      root.add(shaft, headR, headL);
+    } else if (shapeType === 'l-turn') {
+      const leg1 = new THREE.Mesh(new THREE.BoxGeometry(0.22, h * 0.5, d * 0.72), arrowMat);
+      leg1.position.set(-w * 0.32, 0, -d * 0.12);
+      const leg2 = new THREE.Mesh(new THREE.BoxGeometry(w * 0.55, h * 0.5, 0.22), arrowMat);
+      leg2.position.set(-0.05, 0, d * 0.22);
+      const head = new THREE.Mesh(new THREE.ConeGeometry(0.26, 0.48, 16), arrowMat);
+      head.rotation.z = -Math.PI / 2;
+      head.position.set(w * 0.32, 0, d * 0.22);
+      root.add(leg1, leg2, head);
+    } else if (shapeType === 'curved') {
+      const curve = new THREE.CatmullRomCurve3([
+        new THREE.Vector3(-w * 0.42, -h * 0.3, 0),
+        new THREE.Vector3(-w * 0.15, h * 0.38, 0),
+        new THREE.Vector3(w * 0.18, h * 0.38, 0),
+        new THREE.Vector3(w * 0.35, -h * 0.08, 0)
+      ]);
+      const tube = new THREE.Mesh(new THREE.TubeGeometry(curve, 32, 0.085, 12, false), arrowMat);
+      const head = new THREE.Mesh(new THREE.ConeGeometry(0.22, 0.42, 16), arrowMat);
+      head.position.set(w * 0.42, -h * 0.22, 0);
+      head.rotation.z = -Math.PI * 0.78;
+      root.add(tube, head);
+    } else if (shapeType === 'chevrons') {
+      for (let i = -1; i <= 1; i++) {
+        const cx = i * 0.58;
+        const topWing = new THREE.Mesh(new THREE.BoxGeometry(0.42, h * 0.52, 0.14), arrowMat);
+        topWing.position.set(cx, 0, -0.11);
+        topWing.rotation.y = -Math.PI / 5;
+        const botWing = new THREE.Mesh(new THREE.BoxGeometry(0.42, h * 0.52, 0.14), arrowMat);
+        botWing.position.set(cx, 0, 0.11);
+        botWing.rotation.y = Math.PI / 5;
+        root.add(topWing, botWing);
+      }
+    }
+
+    const hostname = instanceData.hostname || spec.defaultHostname;
+    const ip = instanceData.ip || spec.defaultIp;
+    const labelSprite = createDeviceLabelSprite(hostname, ip, 'Flujo 3D', colHex);
+    labelSprite.position.set(0, h / 2 + 0.32, 0);
+    root.add(labelSprite);
+    return root;
+  }
 
   // ================= 1. 3D VIRTUAL SERVER CUBES (WINDOWS, RED HAT, APPLIANCE) =================
   if (spec.isVirtualCube) {
