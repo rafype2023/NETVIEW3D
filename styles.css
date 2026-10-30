@@ -33,22 +33,52 @@ body {
 
 /* Top Ribbon / Visio 3D Toolbar */
 .top-toolbar {
-  height: 58px;
+  min-height: 56px;
+  height: auto;
   background: var(--bg-panel);
   border-bottom: 1px solid var(--border-ui);
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  padding: 0 14px;
-  gap: 10px;
+  padding: 6px 14px;
+  gap: 8px;
   z-index: 20;
+}
+
+.brand-and-file {
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
 .brand-block {
   display: flex;
   align-items: center;
-  gap: 10px;
-  min-width: 210px;
+  gap: 9px;
+}
+
+.file-actions-box {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(14, 165, 233, 0.12);
+  border: 1px solid #38bdf8;
+  padding: 4px 8px;
+  border-radius: 8px;
+}
+
+.btn-file-action {
+  background: #1e293b;
+  border-color: #38bdf8;
+  color: #f8fafc;
+  font-weight: 700;
+}
+
+.btn-file-action:hover {
+  background: #0284c7;
+  color: #ffffff;
+  border-color: #7dd3fc;
 }
 
 .brand-cube {

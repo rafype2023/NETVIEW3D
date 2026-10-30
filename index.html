@@ -17,15 +17,35 @@
 <body>
   <!-- Barra Superior estilo Visio 3D -->
   <header class="top-toolbar">
-    <div class="brand-block">
-      <div class="brand-cube" aria-hidden="true">3D</div>
-      <div>
-        <div class="brand-title">NetVisio 3D Studio</div>
-        <div class="brand-subtitle">Diagramador 3D en 3 Ejes • Datacenter & Virtualización</div>
+    <div class="brand-and-file">
+      <div class="brand-block">
+        <div class="brand-cube" aria-hidden="true">3D</div>
+        <div>
+          <div class="brand-title">NetVisio 3D Studio</div>
+          <div class="brand-subtitle">Diagramador 3D en 3 Ejes</div>
+        </div>
+      </div>
+
+      <!-- Área Unificada y Destacada de GUARDAR y ABRIR Proyecto -->
+      <div class="file-actions-box" role="group" aria-label="Guardar y Abrir Proyecto">
+        <button id="btn-import-json" class="tool-btn btn-file-action" title="Abrir un diagrama guardado (.json)">
+          <span aria-hidden="true">📂</span> Abrir
+        </button>
+        <button id="btn-export-json" class="tool-btn btn-file-action" title="Guardar el diagrama actual (.json)">
+          <span aria-hidden="true">💾</span> Guardar
+        </button>
+        <input type="file" id="file-import-json" accept=".json" hidden />
+        <div class="toolbar-divider"></div>
+        <button id="btn-export-png" class="tool-btn btn-highlight-png" title="Exportar Diagrama 3D a Imagen PNG">
+          <span aria-hidden="true">📸</span> Exportar PNG
+        </button>
+        <button id="btn-export-bom" class="tool-btn" title="Exportar Inventario BOM en CSV">
+          <span aria-hidden="true">📊</span> BOM CSV
+        </button>
       </div>
     </div>
 
-    <!-- Herramientas de Selección, Gizmo 3 Ejes y Cableado -->
+    <!-- Herramientas de Selección, Gizmo 3 Ejes, Textos/Flechas y Cableado -->
     <div class="toolbar-group" role="toolbar" aria-label="Herramientas de transformación 3D">
       <button id="btn-mode-select" class="tool-btn active" title="Modo Selección (Esc)">
         <span aria-hidden="true">↖</span> Seleccionar
@@ -42,17 +62,6 @@
 
       <div class="toolbar-divider"></div>
 
-      <button id="btn-mode-connect" class="tool-btn" title="Tender Cable / Fibra 3D entre Equipos (Tecla C)">
-        <span aria-hidden="true">⇄</span> Conectar Cable 3D (C)
-      </button>
-      <select id="toolbar-cable-type" class="tool-select" aria-label="Tipo de cable 3D"></select>
-      <select id="toolbar-route-style" class="tool-select" aria-label="Estilo de ruta 3D">
-        <option value="manhattan">Ruta Ortogonal 3D (Visio)</option>
-        <option value="overhead">Bandeja Aérea Superior</option>
-        <option value="bezier">Curva Directa</option>
-      </select>
-      <div class="toolbar-divider"></div>
-
       <button id="btn-add-title3d" class="tool-btn" title="Insertar Título 3D Flotante Relocalizable">
         <span aria-hidden="true">🪧</span> + Título 3D
       </button>
@@ -62,7 +71,21 @@
       <button id="btn-add-arrow3d" class="tool-btn" title="Insertar Flecha 3D de Flujo">
         <span aria-hidden="true">➔</span> + Flecha 3D
       </button>
+
+      <div class="toolbar-divider"></div>
+
+      <button id="btn-mode-connect" class="tool-btn" title="Tender Cable / Fibra 3D entre Equipos (Tecla C)">
+        <span aria-hidden="true">⇄</span> Conectar Cable (C)
+      </button>
+      <select id="toolbar-cable-type" class="tool-select" aria-label="Tipo de cable 3D"></select>
+      <select id="toolbar-route-style" class="tool-select" aria-label="Estilo de ruta 3D">
+        <option value="manhattan">Ruta Ortogonal 3D</option>
+        <option value="overhead">Bandeja Aérea</option>
+        <option value="bezier">Curva Directa</option>
+      </select>
     </div>
+
+    <!-- Acciones de Escena -->
     <div class="toolbar-group">
       <button id="btn-toggle-labels" class="tool-btn active" title="Mostrar/Ocultar Etiquetas 3D">
         <span aria-hidden="true">🏷️</span> Etiquetas
@@ -76,14 +99,6 @@
       <button id="btn-clear-scene" class="tool-btn" title="Limpiar Diagrama">
         <span aria-hidden="true">🗑️</span> Limpiar
       </button>
-      <div class="toolbar-divider"></div>
-      <button id="btn-export-png" class="tool-btn btn-highlight-png" title="Exportar Diagrama 3D a Imagen PNG">
-        <span aria-hidden="true">📸</span> Exportar PNG
-      </button>
-      <button id="btn-export-json" class="tool-btn" title="Guardar Proyecto JSON">Guardar JSON</button>
-      <button id="btn-import-json" class="tool-btn" title="Abrir Proyecto JSON">Abrir</button>
-      <input type="file" id="file-import-json" accept=".json" hidden />
-      <button id="btn-export-bom" class="tool-btn" title="Exportar Inventario BOM en CSV">BOM CSV</button>
     </div>
   </header>
 
