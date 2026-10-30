@@ -436,16 +436,69 @@ function addRearPSUsAndPorts(group, w, h, d) {
   addPortGrid(group, -w / 2 + 0.2, 0.05, 0, z, 6, 1, 0.045, 0.035, MAT.portDark);
 }
 
-// Create crisp canvas texture for floating 3D label
+// Create crisp canvas texture for floating 3D label (auto-expands width & wraps long text without truncation)
 export function createDeviceLabelSprite(hostname, ip, vendor, badgeColor) {
+  const safeHost = String(hostname || '').trim() || 'EQUIPO';
+  const safeIp = String(ip || '').trim();
+  const skipVendor =
+    !vendor ||
+    vendor === 'Topology Zone' ||
+    vendor === 'Topology' ||
+    vendor === 'Flow Arrow 3D' ||
+    vendor === 'Flujo 3D' ||
+    safeIp.toLowerCase().startsWith(String(vendor).toLowerCase());
+
+  const subText = skipVendor ? safeIp : safeIp ? `${vendor} • ${safeIp}` : String(vendor || '');
+
+  const measureCanvas = document.createElement('canvas');
+  const mCtx = measureCanvas.getContext('2d');
+
+  const titleFont = 'bold 34px system-ui, -apple-system, sans-serif';
+  const subFont = '600 24px ui-monospace, SFMono-Regular, monospace';
+
+  mCtx.font = titleFont;
+  const titleWidth = mCtx.measureText(safeHost).width;
+
+  mCtx.font = subFont;
+  const maxContentWidth = 820;
+
+  const wrapSubtitleLines = (text, maxW) => {
+    if (!text) return [''];
+    const paragraphs = text.split(/\r?\n/);
+    const lines = [];
+    for (const para of paragraphs) {
+      const words = para.split(/\s+/);
+      let current = '';
+      for (const word of words) {
+        const candidate = current ? `${current} ${word}` : word;
+        if (mCtx.measureText(candidate).width <= maxW || !current) {
+          current = candidate;
+        } else {
+          lines.push(current);
+          current = word;
+        }
+      }
+      if (current) lines.push(current);
+    }
+    return lines.length > 0 ? lines.slice(0, 4) : [''];
+  };
+
+  const subLines = wrapSubtitleLines(subText, maxContentWidth);
+  const widestSubLine = Math.max(...subLines.map((l) => mCtx.measureText(l).width), 0);
+
+  const canvasWidth = Math.max(512, Math.min(920, Math.ceil(Math.max(titleWidth, widestSubLine) + 76)));
+  const extraLines = Math.max(0, subLines.length - 1);
+  const lineHeight = 32;
+  const canvasHeight = 144 + extraLines * lineHeight;
+
   const canvas = document.createElement('canvas');
-  canvas.width = 512;
-  canvas.height = 144;
+  canvas.width = canvasWidth;
+  canvas.height = canvasHeight;
   const ctx = canvas.getContext('2d');
 
-  ctx.fillStyle = 'rgba(13, 18, 28, 0.88)';
+  ctx.fillStyle = 'rgba(13, 18, 28, 0.90)';
   ctx.beginPath();
-  ctx.roundRect(6, 6, 500, 132, 18);
+  ctx.roundRect(6, 6, canvasWidth - 12, canvasHeight - 12, 18);
   ctx.fill();
 
   ctx.lineWidth = 4;
@@ -454,16 +507,18 @@ export function createDeviceLabelSprite(hostname, ip, vendor, badgeColor) {
 
   ctx.fillStyle = badgeColor || '#00e5ff';
   ctx.beginPath();
-  ctx.roundRect(14, 16, 12, 112, 6);
+  ctx.roundRect(14, 16, 12, canvasHeight - 32, 6);
   ctx.fill();
 
   ctx.fillStyle = '#ffffff';
-  ctx.font = 'bold 34px system-ui, -apple-system, sans-serif';
-  ctx.fillText(hostname.slice(0, 22), 40, 58);
+  ctx.font = titleFont;
+  ctx.fillText(safeHost, 40, 58);
 
   ctx.fillStyle = '#90caf9';
-  ctx.font = '600 24px ui-monospace, SFMono-Regular, monospace';
-  ctx.fillText(`${vendor} • ${ip}`.slice(0, 34), 40, 104);
+  ctx.font = subFont;
+  subLines.forEach((line, idx) => {
+    ctx.fillText(line, 40, 104 + idx * lineHeight);
+  });
 
   const texture = new THREE.CanvasTexture(canvas);
   texture.needsUpdate = true;
@@ -473,7 +528,7 @@ export function createDeviceLabelSprite(hostname, ip, vendor, badgeColor) {
     depthTest: false
   });
   const sprite = new THREE.Sprite(spriteMat);
-  sprite.scale.set(1.75, 0.49, 1);
+  sprite.scale.set((canvasWidth / 512) * 1.75, (canvasHeight / 144) * 0.49, 1);
   sprite.name = 'deviceLabelSprite';
   return sprite;
 }

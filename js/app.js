@@ -1329,6 +1329,8 @@ class NetVisio3DApp {
               ? 'Subtítulo del Diagrama 3D'
               : spec.isFlowArrow
               ? 'Detalle / Protocolo del Flujo'
+              : spec.isZone
+              ? 'Subred / VLAN / Descripción de la Zona'
               : 'IP de Gestión / Sistema Operativo / Rol'
           }</label>
           <input type="text" id="inp-ip" class="insp-input" value="${data.ip}" />`
