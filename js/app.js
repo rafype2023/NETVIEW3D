@@ -6,7 +6,8 @@ import {
   buildHardwareMesh,
   createDeviceLabelSprite,
   createTitle3DTexture,
-  createProcessPanelTexture
+  createProcessPanelTexture,
+  createDataPortTubeTexture
 } from './models3d.js';
 
 const RAD2DEG = 180 / Math.PI;
@@ -998,6 +999,17 @@ class NetVisio3DApp {
       this.showToast('Flecha de Flujo 3D añadida — Usa E para rotarla o elige otras formas en la librería');
     });
 
+    document.getElementById('btn-add-porttube')?.addEventListener('click', () => {
+      const jitterX = Math.round((Math.random() - 0.5) * 4 * 2) / 2;
+      const node = this.addHardwareNode('data-port-tube', {
+        hostname: 'UDP/49380',
+        ip: 'Canal de Datos por Puerto Específico',
+        position: [jitterX, 2.2, 2.6]
+      });
+      this.selectNode(node.id);
+      this.showToast('Tubo de Puerto 3D añadido — Modifica el puerto ("RDP", "UDP/49380", etc.) en el Inspector');
+    });
+
     document.querySelectorAll('[data-transform-mode]').forEach((btn) => {
       btn.addEventListener('click', () => {
         this.setInteractionMode('select');
@@ -1275,7 +1287,9 @@ class NetVisio3DApp {
           <p class="insp-sub">${spec.specs}</p>
 
           <label class="insp-label">${
-            spec.isTitle3D
+            spec.isDataPortTube
+              ? 'Puerto / Protocolo dentro del Tubo 3D (ej. RDP, UDP/49380)'
+              : spec.isTitle3D
               ? 'Texto del Título Principal 3D'
               : spec.isTextPanel3D
               ? 'Encabezado del Panel de Proceso'
@@ -1286,13 +1300,32 @@ class NetVisio3DApp {
           <input type="text" id="inp-hostname" class="insp-input" value="${data.hostname}" />
 
           ${
+            spec.isDataPortTube
+              ? `
+          <label class="insp-label">Presets Rápidos de Puerto</label>
+          <div class="quick-rot-row" style="flex-wrap:wrap; margin-bottom:6px;">
+            <button class="btn-mini" data-port-preset="RDP|TCP/3389 • Remote Desktop">RDP</button>
+            <button class="btn-mini" data-port-preset="UDP/49380|Canal de Datos Dinámico">UDP/49380</button>
+            <button class="btn-mini" data-port-preset="TCP/443|HTTPS / TLS 1.3">TCP/443</button>
+            <button class="btn-mini" data-port-preset="TCP/22|SSH Administración">TCP/22</button>
+            <button class="btn-mini" data-port-preset="TCP/1433|SQL Server DB">TCP/1433</button>
+            <button class="btn-mini" data-port-preset="UDP/53|DNS Queries">UDP/53</button>
+            <button class="btn-mini" data-port-preset="TCP/636|LDAPS Active Directory">TCP/636</button>
+            <button class="btn-mini" data-port-preset="UDP/500|IPsec VPN Tunnel">UDP/500</button>
+          </div>`
+              : ''
+          }
+
+          ${
             spec.isTextPanel3D
               ? `
           <label class="insp-label">Explicación del Proceso / Pasos (Multilínea)</label>
           <textarea id="inp-ip" class="insp-input" rows="5" style="resize:vertical; font-family:inherit; line-height:1.4;">${data.ip}</textarea>`
               : `
           <label class="insp-label">${
-            spec.isTitle3D
+            spec.isDataPortTube
+              ? 'Descripción / Servicio del Puerto (Opcional)'
+              : spec.isTitle3D
               ? 'Subtítulo del Diagrama 3D'
               : spec.isFlowArrow
               ? 'Detalle / Protocolo del Flujo'
@@ -1303,7 +1336,7 @@ class NetVisio3DApp {
         </div>
 
         ${
-          spec.isZone || spec.isTitle3D || spec.isTextPanel3D || spec.isFlowArrow
+          spec.isZone || spec.isTitle3D || spec.isTextPanel3D || spec.isFlowArrow || spec.isDataPortTube
             ? `
         <div class="insp-section">
           <div class="insp-section-title">Color 3D (Azul / Rojo / Verde / Cian / Ámbar / Morado)</div>
@@ -1419,6 +1452,19 @@ class NetVisio3DApp {
       const refreshLabel = () => {
         const accent = node.data.customColor || spec.badgeColor;
 
+        // If 3D Data Port Communication Tube, update its interior glowing port texture
+        if (spec.isDataPortTube) {
+          const newTex = createDataPortTubeTexture(node.data.hostname, node.data.ip, accent);
+          ['dataTubeCoreFront', 'dataTubeCoreBack', 'dataTubeCoreTop'].forEach((partName) => {
+            const part = node.group.getObjectByName(partName);
+            if (part && part.material) {
+              part.material.map = newTex;
+              part.material.needsUpdate = true;
+            }
+          });
+          return;
+        }
+
         // If 3D Title Banner, update its front and back 3D canvas textures
         if (spec.isTitle3D) {
           const newTex = createTitle3DTexture(node.data.hostname, node.data.ip, accent);
@@ -1469,6 +1515,20 @@ class NetVisio3DApp {
         refreshLabel();
       });
 
+      container.querySelectorAll('[data-port-preset]').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const [portName, portDesc] = btn.dataset.portPreset.split('|');
+          node.data.hostname = portName;
+          node.data.ip = portDesc || '';
+          const hEl = document.getElementById('inp-hostname');
+          const iEl = document.getElementById('inp-ip');
+          if (hEl) hEl.value = node.data.hostname;
+          if (iEl) iEl.value = node.data.ip;
+          refreshLabel();
+          this.updateSelectionHudBanner();
+        });
+      });
+
       container.querySelectorAll('[data-zone-color]').forEach((btn) => {
         btn.addEventListener('click', () => {
           const newCol = btn.dataset.zoneColor;
@@ -1476,10 +1536,12 @@ class NetVisio3DApp {
           node.group.traverse((child) => {
             if (child.isLineSegments && child.material) {
               child.material.color.set(newCol);
-            } else if (child.isMesh && child.material && (spec.isZone || spec.isFlowArrow)) {
-              child.material.color.set(newCol);
-              if (child.material.emissive) {
-                child.material.emissive.set(newCol).multiplyScalar(0.32);
+            } else if (child.isMesh && child.material && (spec.isZone || spec.isFlowArrow || spec.isDataPortTube)) {
+              if (child.name === 'dataTubeOuterGlass' || child.name === 'dataTubeRing' || spec.isZone || spec.isFlowArrow) {
+                child.material.color.set(newCol);
+                if (child.material.emissive) {
+                  child.material.emissive.set(newCol).multiplyScalar(0.32);
+                }
               }
             }
           });
@@ -1663,12 +1725,20 @@ class NetVisio3DApp {
       position: [3.2, 7.1, -3.2]
     });
 
-    // Flechas 3D explicando el flujo entre zonas
-    this.addHardwareNode('arrow-3d-straight', {
-      hostname: '1. FLUJO INSPECCIONADO ➔',
-      ip: '100G hacia Core Cisco',
-      customColor: '#ff1744',
+    // Flechas 3D y Tubos de Comunicación de Datos por Puerto ("RDP", "UDP/49380") explicando el flujo
+    this.addHardwareNode('data-port-tube-udp', {
+      hostname: 'UDP/49380',
+      ip: 'Canal Dinámico / Flujo Inspeccionado',
+      customColor: '#00e676',
       position: [-5.2, 2.2, 5.5]
+    });
+
+    this.addHardwareNode('data-port-tube', {
+      hostname: 'RDP',
+      ip: 'TCP/3389 • Gestión Windows Server',
+      customColor: '#00e5ff',
+      position: [-4.8, 1.9, -0.5],
+      rotation: [0, 35, 0]
     });
 
     this.addHardwareNode('arrow-3d-curved', {

@@ -593,9 +593,133 @@ export function createProcessPanelTexture(headerTitle, bodyText, accentColor = '
   return tex;
 }
 
+// Create High-Res Interior Texture for the 3D Data Port Communication Tube ("RDP", "UDP/49380", etc.)
+export function createDataPortTubeTexture(portText, descText, accentColor = '#00e5ff') {
+  const canvas = document.createElement('canvas');
+  canvas.width = 1024;
+  canvas.height = 256;
+  const ctx = canvas.getContext('2d');
+
+  // Dark translucent core background inside the glass tube
+  const grad = ctx.createLinearGradient(0, 0, 1024, 0);
+  grad.addColorStop(0, 'rgba(8, 15, 28, 0.85)');
+  grad.addColorStop(0.5, 'rgba(15, 28, 48, 0.94)');
+  grad.addColorStop(1, 'rgba(8, 15, 28, 0.85)');
+  ctx.fillStyle = grad;
+  ctx.beginPath();
+  ctx.roundRect(12, 18, 1000, 220, 36);
+  ctx.fill();
+
+  // Glowing neon border along the core strip
+  ctx.lineWidth = 6;
+  ctx.strokeStyle = accentColor;
+  ctx.stroke();
+
+  // Subtle data flow chevrons on left and right
+  ctx.fillStyle = accentColor;
+  ctx.font = '900 54px ui-monospace, SFMono-Regular, monospace';
+  ctx.textAlign = 'left';
+  ctx.fillText('»»', 42, 134);
+  ctx.textAlign = 'right';
+  ctx.fillText('»»', 982, 134);
+
+  // Main Port / Protocol Text inside the tube (e.g. "RDP" or "UDP/49380")
+  ctx.save();
+  ctx.shadowColor = accentColor;
+  ctx.shadowBlur = 18;
+  ctx.fillStyle = '#ffffff';
+  ctx.textAlign = 'center';
+  ctx.font = '900 72px ui-monospace, SFMono-Regular, Menlo, monospace';
+  ctx.fillText((portText || 'UDP/49380').slice(0, 22), 512, 132);
+  ctx.restore();
+
+  // Subtitle / Description inside the tube
+  if (descText) {
+    ctx.fillStyle = '#93c5fd';
+    ctx.textAlign = 'center';
+    ctx.font = '600 30px system-ui, -apple-system, sans-serif';
+    ctx.fillText(descText.slice(0, 46), 512, 198);
+  }
+
+  const tex = new THREE.CanvasTexture(canvas);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  tex.needsUpdate = true;
+  return tex;
+}
+
 export function buildHardwareMesh(spec, instanceData = {}) {
   const root = new THREE.Group();
   const { width: w, height: h, depth: d, id } = spec;
+
+  // ================= 00. 3D DATA PORT COMMUNICATION TUBE ("RDP", "UDP/49380", ETC.) =================
+  if (spec.isDataPortTube) {
+    const accent = instanceData.customColor || spec.badgeColor || '#00e5ff';
+    const portText = instanceData.hostname || spec.defaultHostname || 'UDP/49380';
+    const descText = instanceData.ip || spec.defaultIp || '';
+    const radius = h / 2;
+
+    // 1. Outer Translucent Glass Cylinder Tube (laid horizontally along X axis)
+    const tubeGeom = new THREE.CylinderGeometry(radius, radius, w, 32, 1, false);
+    tubeGeom.rotateZ(Math.PI / 2);
+    const glassTubeMat = new THREE.MeshPhysicalMaterial({
+      color: new THREE.Color(accent),
+      transparent: true,
+      opacity: 0.26,
+      roughness: 0.12,
+      metalness: 0.15,
+      transmission: 0.5,
+      depthWrite: false
+    });
+    const outerTube = new THREE.Mesh(tubeGeom, glassTubeMat);
+    outerTube.name = 'dataTubeOuterGlass';
+    root.add(outerTube);
+
+    // 2. Metallic End Collars + Glowing Neon Energy Rings at both ends and center
+    const collarGeom = new THREE.CylinderGeometry(radius * 1.08, radius * 1.08, 0.1, 28);
+    collarGeom.rotateZ(Math.PI / 2);
+    const leftCollar = new THREE.Mesh(collarGeom, MAT.silverMetal);
+    leftCollar.position.set(-w / 2 + 0.05, 0, 0);
+    const rightCollar = new THREE.Mesh(collarGeom, MAT.silverMetal);
+    rightCollar.position.set(w / 2 - 0.05, 0, 0);
+    root.add(leftCollar, rightCollar);
+
+    const ringGeom = new THREE.TorusGeometry(radius * 1.06, 0.02, 14, 36);
+    ringGeom.rotateY(Math.PI / 2);
+    const ringMat = new THREE.MeshBasicMaterial({ color: new THREE.Color(accent) });
+    [-w / 2 + 0.11, 0, w / 2 - 0.11].forEach((rx) => {
+      const ring = new THREE.Mesh(ringGeom, ringMat);
+      ring.name = 'dataTubeRing';
+      ring.position.set(rx, 0, 0);
+      root.add(ring);
+    });
+
+    // 3. Internal Glowing Core Banner INSIDE the tube showing the Port ("RDP", "UDP/49380") from Front, Back, and Top
+    const coreTex = createDataPortTubeTexture(portText, descText, accent);
+    const coreMat = new THREE.MeshBasicMaterial({
+      map: coreTex,
+      transparent: true,
+      side: THREE.DoubleSide
+    });
+    const coreW = w * 0.86;
+    const coreH = radius * 1.38;
+
+    const coreFront = new THREE.Mesh(new THREE.PlaneGeometry(coreW, coreH), coreMat);
+    coreFront.name = 'dataTubeCoreFront';
+    coreFront.position.set(0, 0, 0.02);
+
+    const coreBack = new THREE.Mesh(new THREE.PlaneGeometry(coreW, coreH), coreMat);
+    coreBack.name = 'dataTubeCoreBack';
+    coreBack.rotation.y = Math.PI;
+    coreBack.position.set(0, 0, -0.02);
+
+    const coreTop = new THREE.Mesh(new THREE.PlaneGeometry(coreW, coreH), coreMat);
+    coreTop.name = 'dataTubeCoreTop';
+    coreTop.rotation.x = -Math.PI / 2;
+    coreTop.position.set(0, 0.02, 0);
+
+    root.add(coreFront, coreBack, coreTop);
+    return root;
+  }
 
   // ================= 0A. 3D RELOCATABLE DIAGRAM TITLE BANNER =================
   if (spec.isTitle3D) {

@@ -22,6 +22,56 @@ export const CABLE_TYPES = [
 ];
 
 export const HARDWARE_CATALOG = [
+  // ================= 3D DATA PORT COMMUNICATION TUBES (RDP, UDP/49380, ETC.) =================
+  {
+    id: 'data-port-tube',
+    name: 'Tubo de Datos / Puerto 3D ("RDP")',
+    vendor: 'Data Port Conduit',
+    category: 'annotations',
+    uHeight: 0,
+    width: 2.5,
+    height: 0.56,
+    depth: 0.56,
+    isDataPortTube: true,
+    badgeColor: '#00e5ff',
+    defaultHostname: 'RDP',
+    defaultIp: 'TCP/3389 • Remote Desktop',
+    specs: 'Tubo 3D translúcido de comunicación de datos con descripción de puerto/protocolo editable en su interior (ej. RDP, UDP/49380, HTTPS)',
+    ports: ['In-Port', 'Out-Port']
+  },
+  {
+    id: 'data-port-tube-udp',
+    name: 'Tubo de Datos / Puerto 3D ("UDP/49380")',
+    vendor: 'Data Port Conduit',
+    category: 'annotations',
+    uHeight: 0,
+    width: 2.5,
+    height: 0.56,
+    depth: 0.56,
+    isDataPortTube: true,
+    badgeColor: '#00e676',
+    defaultHostname: 'UDP/49380',
+    defaultIp: 'Canal de Datos Dinámico / RPC',
+    specs: 'Tubo 3D translúcido con texto interior editable para documentar puertos específicos (UDP/49380, TCP/1433, etc.)',
+    ports: ['In-Port', 'Out-Port']
+  },
+  {
+    id: 'data-port-tube-tls',
+    name: 'Tubo de Datos / Puerto 3D ("TCP/443 TLS")',
+    vendor: 'Data Port Conduit',
+    category: 'annotations',
+    uHeight: 0,
+    width: 2.5,
+    height: 0.56,
+    depth: 0.56,
+    isDataPortTube: true,
+    badgeColor: '#ffab00',
+    defaultHostname: 'TCP/443 HTTPS',
+    defaultIp: 'Tráfico Cifrado TLS 1.3',
+    specs: 'Tubo 3D translúcido con texto interior editable para flujos de puertos seguros o APIs',
+    ports: ['In-Port', 'Out-Port']
+  },
+
   // ================= 3D TITLES, PROCESS TEXT PANELS & 3D FLOW ARROWS =================
   {
     id: 'title-3d-banner',
