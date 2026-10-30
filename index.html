@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NetVisio 3D Studio — Diagramador 3D de Infraestructura, Redes, Storage & Seguridad</title>
+  <link rel="stylesheet" href="./styles.css" />
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js",
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.169.0/examples/jsm/"
+      }
+    }
+  </script>
+</head>
+<body>
+  <!-- Barra Superior estilo Visio 3D -->
+  <header class="top-toolbar">
+    <div class="brand-block">
+      <div class="brand-cube" aria-hidden="true">3D</div>
+      <div>
+        <div class="brand-title">NetVisio 3D Studio</div>
+        <div class="brand-subtitle">Diagramador 3D en 3 Ejes • Datacenter CAD</div>
+      </div>
+    </div>
+
+    <!-- Herramientas de Selección, Gizmo 3 Ejes y Cableado -->
+    <div class="toolbar-group" role="toolbar" aria-label="Herramientas de transformación 3D">
+      <button id="btn-mode-select" class="tool-btn active" title="Modo Selección (Esc)">
+        <span aria-hidden="true">↖</span> Seleccionar
+      </button>
+      <button class="tool-btn active" data-transform-mode="translate" title="Mover en 3 Ejes X/Y/Z (Tecla W)">
+        <span aria-hidden="true">✥</span> Mover (W)
+      </button>
+      <button class="tool-btn" data-transform-mode="rotate" title="Rotar Objeto en los 3 Ejes X/Y/Z (Tecla E)">
+        <span aria-hidden="true">↻</span> Rotar 3 Ejes (E)
+      </button>
+      <button class="tool-btn" data-transform-mode="scale" title="Escalar Objeto (Tecla R)">
+        <span aria-hidden="true">⤢</span> Escalar (R)
+      </button>
+
+      <div class="toolbar-divider"></div>
+
+      <button id="btn-mode-connect" class="tool-btn" title="Tender Cable / Fibra 3D entre Equipos (Tecla C)">
+        <span aria-hidden="true">⇄</span> Conectar Cable 3D (C)
+      </button>
+      <select id="toolbar-cable-type" class="tool-select" aria-label="Tipo de cable 3D"></select>
+      <select id="toolbar-route-style" class="tool-select" aria-label="Estilo de ruta 3D">
+        <option value="manhattan">Ruta Ortogonal 3D (Visio)</option>
+        <option value="overhead">Bandeja Aérea Superior</option>
+        <option value="bezier">Curva Directa</option>
+      </select>
+    </div>
+
+    <!-- Acciones de Escena y Exportación -->
+    <div class="toolbar-group">
+      <button id="btn-toggle-labels" class="tool-btn active" title="Mostrar/Ocultar Etiquetas 3D">
+        <span aria-hidden="true">🏷️</span> Etiquetas
+      </button>
+      <button id="btn-toggle-autorotate" class="tool-btn" title="Rotación orbital automática">
+        <span aria-hidden="true">⟳</span> Auto-Órbita
+      </button>
+      <button id="btn-load-demo" class="tool-btn" title="Cargar Arquitectura Datacenter de Referencia">
+        <span aria-hidden="true">🏛️</span> Demo Datacenter
+      </button>
+      <button id="btn-clear-scene" class="tool-btn" title="Limpiar Diagrama">
+        <span aria-hidden="true">🗑️</span> Limpiar
+      </button>
+      <div class="toolbar-divider"></div>
+      <button id="btn-export-json" class="tool-btn" title="Guardar Proyecto JSON">Guardar JSON</button>
+      <button id="btn-import-json" class="tool-btn" title="Abrir Proyecto JSON">Abrir</button>
+      <input type="file" id="file-import-json" accept=".json" hidden />
+      <button id="btn-export-png" class="tool-btn" title="Capturar Imagen PNG">PNG</button>
+      <button id="btn-export-bom" class="tool-btn" title="Exportar Inventario BOM en CSV">BOM CSV</button>
+    </div>
+  </header>
+
+  <!-- Área Principal: Librería de Stencils 3D | Lienzo WebGL 3D | Inspector -->
+  <main class="workspace-grid">
+    <!-- Librería Izquierda de Equipos 3D -->
+    <aside class="stencil-sidebar" aria-label="Librería de Equipos 3D">
+      <div class="sidebar-header">
+        <h2>Librería Stencils 3D</h2>
+        <input
+          type="search"
+          id="catalog-search"
+          class="search-box"
+          placeholder="Buscar Synergy, Nutanix, Alletra, Pure, Nexus 9508, 9410, FortiGate..."
+          aria-label="Buscar equipo en la librería"
+        />
+      </div>
+      <div id="category-tabs" class="category-tabs"></div>
+      <div id="catalog-list" class="catalog-list"></div>
+    </aside>
+
+    <!-- Lienzo Central 3D -->
+    <section class="viewport-wrapper" aria-label="Lienzo de Diagrama 3D">
+      <div id="connect-mode-banner" class="connect-banner" hidden></div>
+
+      <!-- Vistas Rápidas de Cámara en los 3 Ejes -->
+      <div class="cam-presets-bar" role="group" aria-label="Vistas de cámara 3D">
+        <button class="tool-btn" data-cam-preset="iso">Isométrica 3D</button>
+        <button class="tool-btn" data-cam-preset="front">Frontal (Z+)</button>
+        <button class="tool-btn" data-cam-preset="rear">Posterior (Z-)</button>
+        <button class="tool-btn" data-cam-preset="left">Lateral Izq (X-)</button>
+        <button class="tool-btn" data-cam-preset="right">Lateral Der (X+)</button>
+        <button class="tool-btn" data-cam-preset="top">Planta Superior (Y+)</button>
+      </div>
+
+      <!-- Control Interactivo de Rotación del Diagrama en los 3 Ejes (X, Y, Z) -->
+      <div class="axis-hud-panel" aria-label="Control de rotación del diagrama en 3 ejes">
+        <div class="axis-hud-header">
+          <span>Rotación del Diagrama (3 Ejes)</span>
+          <button id="btn-reset-axes" class="btn-mini" style="flex:0 0 auto; padding:2px 8px;">Reset 3D</button>
+        </div>
+        <div class="axis-slider-row">
+          <span>Eje X (Pitch)</span>
+          <input type="range" id="scene-rot-x" min="5" max="175" value="58" />
+          <span id="val-scene-x">58°</span>
+        </div>
+        <div class="axis-slider-row">
+          <span>Eje Y (Yaw)</span>
+          <input type="range" id="scene-rot-y" min="-180" max="180" value="38" />
+          <span id="val-scene-y">38°</span>
+        </div>
+        <div class="axis-slider-row">
+          <span>Eje Z (Roll)</span>
+          <input type="range" id="scene-rot-z" min="-180" max="180" value="0" />
+          <span id="val-scene-z">0°</span>
+        </div>
+      </div>
+
+      <div id="viewport-container"></div>
+    </section>
+
+    <!-- Inspector Derecho de Propiedades, Montaje en Rack, Rotación X/Y/Z y Puertos -->
+    <aside class="inspector-sidebar" aria-label="Inspector de Propiedades 3D">
+      <div id="inspector-content"></div>
+    </aside>
+  </main>
+
+  <!-- Barra de Estado Inferior -->
+  <footer class="status-bar">
+    <div id="status-counts">Cargando escena 3D...</div>
+    <div>Arrastra equipos desde la librería hacia un Rack 42U (auto-snap por U) o a cualquier punto del plano 3D</div>
+  </footer>
+
+  <div id="toast-notification" class="toast" role="status" aria-live="polite"></div>
+
+  <script type="module" src="./js/app.js"></script>
+</body>
+</html>
+
