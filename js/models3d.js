@@ -719,7 +719,7 @@ export function buildHardwareMesh(spec, instanceData = {}) {
     const glassTubeMat = new THREE.MeshPhysicalMaterial({
       color: new THREE.Color(accent),
       transparent: true,
-      opacity: 0.26,
+      opacity: 0.16,
       roughness: 0.12,
       metalness: 0.15,
       transmission: 0.5,
@@ -741,7 +741,7 @@ export function buildHardwareMesh(spec, instanceData = {}) {
     const ringGeom = new THREE.TorusGeometry(radius * 1.06, 0.02, 14, 36);
     ringGeom.rotateY(Math.PI / 2);
     const ringMat = new THREE.MeshBasicMaterial({ color: new THREE.Color(accent) });
-    [-w / 2 + 0.11, 0, w / 2 - 0.11].forEach((rx) => {
+    [-w / 2 + 0.11, w / 2 - 0.11].forEach((rx) => {
       const ring = new THREE.Mesh(ringGeom, ringMat);
       ring.name = 'dataTubeRing';
       ring.position.set(rx, 0, 0);
