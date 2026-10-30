@@ -668,16 +668,114 @@ export function buildHardwareMesh(spec, instanceData = {}) {
       m.position.set(x, y, z);
       root.add(m);
     });
+  } else if (id === 'atm-kiosk-24-7') {
+    // ================= 3D ATM 24/7 KIOSK ("BANK YOUR WAY") =================
+    const atmGreenMat = new THREE.MeshStandardMaterial({
+      color: 0x1e6b43,
+      roughness: 0.35,
+      metalness: 0.2
+    });
+    const kioskBody = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), atmGreenMat);
+    kioskBody.castShadow = true;
+    kioskBody.receiveShadow = true;
+    root.add(kioskBody);
+
+    // Front Faceplate Texture from ATM.jpeg
+    const atmTex = loadProductTexture('./assets/textures/atm_front.jpg');
+    const frontFace = new THREE.Mesh(
+      new THREE.PlaneGeometry(w * 0.98, h * 0.98),
+      new THREE.MeshStandardMaterial({ map: atmTex, roughness: 0.3, metalness: 0.1 })
+    );
+    frontFace.position.set(0, 0, d / 2 + 0.006);
+    root.add(frontFace);
+
+    // 3D Extruded ATM Terminal Hood & Frame in lower-center of kiosk
+    const termW = w * 0.36;
+    const termH = h * 0.54;
+    const termY = -h * 0.12;
+    const termX = w * 0.02;
+    const fz = d / 2;
+
+    const pillarL = new THREE.Mesh(new THREE.BoxGeometry(0.05, termH, 0.09), MAT.darkChassis);
+    pillarL.position.set(termX - termW / 2, termY, fz + 0.04);
+    const pillarR = new THREE.Mesh(new THREE.BoxGeometry(0.05, termH, 0.09), MAT.darkChassis);
+    pillarR.position.set(termX + termW / 2, termY, fz + 0.04);
+    const topHood = new THREE.Mesh(new THREE.BoxGeometry(termW + 0.05, 0.09, 0.11), MAT.silverMetal);
+    topHood.position.set(termX, termY + termH / 2 - 0.04, fz + 0.045);
+    const botShelf = new THREE.Mesh(new THREE.BoxGeometry(termW + 0.05, 0.05, 0.10), MAT.silverMetal);
+    botShelf.position.set(termX, termY - termH / 2 + 0.02, fz + 0.04);
+    root.add(pillarL, pillarR, topHood, botShelf);
+
+    // Glowing Green Card Reader Slot LED
+    const cardLed = new THREE.Mesh(new THREE.BoxGeometry(0.07, 0.018, 0.03), MAT.ledGreen);
+    cardLed.position.set(termX + termW * 0.24, termY - 0.08, fz + 0.025);
+    root.add(cardLed);
+  } else if (id === 'all-in-one-pc') {
+    // ================= 3D ALL-IN-ONE PC WORKSTATION + KEYBOARD & MOUSE =================
+    const monW = 0.96;
+    const monH = 0.58;
+    const monD = 0.042;
+    const monY = 0.14;
+    const monZ = -0.06;
+
+    const monitorGroup = new THREE.Group();
+    monitorGroup.position.set(0, monY, monZ);
+    monitorGroup.rotation.x = -0.09; // Slight ergonomic tilt back
+
+    const monBody = new THREE.Mesh(new THREE.BoxGeometry(monW, monH, monD), MAT.silverMetal);
+    monBody.castShadow = true;
+    monitorGroup.add(monBody);
+
+    // Windows 11 + B&O Speaker Chin Screen Texture from ALL IN ONE.png
+    const aioTex = loadProductTexture('./assets/textures/aio_screen.jpg');
+    const screenMesh = new THREE.Mesh(
+      new THREE.PlaneGeometry(monW * 0.97, monH * 0.96),
+      new THREE.MeshBasicMaterial({ map: aioTex })
+    );
+    screenMesh.position.set(0, 0, monD / 2 + 0.003);
+    monitorGroup.add(screenMesh);
+
+    // Top Pop-up Webcam Module
+    const webcam = new THREE.Mesh(new THREE.BoxGeometry(0.16, 0.045, 0.028), MAT.darkChassis);
+    webcam.position.set(0, monH / 2 + 0.022, 0);
+    const camLens = new THREE.Mesh(new THREE.CylinderGeometry(0.008, 0.008, 0.032, 12), MAT.ledCyan);
+    camLens.rotation.x = Math.PI / 2;
+    camLens.position.set(0, monH / 2 + 0.022, 0.002);
+    monitorGroup.add(webcam, camLens);
+    root.add(monitorGroup);
+
+    // Cylindrical Silver Stand Neck + Flat Rectangular Base
+    const neck = new THREE.Mesh(new THREE.CylinderGeometry(0.038, 0.042, 0.34, 20), MAT.silverMetal);
+    neck.position.set(0, -0.26, monZ - 0.03);
+    const basePlate = new THREE.Mesh(new THREE.BoxGeometry(0.42, 0.018, 0.28), MAT.silverMetal);
+    basePlate.position.set(0, -h / 2 + 0.01, monZ);
+    root.add(neck, basePlate);
+
+    // 3D Slim Black Wireless Keyboard in front of monitor
+    const kbGroup = new THREE.Group();
+    kbGroup.position.set(-0.08, -h / 2 + 0.018, 0.22);
+    kbGroup.rotation.x = 0.06;
+    const kbBody = new THREE.Mesh(new THREE.BoxGeometry(0.54, 0.016, 0.18), MAT.darkChassis);
+    const kbTrim = new THREE.Mesh(new THREE.BoxGeometry(0.545, 0.006, 0.184), MAT.silverMetal);
+    kbTrim.position.y = -0.005;
+    kbGroup.add(kbBody, kbTrim);
+    root.add(kbGroup);
+
+    // 3D Ergonomic Black Wireless Mouse on the right
+    const mouse = new THREE.Mesh(new THREE.BoxGeometry(0.085, 0.032, 0.13), MAT.darkChassis);
+    mouse.position.set(0.34, -h / 2 + 0.018, 0.23);
+    root.add(mouse);
   } else {
     // ================= 4. ENTERPRISE HARDWARE CHASSIS MODELS =================
     const isForti = id.startsWith('fortigate-');
     const isCiscoChassis = id === 'cisco-nexus-9508' || id === 'cisco-catalyst-9410r';
     const isPure = id.startsWith('pure-');
     const isSynergy = id === 'hpe-synergy-12000';
+    const isRackServer = id === 'rack-server-pro' || id === 'hpe-dl360-gen11' || id === 'hpe-dl380-gen11';
 
     let bodyMat = MAT.darkChassis;
     if (isForti) bodyMat = MAT.fortiWhite;
-    else if (isCiscoChassis || isSynergy) bodyMat = MAT.ciscoSilver;
+    else if (isCiscoChassis || isSynergy || isRackServer) bodyMat = MAT.ciscoSilver;
     else if (isPure) bodyMat = MAT.pureBlack;
 
     const chassis = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), bodyMat);
@@ -870,6 +968,33 @@ export function buildHardwareMesh(spec, instanceData = {}) {
       );
       frontFace.position.set(0, 0, fz);
       root.add(frontFace);
+    } else if (id === 'kemp-loadmaster-x3') {
+      // Real Kemp LoadMaster X3 yellow/black front faceplate from KEMP LB.webp
+      const kempTex = loadProductTexture('./assets/textures/kemp_front.jpg');
+      const frontFace = new THREE.Mesh(
+        new THREE.PlaneGeometry(w * 0.99, h * 0.96),
+        new THREE.MeshStandardMaterial({ map: kempTex, roughness: 0.3, metalness: 0.2 })
+      );
+      frontFace.position.set(0, 0, fz);
+      root.add(frontFace);
+    } else if (id === 'rack-server-pro' || id === 'hpe-dl360-gen11' || id === 'hpe-dl380-gen11') {
+      // Real HPE Rack Server Bezel from RACK SERVER.webp + 3D sculpted latches & central green HPE emblem
+      const rsTex = loadProductTexture('./assets/textures/rack_server_front.jpg');
+      const frontFace = new THREE.Mesh(
+        new THREE.PlaneGeometry(w * 0.99, h * 0.96),
+        new THREE.MeshStandardMaterial({ map: rsTex, roughness: 0.32, metalness: 0.35 })
+      );
+      frontFace.position.set(0, 0, fz);
+      root.add(frontFace);
+
+      // 3D central HPE green rectangular emblem & left/right silver bezel latches
+      const hpeEmblem = new THREE.Mesh(new THREE.BoxGeometry(0.18, h * 0.38, 0.022), MAT.hpeGreen);
+      hpeEmblem.position.set(-0.02, 0, fz + 0.008);
+      const latchL = new THREE.Mesh(new THREE.BoxGeometry(0.11, h * 0.86, 0.022), MAT.silverMetal);
+      latchL.position.set(-w * 0.42, 0, fz + 0.008);
+      const latchR = new THREE.Mesh(new THREE.BoxGeometry(0.11, h * 0.86, 0.022), MAT.silverMetal);
+      latchR.position.set(w * 0.39, 0, fz + 0.008);
+      root.add(hpeEmblem, latchL, latchR);
     } else if (id.startsWith('nutanix-')) {
       const accent = id.includes('3060') ? MAT.nutanixGreen : MAT.dellBlue;
       addDriveBays(root, w, h, fz, 12, 2, accent);

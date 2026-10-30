@@ -1250,6 +1250,20 @@ class NetVisio3DApp {
         </div>
 
         ${
+          spec.isZone
+            ? `
+        <div class="insp-section">
+          <div class="insp-section-title">Color de la Zona 3D (Azul / Rojo / Verde)</div>
+          <div class="quick-rot-row">
+            <button class="btn-mini" data-zone-color="#2979ff" style="border-color:#2979ff; color:#60a5fa;">🟦 Azul</button>
+            <button class="btn-mini" data-zone-color="#ee3124" style="border-color:#ee3124; color:#f87171;">🟥 Rojo</button>
+            <button class="btn-mini" data-zone-color="#00c853" style="border-color:#00c853; color:#4ade80;">🟩 Verde</button>
+          </div>
+        </div>`
+            : ''
+        }
+
+        ${
           !spec.isRackContainer && !spec.isZone && spec.uHeight > 0
             ? `
         <div class="insp-section">
@@ -1363,6 +1377,21 @@ class NetVisio3DApp {
       document.getElementById('inp-ip')?.addEventListener('input', (e) => {
         node.data.ip = e.target.value;
         refreshLabel();
+      });
+
+      container.querySelectorAll('[data-zone-color]').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const newCol = btn.dataset.zoneColor;
+          node.data.customColor = newCol;
+          node.group.traverse((child) => {
+            if (child.isMesh && child.material) {
+              child.material.color.set(newCol);
+            } else if (child.isLineSegments && child.material) {
+              child.material.color.set(newCol);
+            }
+          });
+          refreshLabel();
+        });
       });
 
       const applyTransformFromInputs = () => {
@@ -1519,37 +1548,29 @@ class NetVisio3DApp {
   loadEnterpriseSampleArchitecture() {
     this.clearScene();
 
-    // 1. Visio-style 3D Security / Core / Virtualization / Compute & Storage Zone Platforms
-    this.addHardwareNode('zone-platform', {
-      hostname: 'ZONA PERIMETRAL FORTINET',
-      ip: 'FG-1800F HA + FG-600F + FG-200F',
+    // 1. Zonas 3D en ROJO, AZUL y VERDE
+    this.addHardwareNode('zone-platform-red', {
+      hostname: 'ZONA ROJA — SEGURIDAD FORTINET & KEMP LB',
+      ip: 'VLAN 10 / Perímetro, WAF & Balanceo ADC',
       customColor: '#ee3124',
       position: [-8.8, 0.04, 5.2],
-      scale: [0.92, 1, 0.85]
+      scale: [0.95, 1, 0.90]
     });
 
     this.addHardwareNode('zone-platform', {
-      hostname: 'ZONA CORE & DISTRIBUCIÓN CISCO',
-      ip: 'Nexus 9508 Spine + Catalyst 9410R/9300',
-      customColor: '#00bceb',
-      position: [-0.2, 0.04, 5.2],
-      scale: [1.05, 1, 0.85]
+      hostname: 'ZONA AZUL — CORE CISCO & VIRTUALIZACIÓN 3D',
+      ip: 'Nexus 9508 + Catalyst 9410R + VMs (Win / RHEL / vApp)',
+      customColor: '#2979ff',
+      position: [-2.2, 0.04, 1.2],
+      scale: [1.35, 1, 1.85]
     });
 
-    this.addHardwareNode('zone-platform', {
-      hostname: 'ZONA VIRTUALIZACIÓN 3D (WINDOWS / RHEL / APPLIANCE)',
-      ip: 'Cluster Hypervisor + Instancias Aisladas',
-      customColor: '#00b4ff',
-      position: [-7.2, 0.04, -2.8],
-      scale: [0.95, 1, 0.95]
-    });
-
-    this.addHardwareNode('zone-platform', {
-      hostname: 'ZONA SYNERGY, NUTANIX & STORAGE ALLETRA/PURE',
-      ip: 'HPE Synergy 12000 + Alletra 9000 + Pure Storage',
-      customColor: '#01a982',
-      position: [3.2, 0.04, -3.2],
-      scale: [1.75, 1, 1.05]
+    this.addHardwareNode('zone-platform-green', {
+      hostname: 'ZONA VERDE — SYNERGY, STORAGE, ATMs & ALL-IN-ONE',
+      ip: 'HPE Synergy + Alletra/Pure + ATM 24/7 + Estaciones',
+      customColor: '#00c853',
+      position: [5.2, 0.04, 0.8],
+      scale: [1.55, 1, 1.95]
     });
 
     // External WAN Dark Fiber Cloud
@@ -1557,6 +1578,31 @@ class NetVisio3DApp {
       hostname: 'RED / INTERNET WAN',
       ip: '100G Dark Fiber Ring',
       position: [-12.5, 2.8, 5.2]
+    });
+
+    // ================= NEW ENDPOINTS: ATM 24/7, ALL-IN-ONE PC, KEMP LB & RACK SERVER =================
+    const atm247 = this.addHardwareNode('atm-kiosk-24-7', {
+      hostname: 'ATM-247-AIRPORT-01',
+      ip: '10.40.10.11 (Bank Your Way 24/7)',
+      position: [6.4, 0.92, 4.6]
+    });
+
+    const aioPc = this.addHardwareNode('all-in-one-pc', {
+      hostname: 'AIO-EJECUTIVO-01',
+      ip: '10.40.20.15 (Windows 11 Enterprise)',
+      position: [3.6, 0.50, 4.6]
+    });
+
+    const kempLb = this.addHardwareNode('kemp-loadmaster-x3', {
+      hostname: 'KEMP-LOADMASTER-X3',
+      ip: '10.20.5.10 (VIP Load Balancer)',
+      position: [-8.8, 2.65, 4.2]
+    });
+
+    const rackSrvPro = this.addHardwareNode('rack-server-pro', {
+      hostname: 'SRV-RACK-PROLIANT-01',
+      ip: '10.20.20.10 (Bezel HPE 1U)',
+      position: [-4.2, 0.95, 5.2]
     });
 
     // ================= VIRTUALIZATION STACK (MATCHING "Servidor Virtual.png") =================
@@ -1813,6 +1859,38 @@ class NetVisio3DApp {
       fromPort: 'Stack-1',
       toPort: 'Stack-1',
       cableType: 'cat6a-blue',
+      routeStyle: 'manhattan'
+    });
+    this.addCableLink({
+      fromId: c9300_48.id,
+      toId: atm247.id,
+      fromPort: 'Gi1/0/1-12',
+      toPort: 'LAN-Primary (RJ45)',
+      cableType: 'cat6a-blue',
+      routeStyle: 'manhattan'
+    });
+    this.addCableLink({
+      fromId: c9300_24.id,
+      toId: aioPc.id,
+      fromPort: 'Gi1/0/1-12',
+      toPort: 'eth0-1GbE (RJ45)',
+      cableType: 'cat6a-blue',
+      routeStyle: 'manhattan'
+    });
+    this.addCableLink({
+      fromId: kempLb.id,
+      toId: fg600.id,
+      fromPort: 'eth0 (WAN/VIP)',
+      toPort: 'port1-RJ45',
+      cableType: 'cat6a-blue',
+      routeStyle: 'manhattan'
+    });
+    this.addCableLink({
+      fromId: kempLb.id,
+      toId: rackSrvPro.id,
+      fromPort: 'eth2 (Backend-1)',
+      toPort: 'OCP-25G-1',
+      cableType: 'om4-aqua',
       routeStyle: 'manhattan'
     });
 

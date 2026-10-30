@@ -1,13 +1,14 @@
-// Hardware & Virtualization Stencil Catalog for NetVisio 3D Studio
+// Hardware, Endpoints, Load Balancers & Virtualization Stencil Catalog for NetVisio 3D Studio
 export const CATEGORIES = [
   { id: 'all', name: 'Todos', icon: '◈' },
+  { id: 'endpoints', name: 'ATMs, All-in-One & KEMP', icon: '🏧' },
   { id: 'virtual', name: 'Servidores Virtuales (VM)', icon: '🧊' },
   { id: 'enclosures', name: 'Racks & Synergy', icon: '▣' },
-  { id: 'compute', name: 'Servidores & Nutanix', icon: '▤' },
+  { id: 'compute', name: 'Rack Servers & Nutanix', icon: '▤' },
   { id: 'storage', name: 'Storage (Alletra / Pure)', icon: '▥' },
   { id: 'network', name: 'Cisco (Nexus / Catalyst)', icon: '⇄' },
   { id: 'security', name: 'Seguridad (FortiGate)', icon: '🛡️' },
-  { id: 'zones', name: 'Zonas & Topología', icon: '⬡' }
+  { id: 'zones', name: 'Zonas 3D (Azul/Rojo/Verde)', icon: '⬡' }
 ];
 
 export const CABLE_TYPES = [
@@ -20,6 +21,133 @@ export const CABLE_TYPES = [
 ];
 
 export const HARDWARE_CATALOG = [
+  // ================= NEW ENDPOINTS, ATMS, KEMP LB & RACK SERVER =================
+  {
+    id: 'atm-kiosk-24-7',
+    name: 'ATM 24/7 Kiosk (Bank Your Way)',
+    vendor: 'FirstBank ATM',
+    category: 'endpoints',
+    uHeight: 0,
+    width: 1.55,
+    height: 1.78,
+    depth: 0.54,
+    badgeColor: '#2e8b57',
+    defaultHostname: 'ATM-247-01',
+    defaultIp: '10.40.10.11 (TLS / ISO8583)',
+    specs: 'Cajero Automático 24/7 en 3D | Retiros, Transferencias y Consultas | Doble NIC Redundante + Cifrado Hardware',
+    ports: ['LAN-Primary (RJ45)', 'LAN-Backup (LTE/MPLS)', 'Vault-Sensor', 'Alarm-Port']
+  },
+  {
+    id: 'all-in-one-pc',
+    name: 'All-in-One PC Workstation (Win 11)',
+    vendor: 'HP Enterprise Desktop',
+    category: 'endpoints',
+    uHeight: 0,
+    width: 1.15,
+    height: 0.92,
+    depth: 0.72,
+    badgeColor: '#0ea5e9',
+    defaultHostname: 'AIO-WKS-01',
+    defaultIp: '10.40.20.15 (VLAN Usuarios)',
+    specs: 'Estación de Trabajo All-in-One 3D | Pantalla QHD + Webcam Pop-up + Audio B&O + Teclado y Mouse Inalámbricos',
+    ports: ['eth0-1GbE (RJ45)', 'Wi-Fi-6E', 'USB-C-Thunderbolt', 'DisplayPort']
+  },
+  {
+    id: 'kemp-loadmaster-x3',
+    name: 'Kemp LoadMaster X3 (Load Balancer)',
+    vendor: 'Progress Kemp',
+    category: 'endpoints',
+    uHeight: 1,
+    width: 1.9,
+    height: 0.15,
+    depth: 1.45,
+    badgeColor: '#f59e0b',
+    defaultHostname: 'LB-KEMP-X3-01',
+    defaultIp: '10.20.5.10 (VIP / ADC)',
+    specs: '1U Hardware Load Balancer & ADC | Chasis Negro/Amarillo KEMP | SSL Offload, WAF & GSLB | 8x GbE + SFP+',
+    ports: ['eth0 (WAN/VIP)', 'eth1 (DMZ)', 'eth2 (Backend-1)', 'eth3 (Backend-2)', 'eth4-7 (Trunk)', 'HA-Sync', 'Mgmt']
+  },
+  {
+    id: 'rack-server-pro',
+    name: 'Rack Server Enterprise (Bezel HPE)',
+    vendor: 'HPE ProLiant',
+    category: 'compute',
+    uHeight: 1,
+    width: 1.9,
+    height: 0.16,
+    depth: 2.25,
+    badgeColor: '#01a982',
+    defaultHostname: 'SRV-RACK-01',
+    defaultIp: '10.20.20.10',
+    specs: 'Servidor de Rack 1U/2U con Security Bezel Frontal HPE | Chasis Metálico Cepillado | Dual 25GbE + FC + iLO 6',
+    ports: ['OCP-25G-1', 'OCP-25G-2', 'FC-HBA-1', 'FC-HBA-2', 'iLO-6-Mgmt']
+  },
+
+  // ================= 3D ZONES (AZUL, ROJO, VERDE) =================
+  {
+    id: 'zone-platform',
+    name: 'Zona 3D Azul (Core / Red / Gestión)',
+    vendor: 'Topology Zone',
+    category: 'zones',
+    uHeight: 0,
+    width: 7.5,
+    height: 0.08,
+    depth: 5.0,
+    isZone: true,
+    badgeColor: '#2979ff',
+    defaultHostname: 'ZONA AZUL — CORE & GESTIÓN',
+    defaultIp: 'VLAN 100 - 10.20.0.0/16',
+    specs: 'Plataforma Contenedora 3D Azul estilo Visio para agrupar visualmente capas de Red Core, Virtualización o Gestión',
+    ports: ['Zone-Anchor']
+  },
+  {
+    id: 'zone-platform-red',
+    name: 'Zona 3D Roja (Seguridad / DMZ / Crítico)',
+    vendor: 'Topology Zone',
+    category: 'zones',
+    uHeight: 0,
+    width: 7.5,
+    height: 0.08,
+    depth: 5.0,
+    isZone: true,
+    badgeColor: '#ee3124',
+    defaultHostname: 'ZONA ROJA — SEGURIDAD & DMZ',
+    defaultIp: 'VLAN 10 - Perímetro & Firewalls',
+    specs: 'Plataforma Contenedora 3D Roja estilo Visio para delimitar Zonas de Seguridad, Perímetro FortiGate, WAF o DMZ',
+    ports: ['Zone-Anchor']
+  },
+  {
+    id: 'zone-platform-green',
+    name: 'Zona 3D Verde (Banca / ATMs / Storage)',
+    vendor: 'Topology Zone',
+    category: 'zones',
+    uHeight: 0,
+    width: 7.5,
+    height: 0.08,
+    depth: 5.0,
+    isZone: true,
+    badgeColor: '#00c853',
+    defaultHostname: 'ZONA VERDE — PRODUCCIÓN & ATMs',
+    defaultIp: 'VLAN 200 - Servicios Bancarios',
+    specs: 'Plataforma Contenedora 3D Verde estilo Visio para agrupar ATMs, Sucursales, Cómputo Synergy o Almacenamiento SAN',
+    ports: ['Zone-Anchor']
+  },
+  {
+    id: 'cloud-wan',
+    name: 'Nube WAN / MPLS / Internet',
+    vendor: 'Topology',
+    category: 'zones',
+    uHeight: 0,
+    width: 2.2,
+    height: 1.1,
+    depth: 1.4,
+    badgeColor: '#00e5ff',
+    defaultHostname: 'ISP-WAN-CORE',
+    defaultIp: 'BGP AS 65001',
+    specs: 'Nodo 3D de interconexión externa (Fibra Oscura / MPLS / Internet Carrier / Cloud)',
+    ports: ['Carrier-A (100G)', 'Carrier-B (100G)', 'DarkFiber-1', 'DarkFiber-2']
+  },
+
   // ================= VIRTUAL SERVERS (3 VERSIONS + HYPERVISOR) =================
   {
     id: 'vm-windows-server',
@@ -69,7 +197,7 @@ export const HARDWARE_CATALOG = [
     badgeColor: '#10b981',
     defaultHostname: 'VM-VAPP-SEC01',
     defaultIp: '10.20.50.15 (OVA Hardened Appliance)',
-    specs: 'Instancia Virtual Aislada | Virtual Appliance Preconfigurado (vCenter / FortiManager / NetScaler / Backup)',
+    specs: 'Instancia Virtual Aislada | Virtual Appliance Preconfigurado (vCenter / FortiManager / Kemp VLM / Backup)',
     ports: ['vPort-Mgmt', 'vPort-Data', 'vPort-HA']
   },
   {
@@ -155,7 +283,7 @@ export const HARDWARE_CATALOG = [
   },
   {
     id: 'hpe-dl380-gen11',
-    name: 'HPE ProLiant DL380 Gen11',
+    name: 'HPE ProLiant DL380 Gen11 (2U)',
     vendor: 'HPE',
     category: 'compute',
     uHeight: 2,
@@ -165,22 +293,22 @@ export const HARDWARE_CATALOG = [
     badgeColor: '#01a982',
     defaultHostname: 'SRV-DL380-01',
     defaultIp: '10.20.20.21',
-    specs: '2U Rack Server | 2x Intel Xeon Scalable | 24x SFF NVMe/SAS | OCP 3.0 25GbE + FC HBA',
+    specs: '2U Rack Server con Bezel HPE | 2x Intel Xeon Scalable | 24x SFF NVMe/SAS | OCP 3.0 25GbE + FC HBA',
     ports: ['OCP-25G-1', 'OCP-25G-2', 'FC-HBA-1', 'FC-HBA-2', 'iLO-6']
   },
   {
     id: 'hpe-dl360-gen11',
-    name: 'HPE ProLiant DL360 Gen11',
+    name: 'HPE ProLiant DL360 Gen11 (1U)',
     vendor: 'HPE',
     category: 'compute',
     uHeight: 1,
     width: 1.9,
-    height: 0.14,
+    height: 0.15,
     depth: 2.2,
     badgeColor: '#01a982',
     defaultHostname: 'SRV-DL360-01',
     defaultIp: '10.20.20.22',
-    specs: '1U Dense Compute Server | 10x SFF NVMe | Dual 25GbE SFP28 | iLO 6',
+    specs: '1U Dense Compute Rack Server con Bezel HPE | 10x SFF NVMe | Dual 25GbE SFP28 | iLO 6',
     ports: ['NIC1-25G', 'NIC2-25G', 'FC0', 'FC1', 'iLO']
   },
   {
@@ -398,38 +526,5 @@ export const HARDWARE_CATALOG = [
     defaultIp: '10.20.0.5',
     specs: '2U Ultra-Scale Data Center NGFW | 6x 100G QSFP28 + 16x 25G/10G SFP28 | Dual NP7 + CP9',
     ports: ['100G-1', '100G-2', '100G-3', '100G-4', '25G-1', '25G-2', 'HA1', 'HA2']
-  },
-
-  // ================= ZONES & TOPOLOGY OBJECTS =================
-  {
-    id: 'zone-platform',
-    name: 'Zona 3D / Contenedor Visio',
-    vendor: 'Topology',
-    category: 'zones',
-    uHeight: 0,
-    width: 7.5,
-    height: 0.08,
-    depth: 5.0,
-    isZone: true,
-    badgeColor: '#3d5afe',
-    defaultHostname: 'ZONA CORE / DMZ',
-    defaultIp: 'VLAN 100 - 10.20.0.0/16',
-    specs: 'Plataforma 3D estilo contenedor de Visio para agrupar visualmente capas o zonas de seguridad',
-    ports: ['Zone-Anchor']
-  },
-  {
-    id: 'cloud-wan',
-    name: 'Nube WAN / MPLS / Internet',
-    vendor: 'Topology',
-    category: 'zones',
-    uHeight: 0,
-    width: 2.2,
-    height: 1.1,
-    depth: 1.4,
-    badgeColor: '#00e5ff',
-    defaultHostname: 'ISP-WAN-CORE',
-    defaultIp: 'BGP AS 65001',
-    specs: 'Nodo 3D de interconexión externa (Fibra Oscura / MPLS / Internet Carrier / Cloud)',
-    ports: ['Carrier-A (100G)', 'Carrier-B (100G)', 'DarkFiber-1', 'DarkFiber-2']
   }
 ];
