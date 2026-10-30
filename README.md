@@ -16,3 +16,4 @@ Aplicación web interactiva tipo **Visio en 3D** para diagramación de arquitect
 - **Cableado 3D Inteligente**:
   - Enrutamiento **Ortogonal 3D (Visio Manhattan)**, **Bandeja Aérea Superior** y **Curva Directa** con animación de tráfico en tiempo real.
   - Exportación/Importación de proyectos en **JSON**, captura **PNG** e inventario **BOM (CSV)**.
+

@@ -64,14 +64,23 @@ class NetVisio3DApp {
 
     // TransformControls for 3-axis Translation, 3-axis Rotation (X, Y, Z), and Scaling
     this.transformControl = new TransformControls(this.camera, this.renderer.domElement);
-    this.transformControl.setSize(0.85);
+    this.transformControl.setSize(1.05);
+    this.transformHelper = this.transformControl.getHelper
+      ? this.transformControl.getHelper()
+      : this.transformControl;
+    this.scene.add(this.transformHelper);
+
     this.transformControl.addEventListener('dragging-changed', (e) => {
       this.orbit.enabled = !e.value;
     });
     this.transformControl.addEventListener('change', () => {
-      if (this.selectedNodeId) {
+      if (this.selectedNodeId && this.transformControl.dragging) {
         const node = this.nodes.get(this.selectedNodeId);
         if (node) {
+          // If moved manually with 3D arrows, detach from fixed rack U lock so it can move freely
+          if (this.transformControl.getMode() === 'translate' && node.data.rackId) {
+            node.data.rackId = '';
+          }
           if (this.snapToGrid && this.transformControl.getMode() === 'translate') {
             node.group.position.x = Math.round(node.group.position.x * 10) / 10;
             node.group.position.y = Math.max(0.04, Math.round(node.group.position.y * 20) / 20);
@@ -80,10 +89,10 @@ class NetVisio3DApp {
           this.syncNodeDataFromTransform(node);
           this.rebuildConnectedLinks(node.id);
           this.updateInspectorTransformInputs(node);
+          this.updateSelectionHudBanner();
         }
       }
     });
-    this.scene.add(this.transformControl);
 
     // Lighting
     const hemiLight = new THREE.HemisphereLight(0xe0f2fe, 0x0f172a, 1.25);
@@ -126,12 +135,64 @@ class NetVisio3DApp {
 
   setupViewportEvents() {
     let pointerDownPos = { x: 0, y: 0 };
+    let isDirectDraggingNode = false;
+    let directDragNode = null;
+    const dragPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
+    const dragOffset = new THREE.Vector3();
+    const dragIntersect = new THREE.Vector3();
 
     this.renderer.domElement.addEventListener('pointerdown', (e) => {
       pointerDownPos = { x: e.clientX, y: e.clientY };
+      if (e.button !== 0 || this.interactionMode === 'connect' || this.transformControl.axis) return;
+
+      // If user clicks directly on the currently selected node in Translate mode, allow direct mouse drag!
+      if (this.selectedNodeId && this.transformControl.getMode() === 'translate') {
+        const rect = this.renderer.domElement.getBoundingClientRect();
+        this.pointer.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+        this.pointer.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+        this.raycaster.setFromCamera(this.pointer, this.camera);
+
+        const selNode = this.nodes.get(this.selectedNodeId);
+        if (selNode && !selNode.spec.isZone) {
+          const hits = this.raycaster.intersectObject(selNode.group, true);
+          if (hits.length > 0) {
+            isDirectDraggingNode = true;
+            directDragNode = selNode;
+            this.orbit.enabled = false;
+            dragPlane.setFromNormalAndCoplanarPoint(new THREE.Vector3(0, 1, 0), selNode.group.position);
+            if (this.raycaster.ray.intersectPlane(dragPlane, dragIntersect)) {
+              dragOffset.copy(selNode.group.position).sub(dragIntersect);
+            }
+          }
+        }
+      }
+    });
+
+    this.renderer.domElement.addEventListener('pointermove', (e) => {
+      if (!isDirectDraggingNode || !directDragNode) return;
+      const rect = this.renderer.domElement.getBoundingClientRect();
+      this.pointer.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+      this.pointer.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+      this.raycaster.setFromCamera(this.pointer, this.camera);
+
+      if (this.raycaster.ray.intersectPlane(dragPlane, dragIntersect)) {
+        const targetPos = dragIntersect.add(dragOffset);
+        directDragNode.data.rackId = '';
+        directDragNode.group.position.x = Math.round(targetPos.x * 10) / 10;
+        directDragNode.group.position.z = Math.round(targetPos.z * 10) / 10;
+        this.syncNodeDataFromTransform(directDragNode);
+        this.rebuildConnectedLinks(directDragNode.id);
+        this.updateInspectorTransformInputs(directDragNode);
+        this.updateSelectionHudBanner();
+      }
     });
 
     this.renderer.domElement.addEventListener('pointerup', (e) => {
+      if (isDirectDraggingNode) {
+        isDirectDraggingNode = false;
+        directDragNode = null;
+        this.orbit.enabled = true;
+      }
       const dist = Math.hypot(e.clientX - pointerDownPos.x, e.clientY - pointerDownPos.y);
       if (dist > 6) return;
       this.handleCanvasClick(e);
@@ -227,16 +288,58 @@ class NetVisio3DApp {
 
     window.addEventListener('keydown', (e) => {
       if (['INPUT', 'SELECT', 'TEXTAREA'].includes(document.activeElement?.tagName)) return;
-      if (e.key === 'w' || e.key === 'W') this.setTransformMode('translate');
-      if (e.key === 'e' || e.key === 'E') this.setTransformMode('rotate');
-      if (e.key === 'r' || e.key === 'R') this.setTransformMode('scale');
+      if (e.key === 'w' || e.key === 'W') {
+        this.setTransformMode('translate');
+        this.showToast(
+          this.selectedNodeId
+            ? 'Modo Mover (W): Arrastra las flechas Roja/Verde/Azul, arrastra el equipo con el mouse o usa las flechas del teclado ←↑↓→'
+            : 'Modo Mover (W) activo: Haz clic primero sobre cualquier equipo 3D para seleccionarlo y moverlo'
+        );
+      }
+      if (e.key === 'e' || e.key === 'E') {
+        this.setTransformMode('rotate');
+        this.showToast(
+          this.selectedNodeId
+            ? 'Modo Rotar 3 Ejes (E): Arrastra los aros Rojo (X), Verde (Y) o Azul (Z) alrededor del equipo'
+            : 'Modo Rotar (E) activo: Haz clic primero sobre un equipo 3D para rotarlo'
+        );
+      }
+      if (e.key === 'r' || e.key === 'R') {
+        this.setTransformMode('scale');
+        this.showToast('Modo Escalar (R): Arrastra los cubos del gizmo para cambiar el tamaño');
+      }
       if (e.key === 'c' || e.key === 'C') this.toggleConnectMode();
       if (e.key === 'Delete' || e.key === 'Backspace') this.deleteSelected();
       if (e.key === 'Escape') {
         this.connectSourceNodeId = null;
         this.setInteractionMode('select');
       }
+
+      // Keyboard Arrow Keys & +/- to move selected object directly
+      if (this.selectedNodeId && this.nodes.has(this.selectedNodeId)) {
+        const step = e.shiftKey ? 0.6 : 0.2;
+        if (e.key === 'ArrowLeft') { e.preventDefault(); this.nudgeSelectedNode(-step, 0, 0); }
+        if (e.key === 'ArrowRight') { e.preventDefault(); this.nudgeSelectedNode(step, 0, 0); }
+        if (e.key === 'ArrowUp') { e.preventDefault(); this.nudgeSelectedNode(0, 0, -step); }
+        if (e.key === 'ArrowDown') { e.preventDefault(); this.nudgeSelectedNode(0, 0, step); }
+        if (e.key === '+' || e.key === '=' || e.key === 'PageUp') { e.preventDefault(); this.nudgeSelectedNode(0, 0.14, 0); }
+        if (e.key === '-' || e.key === '_' || e.key === 'PageDown') { e.preventDefault(); this.nudgeSelectedNode(0, -0.14, 0); }
+      }
     });
+  }
+
+  nudgeSelectedNode(dx, dy, dz) {
+    if (!this.selectedNodeId) return;
+    const node = this.nodes.get(this.selectedNodeId);
+    if (!node) return;
+    node.data.rackId = '';
+    node.group.position.x = Number((node.group.position.x + dx).toFixed(2));
+    node.group.position.y = Math.max(0.04, Number((node.group.position.y + dy).toFixed(2)));
+    node.group.position.z = Number((node.group.position.z + dz).toFixed(2));
+    this.syncNodeDataFromTransform(node);
+    this.rebuildConnectedLinks(node.id);
+    this.updateInspectorTransformInputs(node);
+    this.updateSelectionHudBanner();
   }
 
   findNodeFromObject(obj) {
@@ -525,6 +628,7 @@ class NetVisio3DApp {
     if (!nodeId || !this.nodes.has(nodeId)) {
       this.transformControl.detach();
       this.selectionBox.visible = false;
+      this.updateSelectionHudBanner();
       this.renderInspector();
       return;
     }
@@ -533,6 +637,7 @@ class NetVisio3DApp {
     this.transformControl.attach(node.group);
     this.selectionBox.setFromObject(node.group);
     this.selectionBox.visible = true;
+    this.updateSelectionHudBanner();
     this.renderInspector();
   }
 
@@ -541,7 +646,57 @@ class NetVisio3DApp {
     this.selectedLinkId = linkId;
     this.transformControl.detach();
     this.selectionBox.visible = false;
+    this.updateSelectionHudBanner();
     this.renderInspector();
+  }
+
+  updateSelectionHudBanner() {
+    const hud = document.getElementById('selection-hud-banner');
+    if (!hud) return;
+    if (!this.selectedNodeId || !this.nodes.has(this.selectedNodeId) || this.interactionMode === 'connect') {
+      hud.hidden = true;
+      return;
+    }
+    const node = this.nodes.get(this.selectedNodeId);
+    const mode = this.transformControl.getMode();
+    const modeText =
+      mode === 'rotate'
+        ? 'Arrastra los aros Rojo (X), Verde (Y), Azul (Z) para rotar'
+        : mode === 'scale'
+        ? 'Arrastra los cubos del gizmo para escalar'
+        : 'Arrastra las flechas Roja (X), Verde (Y), Azul (Z), arrastra el equipo con el mouse o usa el teclado ←↑↓→';
+
+    hud.hidden = false;
+    hud.innerHTML = `
+      <div class="selection-hud-top">
+        <span><strong>${node.data.hostname}</strong> <code>(${node.data.position.join(', ')})</code></span>
+        <span style="color:#38bdf8; font-size:11px;">${modeText}</span>
+      </div>
+      <div class="selection-hud-btns">
+        <button class="btn-mini" data-nudge="-0.3,0,0">⬅ Izq (X-)</button>
+        <button class="btn-mini" data-nudge="0.3,0,0">Der (X+) ➡</button>
+        <button class="btn-mini" data-nudge="0,0,-0.3">⬆ Fondo (Z-)</button>
+        <button class="btn-mini" data-nudge="0,0,0.3">⬇ Frente (Z+)</button>
+        <button class="btn-mini" data-nudge="0,0.14,0">🔼 Subir (Y+)</button>
+        <button class="btn-mini" data-nudge="0,-0.14,0">🔽 Bajar (Y-)</button>
+        <button class="btn-mini" id="hud-btn-rot90">↻ Girar 90°</button>
+      </div>
+    `;
+
+    hud.querySelectorAll('[data-nudge]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const [dx, dy, dz] = btn.dataset.nudge.split(',').map(Number);
+        this.nudgeSelectedNode(dx, dy, dz);
+      });
+    });
+
+    hud.querySelector('#hud-btn-rot90')?.addEventListener('click', () => {
+      node.group.rotation.y += Math.PI / 2;
+      this.syncNodeDataFromTransform(node);
+      this.rebuildConnectedLinks(node.id);
+      this.updateInspectorTransformInputs(node);
+      this.updateSelectionHudBanner();
+    });
   }
 
   deleteSelected() {
@@ -600,6 +755,7 @@ class NetVisio3DApp {
     document.querySelectorAll('[data-transform-mode]').forEach((btn) => {
       btn.classList.toggle('active', btn.dataset.transformMode === mode);
     });
+    this.updateSelectionHudBanner();
   }
 
   setInteractionMode(mode) {
@@ -903,14 +1059,14 @@ class NetVisio3DApp {
 
   // ================= HIGH-RESOLUTION PNG EXPORT ENGINE =================
   generateCompositePNGCanvas({ scale = 2, bgMode = 'dark', includeHeader = true, titleText = '' } = {}) {
-    const prevGizmoVisible = this.transformControl.visible;
+    const prevGizmoVisible = this.transformHelper ? this.transformHelper.visible : true;
     const prevBoxVisible = this.selectionBox.visible;
     const prevBg = this.scene.background;
     const prevFog = this.scene.fog;
     const prevPixelRatio = this.renderer.getPixelRatio();
 
     // Hide gizmos during clean PNG render
-    this.transformControl.visible = false;
+    if (this.transformHelper) this.transformHelper.visible = false;
     this.selectionBox.visible = false;
 
     if (bgMode === 'transparent') {
@@ -975,7 +1131,7 @@ class NetVisio3DApp {
     this.renderer.setPixelRatio(prevPixelRatio);
     this.scene.background = prevBg;
     this.scene.fog = prevFog;
-    this.transformControl.visible = prevGizmoVisible;
+    if (this.transformHelper) this.transformHelper.visible = prevGizmoVisible;
     this.selectionBox.visible = prevBoxVisible;
     this.renderer.render(this.scene, this.camera);
 

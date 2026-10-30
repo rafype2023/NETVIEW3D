@@ -456,6 +456,41 @@ body {
   z-index: 12;
 }
 
+.selection-hud-banner {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  background: rgba(15, 22, 35, 0.92);
+  border: 1px solid var(--accent-primary);
+  color: var(--text-main);
+  padding: 8px 12px;
+  border-radius: 10px;
+  font-size: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  z-index: 11;
+  backdrop-filter: blur(8px);
+  max-width: 540px;
+}
+
+.selection-hud-banner[hidden] {
+  display: none !important;
+}
+
+.selection-hud-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.selection-hud-btns {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
 /* Right Inspector Sidebar */
 .inspector-sidebar {
   background: var(--bg-panel);
