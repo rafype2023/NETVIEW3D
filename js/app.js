@@ -1099,6 +1099,52 @@ class NetVisio3DApp {
     });
 
     document.getElementById('btn-export-bom')?.addEventListener('click', () => this.exportBOMCSV());
+    document.getElementById('btn-export-blender')?.addEventListener('click', () => this.exportBlenderGLB());
+  }
+
+  // ================= BLENDER EXPORT (glTF binary con texturas embebidas) =================
+  async exportBlenderGLB() {
+    if (this.nodes.size === 0) {
+      this.showToast('No hay objetos 3D para exportar');
+      return;
+    }
+    this.showToast('Generando archivo para Blender…');
+    try {
+      const { GLTFExporter } = await import('three/addons/exporters/GLTFExporter.js');
+
+      const exportRoot = new THREE.Group();
+      exportRoot.name = 'NetVisio3D_Diagrama';
+
+      const addClean = (src, name) => {
+        const clone = src.clone(true);
+        clone.name = name;
+        const toRemove = [];
+        clone.traverse((o) => {
+          if (o.isSprite || o.name === 'deviceLabelSprite' || o.isLight) toRemove.push(o);
+        });
+        toRemove.forEach((o) => o.parent && o.parent.remove(o));
+        exportRoot.add(clone);
+      };
+
+      this.nodes.forEach((n) => addClean(n.group, (n.data.hostname || n.spec.name).replace(/[^\w\-. ]/g, '_')));
+      this.links.forEach((l, id) => {
+        if (l.mesh) addClean(l.mesh, `Cable_${id}`);
+      });
+
+      const exporter = new GLTFExporter();
+      const glb = await exporter.parseAsync(exportRoot, { binary: true, onlyVisible: true, maxTextureSize: 2048 });
+      const blob = new Blob([glb], { type: 'model/gltf-binary' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `netview3d-blender-${new Date().toISOString().slice(0, 10)}.glb`;
+      a.click();
+      setTimeout(() => URL.revokeObjectURL(url), 2000);
+      this.showToast('Exportado .glb — en Blender: File ▸ Import ▸ glTF 2.0');
+    } catch (err) {
+      console.error(err);
+      this.showToast('Error al exportar para Blender');
+    }
   }
 
   // ================= HIGH-RESOLUTION PNG EXPORT ENGINE =================
