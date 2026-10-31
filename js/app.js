@@ -1108,6 +1108,9 @@ class NetVisio3DApp {
       this.showToast('No hay objetos 3D para exportar');
       return;
     }
+    const includeLabels = window.confirm(
+      '¿Incluir las etiquetas (hostname / IP) en el archivo de Blender?\n\nAceptar = Sí, con etiquetas (como planos con textura)\nCancelar = No, solo los equipos'
+    );
     this.showToast('Generando archivo para Blender…');
     try {
       const { GLTFExporter } = await import('three/addons/exporters/GLTFExporter.js');
@@ -1119,10 +1122,25 @@ class NetVisio3DApp {
         const clone = src.clone(true);
         clone.name = name;
         const toRemove = [];
+        const labelPlanes = [];
         clone.traverse((o) => {
-          if (o.isSprite || o.name === 'deviceLabelSprite' || o.isLight) toRemove.push(o);
+          if (o.isSprite || o.name === 'deviceLabelSprite' || o.isLight) {
+            toRemove.push(o);
+            if (includeLabels && o.isSprite && o.material?.map) {
+              // Sprites no existen en glTF: se convierten en un plano con la textura de la etiqueta
+              const plane = new THREE.Mesh(
+                new THREE.PlaneGeometry(1, 1),
+                new THREE.MeshBasicMaterial({ map: o.material.map, transparent: true, side: THREE.DoubleSide })
+              );
+              plane.name = 'Etiqueta';
+              plane.position.copy(o.position);
+              plane.scale.set(o.scale.x, o.scale.y, 1);
+              labelPlanes.push([o.parent, plane]);
+            }
+          }
         });
         toRemove.forEach((o) => o.parent && o.parent.remove(o));
+        labelPlanes.forEach(([parent, plane]) => parent && parent.add(plane));
         exportRoot.add(clone);
       };
 
@@ -1140,7 +1158,7 @@ class NetVisio3DApp {
       a.download = `netview3d-blender-${new Date().toISOString().slice(0, 10)}.glb`;
       a.click();
       setTimeout(() => URL.revokeObjectURL(url), 2000);
-      this.showToast('Exportado .glb — en Blender: File ▸ Import ▸ glTF 2.0');
+      this.showToast(`Exportado .glb ${includeLabels ? 'con' : 'sin'} etiquetas — Blender: File ▸ Import ▸ glTF 2.0`);
     } catch (err) {
       console.error(err);
       this.showToast('Error al exportar para Blender');
