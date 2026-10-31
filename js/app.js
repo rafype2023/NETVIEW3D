@@ -1127,14 +1127,28 @@ class NetVisio3DApp {
           if (o.isSprite || o.name === 'deviceLabelSprite' || o.isLight) {
             toRemove.push(o);
             if (includeLabels && o.isSprite && o.material?.map) {
-              // Sprites no existen en glTF: se convierten en un plano con la textura de la etiqueta
-              const plane = new THREE.Mesh(
-                new THREE.PlaneGeometry(1, 1),
-                new THREE.MeshBasicMaterial({ map: o.material.map, transparent: true, side: THREE.DoubleSide })
-              );
+              // Sprites no existen en glTF: se convierten en un panel de dos caras (igual que los
+              // Paneles de Texto) para que se lea correctamente desde cualquier lado.
+              const plane = new THREE.Group();
               plane.name = 'Etiqueta';
               plane.position.copy(o.position);
-              plane.scale.set(o.scale.x, o.scale.y, 1);
+              const lw = o.scale.x;
+              const lh = o.scale.y;
+              const depth = 0.03;
+              const backing = new THREE.Mesh(
+                new THREE.BoxGeometry(lw, lh, depth),
+                new THREE.MeshStandardMaterial({ color: 0x0b1324, roughness: 0.35, metalness: 0.3 })
+              );
+              backing.name = 'EtiquetaFondo';
+              const faceMat = new THREE.MeshBasicMaterial({ map: o.material.map, transparent: true, side: THREE.FrontSide });
+              const front = new THREE.Mesh(new THREE.PlaneGeometry(lw * 0.985, lh * 0.97), faceMat);
+              front.name = 'EtiquetaFrente';
+              front.position.z = depth / 2 + 0.004;
+              const back = new THREE.Mesh(new THREE.PlaneGeometry(lw * 0.985, lh * 0.97), faceMat);
+              back.name = 'EtiquetaReverso';
+              back.rotation.y = Math.PI;
+              back.position.z = -depth / 2 - 0.004;
+              plane.add(backing, front, back);
               labelPlanes.push([o.parent, plane]);
             }
           }
