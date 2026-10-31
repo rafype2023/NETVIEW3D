@@ -1688,13 +1688,13 @@ class NetVisio3DApp {
             <div>
               <label class="insp-label">Puerto Origen</label>
               <select id="inp-from-port" class="insp-input">
-                ${(fromNode?.spec.ports || ['Port-1']).map((p) => `<option value="${p}" ${p === link.fromPort ? 'selected' : ''}>${p}</option>`).join('')}
+                ${[...new Set([...(fromNode?.spec.ports || ['Port-1']), link.fromPort])].map((p) => `<option value="${p}" ${p === link.fromPort ? 'selected' : ''}>${p}</option>`).join('')}
               </select>
             </div>
             <div>
               <label class="insp-label">Puerto Destino</label>
               <select id="inp-to-port" class="insp-input">
-                ${(toNode?.spec.ports || ['Port-1']).map((p) => `<option value="${p}" ${p === link.toPort ? 'selected' : ''}>${p}</option>`).join('')}
+                ${[...new Set([...(toNode?.spec.ports || ['Port-1']), link.toPort])].map((p) => `<option value="${p}" ${p === link.toPort ? 'selected' : ''}>${p}</option>`).join('')}
               </select>
             </div>
           </div>
