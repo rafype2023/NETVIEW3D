@@ -7,7 +7,8 @@ import {
   createDeviceLabelSprite,
   createTitle3DTexture,
   createProcessPanelTexture,
-  createDataPortTubeTexture
+  createDataPortTubeTexture,
+  createVirtualServerFrontTexture
 } from './models3d.js';
 
 const RAD2DEG = 180 / Math.PI;
@@ -454,6 +455,10 @@ class NetVisio3DApp {
       rackId: customData.rackId || '',
       uSlot: customData.uSlot || 1,
       notes: customData.notes || spec.specs,
+      appLabel: customData.appLabel ?? 'Aplicaciones',
+      vcpu: customData.vcpu ?? '4 vCPU',
+      memory: customData.memory ?? '16 GB',
+      disk: customData.disk ?? '200 GB',
       customColor: customData.customColor || spec.badgeColor,
       position: customData.position ? [...customData.position] : [0, spec.height / 2, 0],
       rotation: customData.rotation ? [...customData.rotation] : [0, 0, 0],
@@ -1416,6 +1421,31 @@ class NetVisio3DApp {
         </div>
 
         ${
+          spec.isVirtualCube
+            ? `
+        <div class="insp-section">
+          <div class="insp-section-title">Recursos del Servidor Virtual</div>
+          <label class="insp-label">Aplicaciones / Rol (texto bajo el SO)</label>
+          <input type="text" id="inp-vm-app" class="insp-input" maxlength="26" value="${data.appLabel ?? ''}" />
+          <div class="insp-grid-3">
+            <div>
+              <label class="insp-label">🔲 vCPU</label>
+              <input type="text" id="inp-vm-vcpu" class="insp-input" maxlength="10" value="${data.vcpu ?? ''}" />
+            </div>
+            <div>
+              <label class="insp-label">▤ Memoria</label>
+              <input type="text" id="inp-vm-mem" class="insp-input" maxlength="10" value="${data.memory ?? ''}" />
+            </div>
+            <div>
+              <label class="insp-label">💾 Disco</label>
+              <input type="text" id="inp-vm-disk" class="insp-input" maxlength="10" value="${data.disk ?? ''}" />
+            </div>
+          </div>
+        </div>`
+            : ''
+        }
+
+        ${
           spec.isZone || spec.isTitle3D || spec.isTextPanel3D || spec.isFlowArrow || spec.isDataPortTube
             ? `
         <div class="insp-section">
@@ -1583,6 +1613,33 @@ class NetVisio3DApp {
         newSprite.visible = this.showLabels;
         node.group.add(newSprite);
       };
+
+      if (spec.isVirtualCube) {
+        const refreshVmFront = () => {
+          const front = node.group.getObjectByName('vmFrontPlane');
+          if (!front) return;
+          const tex = createVirtualServerFrontTexture(spec.vmType, node.data.hostname, {
+            appLabel: node.data.appLabel,
+            vcpu: node.data.vcpu,
+            memory: node.data.memory,
+            disk: node.data.disk
+          });
+          front.material.map?.dispose();
+          front.material.map = tex;
+          front.material.needsUpdate = true;
+        };
+        [
+          ['inp-vm-app', 'appLabel'],
+          ['inp-vm-vcpu', 'vcpu'],
+          ['inp-vm-mem', 'memory'],
+          ['inp-vm-disk', 'disk']
+        ].forEach(([elId, key]) => {
+          document.getElementById(elId)?.addEventListener('input', (e) => {
+            node.data[key] = e.target.value;
+            refreshVmFront();
+          });
+        });
+      }
 
       document.getElementById('inp-hostname')?.addEventListener('input', (e) => {
         node.data.hostname = e.target.value;

@@ -77,7 +77,7 @@ function getFortinetTopMaterial(w = 2, d = 1) {
 }
 
 // Create Front Faceplate Canvas Texture for the 3 Virtual Server Cubes (Windows, Red Hat, Appliance)
-function createVirtualServerFrontTexture(vmType, hostname) {
+export function createVirtualServerFrontTexture(vmType, hostname, info = {}) {
   const canvas = document.createElement('canvas');
   canvas.width = 512;
   canvas.height = 560;
@@ -242,63 +242,90 @@ function createVirtualServerFrontTexture(vmType, hostname) {
 
   ctx.fillStyle = '#cbd5e1';
   ctx.font = '500 28px system-ui, -apple-system, sans-serif';
-  ctx.fillText(pal.subLabel, 256, 378);
+  ctx.fillText(String(info.appLabel || pal.subLabel).slice(0, 26), 256, 378);
 
-  // Bottom 3 Icons matching "Servidor Virtual.png": Database Cylinder | Network Globe | Gear
+  // Bottom 3 resource icons: vCPU (chip) | MEMORIA (RAM module) | DISCO (hard drive), each with editable value
+  const vcpuTxt = String(info.vcpu ?? '4 vCPU').slice(0, 10);
+  const memTxt = String(info.memory ?? '16 GB').slice(0, 10);
+  const diskTxt = String(info.disk ?? '200 GB').slice(0, 10);
   ctx.strokeStyle = '#ffffff';
   ctx.fillStyle = '#ffffff';
   ctx.lineWidth = 4;
+  ctx.lineJoin = 'round';
 
-  // 1. Database Icon (left, x=145, y=458)
-  const dbX = 145, dbY = 435;
-  ctx.beginPath();
-  ctx.ellipse(dbX, dbY, 24, 9, 0, 0, Math.PI * 2);
-  ctx.stroke();
-  for (let k = 1; k <= 3; k++) {
+  // 1. vCPU: processor chip with pins (x=112)
+  {
+    const cx = 112, cy = 424;
     ctx.beginPath();
-    ctx.ellipse(dbX, dbY + k * 14, 24, 9, 0, 0, Math.PI);
+    ctx.roundRect(cx - 20, cy - 20, 40, 40, 5);
     ctx.stroke();
-  }
-  ctx.beginPath();
-  ctx.moveTo(dbX - 24, dbY);
-  ctx.lineTo(dbX - 24, dbY + 42);
-  ctx.moveTo(dbX + 24, dbY);
-  ctx.lineTo(dbX + 24, dbY + 42);
-  ctx.stroke();
-
-  // 2. Network Globe Icon (center, x=256, y=456)
-  const gx = 256, gy = 456, gr = 26;
-  ctx.beginPath();
-  ctx.arc(gx, gy, gr, 0, Math.PI * 2);
-  ctx.stroke();
-  ctx.beginPath();
-  ctx.ellipse(gx, gy, 13, gr, 0, 0, Math.PI * 2);
-  ctx.stroke();
-  ctx.beginPath();
-  ctx.moveTo(gx - gr, gy);
-  ctx.lineTo(gx + gr, gy);
-  ctx.moveTo(gx - gr * 0.85, gy - 12);
-  ctx.lineTo(gx + gr * 0.85, gy - 12);
-  ctx.moveTo(gx - gr * 0.85, gy + 12);
-  ctx.lineTo(gx + gr * 0.85, gy + 12);
-  ctx.stroke();
-
-  // 3. Settings Gear Icon (right, x=367, y=456)
-  const sx = 367, sy = 456;
-  ctx.beginPath();
-  ctx.arc(sx, sy, 18, 0, Math.PI * 2);
-  ctx.stroke();
-  ctx.beginPath();
-  ctx.arc(sx, sy, 8, 0, Math.PI * 2);
-  ctx.stroke();
-  for (let t = 0; t < 8; t++) {
-    const a = (Math.PI / 4) * t;
     ctx.beginPath();
-    ctx.moveTo(sx + Math.cos(a) * 18, sy + Math.sin(a) * 18);
-    ctx.lineTo(sx + Math.cos(a) * 26, sy + Math.sin(a) * 26);
-    ctx.lineWidth = 6;
-    ctx.stroke();
+    ctx.roundRect(cx - 9, cy - 9, 18, 18, 2);
+    ctx.fill();
+    ctx.lineWidth = 3;
+    for (let k = -1; k <= 1; k++) {
+      const o = k * 12;
+      ctx.beginPath();
+      ctx.moveTo(cx + o, cy - 20); ctx.lineTo(cx + o, cy - 29);
+      ctx.moveTo(cx + o, cy + 20); ctx.lineTo(cx + o, cy + 29);
+      ctx.moveTo(cx - 20, cy + o); ctx.lineTo(cx - 29, cy + o);
+      ctx.moveTo(cx + 20, cy + o); ctx.lineTo(cx + 29, cy + o);
+      ctx.stroke();
+    }
+    ctx.lineWidth = 4;
   }
+
+  // 2. MEMORIA: RAM DIMM module with chips and contacts (x=256)
+  {
+    const cx = 256, cy = 424;
+    ctx.beginPath();
+    ctx.roundRect(cx - 38, cy - 17, 76, 32, 4);
+    ctx.stroke();
+    for (let k = 0; k < 4; k++) {
+      ctx.fillRect(cx - 31 + k * 17, cy - 10, 12, 14);
+    }
+    ctx.lineWidth = 3;
+    for (let k = 0; k < 8; k++) {
+      ctx.beginPath();
+      ctx.moveTo(cx - 32 + k * 9, cy + 15); ctx.lineTo(cx - 32 + k * 9, cy + 25);
+      ctx.stroke();
+    }
+    ctx.lineWidth = 4;
+  }
+
+  // 3. DISCO: hard drive with platter (x=400)
+  {
+    const cx = 400, cy = 424;
+    ctx.beginPath();
+    ctx.roundRect(cx - 32, cy - 24, 64, 48, 7);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.arc(cx - 6, cy, 13, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.arc(cx - 6, cy, 3, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.moveTo(cx - 6, cy);
+    ctx.lineTo(cx + 18, cy - 14);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.arc(cx + 22, cy + 16, 3, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  // Values + captions
+  ctx.textAlign = 'center';
+  ctx.fillStyle = '#ffffff';
+  ctx.font = 'bold 27px system-ui, -apple-system, sans-serif';
+  ctx.fillText(vcpuTxt, 112, 486);
+  ctx.fillText(memTxt, 256, 486);
+  ctx.fillText(diskTxt, 400, 486);
+  ctx.fillStyle = '#93c5fd';
+  ctx.font = '600 17px system-ui, -apple-system, sans-serif';
+  ctx.fillText('vCPU', 112, 514);
+  ctx.fillText('MEMORIA', 256, 514);
+  ctx.fillText('DISCO', 400, 514);
 
   const tex = new THREE.CanvasTexture(canvas);
   tex.colorSpace = THREE.SRGBColorSpace;
@@ -969,12 +996,18 @@ export function buildHardwareMesh(spec, instanceData = {}) {
     }
 
     // Front Glass Faceplate with OS Logo (Windows / Red Hat / Appliance), Labels & 3 Icons
-    const frontTex = createVirtualServerFrontTexture(spec.vmType, instanceData.hostname || spec.defaultHostname);
+    const frontTex = createVirtualServerFrontTexture(spec.vmType, instanceData.hostname || spec.defaultHostname, {
+      appLabel: instanceData.appLabel,
+      vcpu: instanceData.vcpu,
+      memory: instanceData.memory,
+      disk: instanceData.disk
+    });
     const frontMat = new THREE.MeshBasicMaterial({
       map: frontTex,
       transparent: true
     });
     const frontPlane = new THREE.Mesh(new THREE.PlaneGeometry(w * 0.94, h * 0.94), frontMat);
+    frontPlane.name = 'vmFrontPlane';
     frontPlane.position.set(0, 0, d / 2 + 0.008);
     root.add(frontPlane);
 
