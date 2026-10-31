@@ -1398,6 +1398,17 @@ export function buildHardwareMesh(spec, instanceData = {}) {
       );
       frontFace.position.set(0, 0, fz);
       root.add(frontFace);
+    } else if (id === 'cisco-isr-4300' || id === 'vmware-sdwan-edge-3800') {
+      // Real product front faceplates (Cisco ISR 4300 / VMware SD-WAN Edge 3800)
+      const tex = loadProductTexture(
+        id === 'cisco-isr-4300' ? './assets/textures/isr4300_front.jpg' : './assets/textures/sdwan3800_front.jpg'
+      );
+      const frontFace = new THREE.Mesh(
+        new THREE.PlaneGeometry(w * 0.99, h * 0.96),
+        new THREE.MeshStandardMaterial({ map: tex, roughness: 0.4, metalness: 0.2 })
+      );
+      frontFace.position.set(0, 0, fz);
+      root.add(frontFace);
     } else if (id === 'kemp-loadmaster-x3') {
       // Real Kemp LoadMaster X3 yellow/black front faceplate from KEMP LB.webp
       const kempTex = loadProductTexture('./assets/textures/kemp_front.jpg');

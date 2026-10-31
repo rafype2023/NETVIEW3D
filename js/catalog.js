@@ -606,6 +606,36 @@ export const HARDWARE_CATALOG = [
     ports: ['Gi1/0/1-12', 'Gi1/0/13-24', 'Gi1/0/25-36', 'Gi1/0/37-48', 'Te1/1/1 (Uplink)', 'Te1/1/2 (Uplink)', 'Stack-1', 'Stack-2']
   },
   {
+    id: 'cisco-isr-4300',
+    name: 'Cisco ISR 4300 Router (2U)',
+    vendor: 'Cisco',
+    category: 'network',
+    uHeight: 2,
+    width: 1.9,
+    height: 0.3,
+    depth: 1.3,
+    badgeColor: '#049fd9',
+    defaultHostname: 'RTR-ISR4331-01',
+    defaultIp: '10.20.4.1',
+    specs: '2U Integrated Services Router 4300 Series | WAN/Branch, SD-WAN (IOS XE) | 3x GE + NIM/SM slots',
+    ports: ['Gi0/0/0', 'Gi0/0/1', 'Gi0/0/2', 'Gi0/1/0 (NIM)', 'Gi0/2/0 (NIM)', 'Console', 'Aux', 'USB']
+  },
+  {
+    id: 'vmware-sdwan-edge-3800',
+    name: 'VMware SD-WAN Edge 3800 (1U)',
+    vendor: 'VMware',
+    category: 'network',
+    uHeight: 1,
+    width: 1.9,
+    height: 0.15,
+    depth: 1.2,
+    badgeColor: '#78be20',
+    defaultHostname: 'SDWAN-EDGE3800-01',
+    defaultIp: '10.20.4.11',
+    specs: '1U VMware SD-WAN Edge 3800 | 6x GE RJ45 + 4x SFP+ (10G) | Orchestrator / VeloCloud',
+    ports: ['GE1', 'GE2', 'GE3', 'GE4', 'GE5', 'GE6', 'SFP1', 'SFP2', 'SFP3', 'SFP4', 'Console']
+  },
+  {
     id: 'cisco-catalyst-9300-24t',
     name: 'Cisco Catalyst 9300-24T (24 Puertos)',
     vendor: 'Cisco',
