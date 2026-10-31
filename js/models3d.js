@@ -34,51 +34,46 @@ const MAT = {
   psuHandle: new THREE.MeshStandardMaterial({ color: 0x37474f, roughness: 0.4, metalness: 0.6 })
 };
 
-// Create Fortinet branded white top cover texture ("FORTINET" with red O bridge)
-let fortinetTopMat = null;
-function getFortinetTopMaterial() {
-  if (fortinetTopMat) return fortinetTopMat;
+// Fortinet branded white top lid using the official logo (assets/textures/fortinet_logo.png)
+// Canvas aspect matches the lid (w:d) so the logo is never stretched.
+const fortinetTopMats = new Map();
+let fortinetLogoImg = null;
+function getFortinetTopMaterial(w = 2, d = 1) {
+  const key = (w / d).toFixed(2);
+  if (fortinetTopMats.has(key)) return fortinetTopMats.get(key);
+
+  const cw = 1024;
+  const ch = Math.max(128, Math.round((cw * d) / w));
   const canvas = document.createElement('canvas');
-  canvas.width = 1024;
-  canvas.height = 512;
+  canvas.width = cw;
+  canvas.height = ch;
   const ctx = canvas.getContext('2d');
-  ctx.fillStyle = '#f2f5f8';
-  ctx.fillRect(0, 0, 1024, 512);
-
-  // Subtle metallicbrush lines
-  ctx.strokeStyle = 'rgba(0,0,0,0.03)';
-  for (let y = 0; y < 512; y += 6) {
-    ctx.beginPath();
-    ctx.moveTo(0, y);
-    ctx.lineTo(1024, y);
-    ctx.stroke();
-  }
-
-  // Draw FORTINET wordmark across center of top lid
-  ctx.fillStyle = '#111827';
-  ctx.font = '900 78px system-ui, -apple-system, sans-serif';
-  ctx.textAlign = 'center';
-  ctx.fillText('F   R T I N E T', 512, 275);
-
-  // Iconic Red Fortinet O (segmented pill box)
-  const ox = 258;
-  const oy = 216;
-  ctx.fillStyle = '#ee3124';
-  const blocks = [
-    [0, 0, 22, 16], [28, 0, 24, 16], [58, 0, 22, 16],
-    [0, 23, 22, 18], [58, 23, 22, 18],
-    [0, 47, 22, 16], [28, 47, 24, 16], [58, 47, 22, 16]
-  ];
-  blocks.forEach(([bx, by, bw, bh]) => {
-    ctx.beginPath();
-    ctx.roundRect(ox + bx, oy + by, bw, bh, 4);
-    ctx.fill();
-  });
-
   const tex = new THREE.CanvasTexture(canvas);
   tex.colorSpace = THREE.SRGBColorSpace;
-  fortinetTopMat = new THREE.MeshStandardMaterial({ map: tex, roughness: 0.35, metalness: 0.2 });
-  return fortinetTopMat;
+  tex.anisotropy = 8;
+
+  const paint = () => {
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, cw, ch);
+    if (fortinetLogoImg && fortinetLogoImg.complete && fortinetLogoImg.naturalWidth) {
+      // Logo already auto-cropped to the wordmark; keep its aspect ratio
+      const dw = cw * 0.72;
+      const dh = (dw * fortinetLogoImg.naturalHeight) / fortinetLogoImg.naturalWidth;
+      ctx.drawImage(fortinetLogoImg, (cw - dw) / 2, (ch - dh) / 2, dw, dh);
+    }
+    tex.needsUpdate = true;
+  };
+
+  if (!fortinetLogoImg) {
+    fortinetLogoImg = new Image();
+    fortinetLogoImg.src = './assets/textures/fortinet_logo.png';
+  }
+  paint();
+  if (!fortinetLogoImg.complete) fortinetLogoImg.addEventListener('load', paint);
+
+  const mat = new THREE.MeshStandardMaterial({ map: tex, roughness: 0.35, metalness: 0.15 });
+  fortinetTopMats.set(key, mat);
+  return mat;
 }
 
 // Create Front Faceplate Canvas Texture for the 3 Virtual Server Cubes (Windows, Red Hat, Appliance)
@@ -1222,7 +1217,7 @@ export function buildHardwareMesh(spec, instanceData = {}) {
     if (isForti) {
       const topLid = new THREE.Mesh(
         new THREE.PlaneGeometry(w * 0.98, d * 0.96),
-        getFortinetTopMaterial()
+        getFortinetTopMaterial(w, d)
       );
       topLid.rotation.x = -Math.PI / 2;
       topLid.position.set(0, h / 2 + 0.002, 0);
