@@ -74,6 +74,22 @@ export const HARDWARE_CATALOG = [
 
   // ================= 3D TITLES, PROCESS TEXT PANELS & 3D FLOW ARROWS =================
   {
+    id: 'camera-star',
+    name: 'Estrella de Cámara (Posición de Cámara para Blender)',
+    vendor: 'Cámara Blender',
+    category: 'annotations',
+    uHeight: 0,
+    width: 0.6,
+    height: 0.6,
+    depth: 0.3,
+    isCameraStar: true,
+    badgeColor: '#ffd600',
+    defaultHostname: '1',
+    defaultIp: 'Vista general',
+    specs: 'Estrella numerada que marca una posición de cámara. Al exportar a Blender se crea una cámara (Camara_N) en esa posición, mirando hacia donde apunta la pirámide amarilla',
+    ports: []
+  },
+  {
     id: 'title-3d-banner',
     name: 'Título 3D Flotante (Relocalizable)',
     vendor: '3D Diagram Title',

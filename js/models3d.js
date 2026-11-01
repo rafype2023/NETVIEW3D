@@ -468,6 +468,7 @@ export function createDeviceLabelSprite(hostname, ip, vendor, badgeColor) {
     vendor === 'Topology' ||
     vendor === 'Flow Arrow 3D' ||
     vendor === 'Flujo 3D' ||
+    vendor === 'Cámara Blender' ||
     safeIp.toLowerCase().startsWith(String(vendor).toLowerCase());
 
   const subText = skipVendor ? safeIp : safeIp ? `${vendor} • ${safeIp}` : String(vendor || '');
@@ -724,9 +725,97 @@ export function createDataPortTubeTexture(portText, descText, accentColor = '#00
   return tex;
 }
 
+// Number badge shown on both faces of a Camera Star
+export function createCameraNumberTexture(num) {
+  const canvas = document.createElement('canvas');
+  canvas.width = 128;
+  canvas.height = 128;
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = '#1a1200';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  const t = String(num ?? '').slice(0, 3);
+  ctx.font = `900 ${t.length > 2 ? 54 : t.length > 1 ? 72 : 92}px system-ui, -apple-system, sans-serif`;
+  ctx.fillText(t, 64, 70);
+  const tex = new THREE.CanvasTexture(canvas);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  return tex;
+}
+
 export function buildHardwareMesh(spec, instanceData = {}) {
   const root = new THREE.Group();
   const { width: w, height: h, depth: d, id } = spec;
+
+  // ================= 000. CAMERA STAR (numbered camera position marker for Blender) =================
+  if (spec.isCameraStar) {
+    const gold = new THREE.Color(instanceData.customColor && instanceData.customColor !== spec.badgeColor ? instanceData.customColor : '#ffd600');
+    const starShape = new THREE.Shape();
+    const R = 0.3, r = 0.13;
+    for (let i = 0; i < 10; i++) {
+      const ang = Math.PI / 2 + (i * Math.PI) / 5;
+      const rad = i % 2 === 0 ? R : r;
+      const x = Math.cos(ang) * rad;
+      const y = Math.sin(ang) * rad;
+      if (i === 0) starShape.moveTo(x, y);
+      else starShape.lineTo(x, y);
+    }
+    starShape.closePath();
+    const starGeom = new THREE.ExtrudeGeometry(starShape, {
+      depth: 0.06,
+      bevelEnabled: true,
+      bevelThickness: 0.015,
+      bevelSize: 0.015,
+      bevelSegments: 2
+    });
+    starGeom.translate(0, 0, -0.03);
+    const star = new THREE.Mesh(
+      starGeom,
+      new THREE.MeshStandardMaterial({ color: gold, emissive: gold.clone().multiplyScalar(0.45), roughness: 0.3, metalness: 0.6 })
+    );
+    star.name = 'cameraStarBody';
+    root.add(star);
+
+    const numTex = createCameraNumberTexture(instanceData.hostname || spec.defaultHostname);
+    const numMat = new THREE.MeshBasicMaterial({ map: numTex, transparent: true });
+    const numFront = new THREE.Mesh(new THREE.PlaneGeometry(0.24, 0.24), numMat);
+    numFront.name = 'cameraStarNumFront';
+    numFront.position.set(0, -0.015, 0.052);
+    const numBack = new THREE.Mesh(new THREE.PlaneGeometry(0.24, 0.24), numMat);
+    numBack.name = 'cameraStarNumBack';
+    numBack.rotation.y = Math.PI;
+    numBack.position.set(0, -0.015, -0.052);
+    root.add(numFront, numBack);
+
+    // Viewing pyramid pointing along local -Z (the direction the exported Blender camera will look)
+    const fw = 0.42, fh = 0.24, fd = 1.0;
+    const o = new THREE.Vector3(0, 0, -0.06);
+    const c = [
+      new THREE.Vector3(-fw, fh, -fd),
+      new THREE.Vector3(fw, fh, -fd),
+      new THREE.Vector3(fw, -fh, -fd),
+      new THREE.Vector3(-fw, -fh, -fd)
+    ];
+    const pts = [];
+    c.forEach((p, i) => {
+      pts.push(o, p, p, c[(i + 1) % 4]);
+    });
+    const frustum = new THREE.LineSegments(
+      new THREE.BufferGeometry().setFromPoints(pts),
+      new THREE.LineBasicMaterial({ color: gold })
+    );
+    frustum.name = 'cameraFrustum';
+    root.add(frustum);
+
+    const labelSprite = createDeviceLabelSprite(
+      `★ CÁMARA ${instanceData.hostname || spec.defaultHostname}`,
+      instanceData.ip || spec.defaultIp,
+      spec.vendor,
+      '#ffd600'
+    );
+    labelSprite.position.set(0, 0.62, 0);
+    root.add(labelSprite);
+    return root;
+  }
 
   // ================= 00. 3D DATA PORT COMMUNICATION TUBE ("RDP", "UDP/49380", ETC.) =================
   if (spec.isDataPortTube) {

@@ -8,7 +8,8 @@ import {
   createTitle3DTexture,
   createProcessPanelTexture,
   createDataPortTubeTexture,
-  createVirtualServerFrontTexture
+  createVirtualServerFrontTexture,
+  createCameraNumberTexture
 } from './models3d.js';
 
 const RAD2DEG = 180 / Math.PI;
@@ -1004,6 +1005,21 @@ class NetVisio3DApp {
       this.showToast('Flecha de Flujo 3D añadida — Usa E para rotarla o elige otras formas en la librería');
     });
 
+    document.getElementById('btn-add-camstar')?.addEventListener('click', () => {
+      const used = Array.from(this.nodes.values())
+        .filter((n) => n.spec.isCameraStar)
+        .map((n) => parseInt(n.data.hostname, 10))
+        .filter((v) => Number.isFinite(v));
+      const next = used.length ? Math.max(...used) + 1 : 1;
+      const node = this.addHardwareNode('camera-star', {
+        hostname: String(next),
+        ip: 'Vista ' + next,
+        position: [Math.round((Math.random() - 0.5) * 6), 3.2, 8]
+      });
+      this.selectNode(node.id);
+      this.showToast(`Estrella de Cámara ${next} añadida — muévela y apúntala; al exportar a Blender será Camara_${next}`);
+    });
+
     document.getElementById('btn-add-porttube')?.addEventListener('click', () => {
       const jitterX = Math.round((Math.random() - 0.5) * 4 * 2) / 2;
       const node = this.addHardwareNode('data-port-tube', {
@@ -1163,7 +1179,20 @@ class NetVisio3DApp {
         exportRoot.add(clone);
       };
 
-      this.nodes.forEach((n) => addClean(n.group, (n.data.hostname || n.spec.name).replace(/[^\w\-. ]/g, '_')));
+      let camCount = 0;
+      this.nodes.forEach((n) => {
+        if (n.spec.isCameraStar) {
+          // Cada estrella se exporta como una cámara real de Blender (no como geometría)
+          const cam = new THREE.PerspectiveCamera(50, 16 / 9, 0.1, 500);
+          cam.name = `Camara_${String(n.data.hostname || camCount + 1).replace(/[^\w\-. ]/g, '_')}`;
+          cam.position.copy(n.group.position);
+          cam.quaternion.copy(n.group.quaternion);
+          exportRoot.add(cam);
+          camCount++;
+          return;
+        }
+        addClean(n.group, (n.data.hostname || n.spec.name).replace(/[^\w\-. ]/g, '_'));
+      });
       this.links.forEach((l, id) => {
         if (l.mesh) addClean(l.mesh, `Cable_${id}`);
       });
@@ -1177,7 +1206,7 @@ class NetVisio3DApp {
       a.download = `netview3d-blender-${new Date().toISOString().slice(0, 10)}.glb`;
       a.click();
       setTimeout(() => URL.revokeObjectURL(url), 2000);
-      this.showToast(`Exportado .glb ${includeLabels ? 'con' : 'sin'} etiquetas — Blender: File ▸ Import ▸ glTF 2.0`);
+      this.showToast(`Exportado .glb ${includeLabels ? 'con' : 'sin'} etiquetas${camCount ? ` y ${camCount} cámara(s)` : ''} — Blender: File ▸ Import ▸ glTF 2.0`);
     } catch (err) {
       console.error(err);
       this.showToast('Error al exportar para Blender');
@@ -1370,7 +1399,9 @@ class NetVisio3DApp {
           <p class="insp-sub">${spec.specs}</p>
 
           <label class="insp-label">${
-            spec.isDataPortTube
+            spec.isCameraStar
+              ? 'Número de Cámara (ej. 1, 2, 3)'
+              : spec.isDataPortTube
               ? 'Puerto / Protocolo dentro del Tubo 3D (ej. RDP, UDP/49380)'
               : spec.isTitle3D
               ? 'Texto del Título Principal 3D'
@@ -1406,7 +1437,9 @@ class NetVisio3DApp {
           <textarea id="inp-ip" class="insp-input" rows="5" style="resize:vertical; font-family:inherit; line-height:1.4;">${data.ip}</textarea>`
               : `
           <label class="insp-label">${
-            spec.isDataPortTube
+            spec.isCameraStar
+              ? 'Descripción de la vista (opcional)'
+              : spec.isDataPortTube
               ? 'Descripción / Servicio del Puerto (Opcional)'
               : spec.isTitle3D
               ? 'Subtítulo del Diagrama 3D'
@@ -1419,6 +1452,19 @@ class NetVisio3DApp {
           <input type="text" id="inp-ip" class="insp-input" value="${data.ip}" />`
           }
         </div>
+
+        ${
+          spec.isCameraStar
+            ? `
+        <div class="insp-section">
+          <div class="insp-section-title">Cámara para Blender</div>
+          <p class="insp-sub">La pirámide amarilla indica hacia dónde mirará la cámara. Al exportar a Blender se crea <strong>Camara_${data.hostname}</strong> en esta posición.</p>
+          <div class="quick-rot-row" style="flex-wrap:wrap;">
+            <button class="btn-mini" id="btn-cam-aim">🎯 Apuntar al centro del diagrama</button>
+          </div>
+        </div>`
+            : ''
+        }
 
         ${
           spec.isVirtualCube
@@ -1601,18 +1647,50 @@ class NetVisio3DApp {
           return;
         }
 
+        if (spec.isCameraStar) {
+          const newNum = createCameraNumberTexture(node.data.hostname);
+          ['cameraStarNumFront', 'cameraStarNumBack'].forEach((nm) => {
+            const part = node.group.getObjectByName(nm);
+            if (part && part.material) {
+              part.material.map = newNum;
+              part.material.needsUpdate = true;
+            }
+          });
+        }
+
         const oldSprite = node.group.getObjectByName('deviceLabelSprite');
         if (oldSprite) node.group.remove(oldSprite);
         const newSprite = createDeviceLabelSprite(
-          node.data.hostname,
+          spec.isCameraStar ? `★ CÁMARA ${node.data.hostname}` : node.data.hostname,
           node.data.ip,
           spec.isFlowArrow ? 'Flujo 3D' : spec.vendor,
           accent
         );
-        newSprite.position.set(0, spec.height / 2 + (spec.isRackContainer ? 0.42 : 0.36), 0);
+        newSprite.position.set(0, spec.isCameraStar ? 0.62 : spec.height / 2 + (spec.isRackContainer ? 0.42 : 0.36), 0);
         newSprite.visible = this.showLabels;
         node.group.add(newSprite);
       };
+
+      document.getElementById('btn-cam-aim')?.addEventListener('click', () => {
+        const box = new THREE.Box3();
+        this.nodes.forEach((n) => {
+          if (!n.spec.isCameraStar && !n.spec.isZone) box.expandByObject(n.group);
+        });
+        if (box.isEmpty()) {
+          this.showToast('No hay equipos a los cuales apuntar');
+          return;
+        }
+        const target = box.getCenter(new THREE.Vector3());
+        const tmp = new THREE.Object3D();
+        tmp.position.copy(node.group.position);
+        tmp.lookAt(target); // +Z hacia el objetivo
+        tmp.rotateY(Math.PI); // la cámara/pirámide mira hacia -Z
+        node.group.quaternion.copy(tmp.quaternion);
+        this.syncNodeDataFromTransform(node);
+        this.updateInspectorTransformInputs(node);
+        this.selectionBox.setFromObject(node.group);
+        this.showToast('Cámara apuntando al centro del diagrama');
+      });
 
       if (spec.isVirtualCube) {
         const refreshVmFront = () => {
