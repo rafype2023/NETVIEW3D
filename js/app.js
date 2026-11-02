@@ -1226,16 +1226,106 @@ class NetVisio3DApp {
     });
   }
 
-  // ================= BLENDER EXPORT (glTF binary con texturas embebidas) =================
+  // ================= BLENDER EXPORT (glTF binary con texturas embebidas & animación de Tour 3D) =================
+  buildTourAnimationClip(cameraStars, camNodeName = 'Camara_Tour_3D_Animada') {
+    if (!cameraStars || cameraStars.length < 2) return null;
+
+    const fps = 10;
+    const dwellSec = 3.0; // Segundos fijos en cada sección
+    const transSec = 2.5; // Segundos de desplazamiento suave cinemático entre secciones
+    const count = cameraStars.length;
+
+    const times = [];
+    const posValues = [];
+    const quatValues = [];
+
+    let currentTime = 0;
+
+    for (let i = 0; i < count; i++) {
+      const curStar = cameraStars[i];
+      const nextStar = cameraStars[(i + 1) % count];
+
+      const curPos = curStar.group.position.clone();
+      const curQuat = curStar.group.quaternion.clone();
+
+      const nextPos = nextStar.group.position.clone();
+      const nextQuat = nextStar.group.quaternion.clone();
+
+      // 1. Fase de Detención / Explicación en la sección actual
+      const dwellFrames = Math.round(dwellSec * fps);
+      for (let f = 0; f < dwellFrames; f++) {
+        const t = currentTime + f / fps;
+        times.push(Number(t.toFixed(2)));
+        // Sutil respiración cinematográfica vertical
+        const drift = Math.sin((f / fps) * Math.PI) * 0.025;
+        posValues.push(
+          Number(curPos.x.toFixed(3)),
+          Number((curPos.y + drift).toFixed(3)),
+          Number(curPos.z.toFixed(3))
+        );
+        quatValues.push(
+          Number(curQuat.x.toFixed(4)),
+          Number(curQuat.y.toFixed(4)),
+          Number(curQuat.z.toFixed(4)),
+          Number(curQuat.w.toFixed(4))
+        );
+      }
+      currentTime += dwellSec;
+
+      // 2. Fase de Transición suave hacia la siguiente sección
+      const transFrames = Math.round(transSec * fps);
+      for (let f = 1; f <= transFrames; f++) {
+        const u = f / transFrames;
+        // Curva smoothstep para aceleración y desaceleración orgánica
+        const ease = u * u * (3 - 2 * u);
+        const t = currentTime + f / fps;
+        times.push(Number(t.toFixed(2)));
+
+        const p = curPos.clone().lerp(nextPos, ease);
+        const q = curQuat.clone().slerp(nextQuat, ease);
+
+        posValues.push(
+          Number(p.x.toFixed(3)),
+          Number(p.y.toFixed(3)),
+          Number(p.z.toFixed(3))
+        );
+        quatValues.push(
+          Number(q.x.toFixed(4)),
+          Number(q.y.toFixed(4)),
+          Number(q.z.toFixed(4)),
+          Number(q.w.toFixed(4))
+        );
+      }
+      currentTime += transSec;
+    }
+
+    const posTrack = new THREE.VectorKeyframeTrack(`${camNodeName}.position`, times, posValues);
+    const rotTrack = new THREE.QuaternionKeyframeTrack(`${camNodeName}.quaternion`, times, quatValues);
+
+    return new THREE.AnimationClip('Tour_3D_Animacion', currentTime, [posTrack, rotTrack]);
+  }
+
   async exportBlenderGLB() {
     if (this.nodes.size === 0) {
       this.showToast('No hay objetos 3D para exportar');
       return;
     }
-    const includeLabels = window.confirm(
-      '¿Incluir las etiquetas (hostname / IP) en el archivo de Blender?\n\nAceptar = Sí, con etiquetas (como planos con textura)\nCancelar = No, solo los equipos'
+
+    const cameraStars = Array.from(this.nodes.values())
+      .filter((n) => n.spec.isCameraStar)
+      .sort((a, b) => (parseInt(a.data.hostname, 10) || 0) - (parseInt(b.data.hostname, 10) || 0));
+
+    const promptMsg =
+      cameraStars.length >= 2
+        ? `¿Exportar a Blender con las etiquetas de texto?\n\n• Se exportarán ${cameraStars.length} cámaras individuales (Camara_1, Camara_2...)\n• Se exportará la cámara animada 'Camara_Tour_3D_Animada' con la animación del Tour 3D.\n\nAceptar = Con etiquetas\nCancelar = Sin etiquetas (solo equipos y cámaras)`
+        : '¿Incluir las etiquetas (hostname / IP) en el archivo de Blender?\n\nAceptar = Sí, con etiquetas (como planos con textura)\nCancelar = No, solo los equipos';
+
+    const includeLabels = window.confirm(promptMsg);
+    this.showToast(
+      cameraStars.length >= 2
+        ? 'Generando archivo para Blender con Tour 3D animado…'
+        : 'Generando archivo para Blender…'
     );
-    this.showToast('Generando archivo para Blender…');
     try {
       const { GLTFExporter } = await import('three/addons/exporters/GLTFExporter.js');
 
@@ -1251,8 +1341,6 @@ class NetVisio3DApp {
           if (o.isSprite || o.name === 'deviceLabelSprite' || o.isLight) {
             toRemove.push(o);
             if (includeLabels && o.isSprite && o.material?.map) {
-              // Sprites no existen en glTF: se convierten en un panel de dos caras (igual que los
-              // Paneles de Texto) para que se lea correctamente desde cualquier lado.
               const plane = new THREE.Group();
               plane.name = 'Etiqueta';
               plane.position.copy(o.position);
@@ -1300,8 +1388,32 @@ class NetVisio3DApp {
         if (l.mesh) addClean(l.mesh, `Cable_${id}`);
       });
 
+      // Añadir la Cámara de Tour 3D con animación Keyframe si hay 2 o más cámaras
+      const animationsToExport = [];
+      if (cameraStars.length >= 2) {
+        const tourCam = new THREE.PerspectiveCamera(50, 16 / 9, 0.1, 500);
+        tourCam.name = 'Camara_Tour_3D_Animada';
+        tourCam.position.copy(cameraStars[0].group.position);
+        tourCam.quaternion.copy(cameraStars[0].group.quaternion);
+        exportRoot.add(tourCam);
+
+        const tourClip = this.buildTourAnimationClip(cameraStars, 'Camara_Tour_3D_Animada');
+        if (tourClip) {
+          animationsToExport.push(tourClip);
+        }
+      }
+
       const exporter = new GLTFExporter();
-      const glb = await exporter.parseAsync(exportRoot, { binary: true, onlyVisible: true, maxTextureSize: 2048 });
+      const exportOptions = {
+        binary: true,
+        onlyVisible: true,
+        maxTextureSize: 2048
+      };
+      if (animationsToExport.length > 0) {
+        exportOptions.animations = animationsToExport;
+      }
+
+      const glb = await exporter.parseAsync(exportRoot, exportOptions);
       const blob = new Blob([glb], { type: 'model/gltf-binary' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -1309,7 +1421,11 @@ class NetVisio3DApp {
       a.download = `netview3d-blender-${new Date().toISOString().slice(0, 10)}.glb`;
       a.click();
       setTimeout(() => URL.revokeObjectURL(url), 2000);
-      this.showToast(`Exportado .glb ${includeLabels ? 'con' : 'sin'} etiquetas${camCount ? ` y ${camCount} cámara(s)` : ''} — Blender: File ▸ Import ▸ glTF 2.0`);
+      this.showToast(
+        `Exportado .glb ${includeLabels ? 'con' : 'sin'} etiquetas (${camCount} cámaras fijas${
+          animationsToExport.length > 0 ? ' + Tour 3D Animado' : ''
+        }) — Blender: File ▸ Import ▸ glTF 2.0 (Play con Barra Espaciadora)`
+      );
     } catch (err) {
       console.error(err);
       this.showToast('Error al exportar para Blender');
