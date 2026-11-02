@@ -1,0 +1,1919 @@
+{
+  "version": "1.1",
+  "exportedAt": "2026-11-02T00:00:00Z",
+  "diagramName": "IC-Mobile PROD Load Balancer Communication Diagram",
+  "customer": "FirstBank / FIS",
+  "nodes": [
+    {
+      "id": "title_main",
+      "specId": "title-3d-banner",
+      "hostname": "IC-MOBILE PROD LOAD BALANCER & CORE",
+      "ip": "FirstBank / FIS • PCI Production & Load Balancer Communication Architecture",
+      "position": [
+        0,
+        6.2,
+        -16.5
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1.3,
+        1.3,
+        1.3
+      ],
+      "customColor": "#00e5ff"
+    },
+    {
+      "id": "panel_legend",
+      "specId": "text-panel-3d",
+      "hostname": "LEYENDA DE SEGURIDAD PCI",
+      "ip": "Amarillo = Cardholder Data Environment (CDE)\nVerde = En Alcance (No CDE)\nAzul = Host ESX / Virtualización\nRojo / Naranja = Segmento No-FB / Externo",
+      "position": [
+        -15.5,
+        2.2,
+        -12.5
+      ],
+      "rotation": [
+        0,
+        20,
+        0
+      ],
+      "scale": [
+        1.2,
+        1.2,
+        1.2
+      ],
+      "customColor": "#ffd600"
+    },
+    {
+      "id": "panel_specs",
+      "specId": "text-panel-3d",
+      "hostname": "ESPECIFICACIONES DEL DIAGRAMA",
+      "ip": "Diagram: IC-Mobile PCI Production & LB Connectivity\nCliente: FirstBank / FIS (Fecha: 8/30/2023)\nDiseño: H. Rivas | Revisión: E. Lopez / A. Cruz",
+      "position": [
+        15.5,
+        2.2,
+        -12.5
+      ],
+      "rotation": [
+        0,
+        -20,
+        0
+      ],
+      "scale": [
+        1.2,
+        1.2,
+        1.2
+      ],
+      "customColor": "#38bdf8"
+    },
+    {
+      "id": "zone_core",
+      "specId": "zone-platform-green",
+      "hostname": "ZONA VERDE — CISCO NEXUS CORE & FIREWALL",
+      "ip": "Nexus 9000 Core 1/2 + Nexus 2148 PODs + FortiGate IDP/Firewall",
+      "position": [
+        0,
+        0.04,
+        -9.0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1.8,
+        1,
+        1.4
+      ],
+      "customColor": "#00c853"
+    },
+    {
+      "id": "zone_web",
+      "specId": "zone-platform",
+      "hostname": "ZONA DMZ — FRONT-END WEB SERVERS",
+      "ip": "FBA08082, FBA08083, FBA08086 • VIP 10.30.192.139",
+      "position": [
+        -8.0,
+        0.04,
+        0.0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1.2,
+        1,
+        1.1
+      ],
+      "customColor": "#00e5ff"
+    },
+    {
+      "id": "zone_esx",
+      "specId": "zone-platform",
+      "hostname": "CLUSTER MR1130_IC_MOBIL_PROD",
+      "ip": "ESX1 (FB64111) & ESX2 (FB64112) • Infraestructura Virtual",
+      "position": [
+        0,
+        0.04,
+        0.0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        0.9,
+        1,
+        1.1
+      ],
+      "customColor": "#2979ff"
+    },
+    {
+      "id": "zone_feis",
+      "specId": "zone-platform-green",
+      "hostname": "ZONA FEIS PROD REAL SERVERS",
+      "ip": "Xpress Servers, FEIS-AMQ, FEIS-Log, FEIS-Mgmt, FEIS-APP01..06 (:9000)",
+      "position": [
+        8.8,
+        0.04,
+        0.0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1.4,
+        1,
+        1.3
+      ],
+      "customColor": "#00c853"
+    },
+    {
+      "id": "zone_app",
+      "specId": "zone-platform",
+      "hostname": "ZONA APLICACIONES — DIGITAL BANKING APP & BACKOFFICE",
+      "ip": "FBA08081, FBA02176..178, FBA02133 • VIP 10.30.137.170",
+      "position": [
+        -7.2,
+        0.04,
+        7.5
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1.5,
+        1,
+        1.2
+      ],
+      "customColor": "#2979ff"
+    },
+    {
+      "id": "zone_sql_prod",
+      "specId": "zone-platform",
+      "hostname": "ZONA SQL SERVERS — CDE (PCI AMBER)",
+      "ip": "FBA03069 (10.30.130.105) • Instance FBA03091\\IC • SQL 1, SQL 2, Analyzer",
+      "position": [
+        6.8,
+        0.04,
+        7.0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1.2,
+        1,
+        1.1
+      ],
+      "customColor": "#ffab00"
+    },
+    {
+      "id": "zone_sql_migr",
+      "specId": "zone-platform",
+      "hostname": "NUEVO SQL ENVIRONMENT — MIGRATION PROPOSAL (VLAN 519)",
+      "ip": "FBA03059 (10.30.147.7) • Instance FBA03127 (10.30.147.26) • Windows 2016",
+      "position": [
+        6.8,
+        0.04,
+        13.8
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1.2,
+        1,
+        1.1
+      ],
+      "customColor": "#ffd600"
+    },
+    {
+      "id": "usr_internal",
+      "specId": "all-in-one-pc",
+      "hostname": "USUARIOS INTERNOS (FIRSTBANK / FIS)",
+      "ip": "Operaciones, Service Desk, Data Center & Security",
+      "position": [
+        0,
+        0.6,
+        -13.0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1.1,
+        1.1,
+        1.1
+      ]
+    },
+    {
+      "id": "n9k_1",
+      "specId": "cisco-nexus-9508",
+      "hostname": "NEXUS 9000 #1 (DIST CORE 1)",
+      "ip": "Distribution Context Core 1 • Dist. VRF",
+      "position": [
+        -2.6,
+        1.2,
+        -11.2
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1.1,
+        1.1,
+        1.1
+      ]
+    },
+    {
+      "id": "n9k_2",
+      "specId": "cisco-nexus-9508",
+      "hostname": "NEXUS 9000 #2 (DIST CORE 2)",
+      "ip": "Distribution Context Core 2 • Dist. VRF",
+      "position": [
+        2.6,
+        1.2,
+        -11.2
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1.1,
+        1.1,
+        1.1
+      ]
+    },
+    {
+      "id": "fw_idp",
+      "specId": "fortigate-1800f",
+      "hostname": "FIREWALL IDP / NGFW HA",
+      "ip": "Inspección Perimetral e Inter-VRF (Dist ↔ Aggr)",
+      "position": [
+        0,
+        0.45,
+        -9.0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1.2,
+        1.2,
+        1.2
+      ]
+    },
+    {
+      "id": "n_aggr_1",
+      "specId": "cisco-nexus-93180yc-fx3",
+      "hostname": "AGGREGATION CONTEXT CORE 1",
+      "ip": "Aggr. VRF • 100G Fabric Uplinks",
+      "position": [
+        -2.6,
+        0.5,
+        -7.2
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1.1,
+        1.1,
+        1.1
+      ]
+    },
+    {
+      "id": "n_aggr_2",
+      "specId": "cisco-nexus-93180yc-fx3",
+      "hostname": "AGGREGATION CONTEXT CORE 2",
+      "ip": "Aggr. VRF • 100G Fabric Uplinks",
+      "position": [
+        2.6,
+        0.5,
+        -7.2
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1.1,
+        1.1,
+        1.1
+      ]
+    },
+    {
+      "id": "n2148_pods",
+      "specId": "cisco-catalyst-9300-48p",
+      "hostname": "NEXUS 2148 (PODS AGGREGATION)",
+      "ip": "Agregación de Fabric Extenders / ToR",
+      "position": [
+        0,
+        0.5,
+        -5.5
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1.1,
+        1.1,
+        1.1
+      ]
+    },
+    {
+      "id": "kemp_dmz_act",
+      "specId": "kemp-loadmaster-x3",
+      "hostname": "ACTIVE DMZ KEMP LOAD BALANCER",
+      "ip": "XPRESS-PROD: 10.30.134.237:80 • WEB-LB: 10.30.192.139",
+      "position": [
+        -8.5,
+        1.8,
+        -11.5
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1.1,
+        1.1,
+        1.1
+      ]
+    },
+    {
+      "id": "kemp_ent_act",
+      "specId": "kemp-loadmaster-x3",
+      "hostname": "ACTIVE ENTERPRISE KEMP LB",
+      "ip": "CAS-HUB: 10.30.137.35:25 • FEIS-SOAP: 10.30.134.202:443 • APP-LB: 10.30.137.170",
+      "position": [
+        -8.5,
+        1.0,
+        -8.5
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1.1,
+        1.1,
+        1.1
+      ]
+    },
+    {
+      "id": "kemp_dmz_pas",
+      "specId": "kemp-loadmaster-x3",
+      "hostname": "PASSIVE DMZ KEMP LOAD BALANCER",
+      "ip": "HA Standby / Sincronización Statefull",
+      "position": [
+        8.5,
+        1.8,
+        -11.5
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1.1,
+        1.1,
+        1.1
+      ]
+    },
+    {
+      "id": "kemp_ent_pas",
+      "specId": "kemp-loadmaster-x3",
+      "hostname": "PASSIVE ENTERPRISE KEMP LB",
+      "ip": "HA Standby / Sincronización Statefull",
+      "position": [
+        8.5,
+        1.0,
+        -8.5
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1.1,
+        1.1,
+        1.1
+      ]
+    },
+    {
+      "id": "kemp_smtp_act",
+      "specId": "kemp-loadmaster-x3",
+      "hostname": "ENTERPRISE KEMP LB (SMTP / EXCHANGE)",
+      "ip": "CAS-HUB-EXCH2013-LB • VIP: 10.30.137.35:25",
+      "position": [
+        12.5,
+        1.0,
+        -4.5
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1.1,
+        1.1,
+        1.1
+      ]
+    },
+    {
+      "id": "cloud_ndm",
+      "specId": "cloud-wan",
+      "hostname": "FIS NDM SERVER CLOUD",
+      "ip": "IP Externa: 199.38.140.17 (Conexión Port tcp/1364)",
+      "position": [
+        14.0,
+        2.8,
+        -9.5
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1.2,
+        1.2,
+        1.2
+      ]
+    },
+    {
+      "id": "srv_ndm_win",
+      "specId": "vm-windows-server",
+      "hostname": "WINDOWS NDM (FBNDMMR)",
+      "ip": "10.30.137.240",
+      "position": [
+        14.0,
+        0.6,
+        -7.0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "customColor": "#38bdf8",
+      "appLabel": "NDM Transfer",
+      "vcpu": "4 vCPU",
+      "memory": "16 GB",
+      "disk": "300 GB"
+    },
+    {
+      "id": "srv_ach_repo",
+      "specId": "vm-windows-server",
+      "hostname": "ACH REPOSITORY",
+      "ip": "10.30.137.12 • \\\\fba01002\\applications\\appl\\P2P Transfers\\P2PACH",
+      "position": [
+        11.2,
+        0.6,
+        -7.0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "customColor": "#38bdf8",
+      "appLabel": "ACH / P2P Repo",
+      "vcpu": "4 vCPU",
+      "memory": "16 GB",
+      "disk": "500 GB"
+    },
+    {
+      "id": "cloud_tsys",
+      "specId": "cloud-wan",
+      "hostname": "RED PRIVADA TSYS & TLP",
+      "ip": "DDS, Quick Remit, Real-time API & TLP",
+      "position": [
+        -15.5,
+        2.5,
+        -4.0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1.2,
+        1.2,
+        1.2
+      ]
+    },
+    {
+      "id": "api_harland",
+      "specId": "data-port-tube-tls",
+      "hostname": "API HARLAND",
+      "ip": "Conexión Segura TLS / TSYS",
+      "position": [
+        -14.5,
+        1.2,
+        -1.8
+      ],
+      "rotation": [
+        0,
+        90,
+        0
+      ],
+      "scale": [
+        0.8,
+        0.8,
+        0.8
+      ],
+      "customColor": "#00e5ff"
+    },
+    {
+      "id": "api_fxd",
+      "specId": "data-port-tube-tls",
+      "hostname": "API FXD",
+      "ip": "Servicio Cambiario / TSYS",
+      "position": [
+        -14.5,
+        1.2,
+        -0.6
+      ],
+      "rotation": [
+        0,
+        90,
+        0
+      ],
+      "scale": [
+        0.8,
+        0.8,
+        0.8
+      ],
+      "customColor": "#00e5ff"
+    },
+    {
+      "id": "api_captcha",
+      "specId": "data-port-tube-tls",
+      "hostname": "GOOGLE CAPTCHA",
+      "ip": "Validación Anti-Bot / Internet",
+      "position": [
+        -14.5,
+        1.2,
+        0.6
+      ],
+      "rotation": [
+        0,
+        90,
+        0
+      ],
+      "scale": [
+        0.8,
+        0.8,
+        0.8
+      ],
+      "customColor": "#00e5ff"
+    },
+    {
+      "id": "api_everpay",
+      "specId": "data-port-tube-tls",
+      "hostname": "API EVERPAY",
+      "ip": "Pasarela de Pagos / TSYS",
+      "position": [
+        -14.5,
+        1.2,
+        1.8
+      ],
+      "rotation": [
+        0,
+        90,
+        0
+      ],
+      "scale": [
+        0.8,
+        0.8,
+        0.8
+      ],
+      "customColor": "#00e5ff"
+    },
+    {
+      "id": "api_fos",
+      "specId": "data-port-tube-tls",
+      "hostname": "API FOS",
+      "ip": "Core Banking Services",
+      "position": [
+        -14.5,
+        1.2,
+        3.0
+      ],
+      "rotation": [
+        0,
+        90,
+        0
+      ],
+      "scale": [
+        0.8,
+        0.8,
+        0.8
+      ],
+      "customColor": "#00e5ff"
+    },
+    {
+      "id": "web_fba08082",
+      "specId": "vm-windows-server",
+      "hostname": "FBA08082 (WEB-SRV-01)",
+      "ip": "10.30.192.142 • Front-End Web",
+      "position": [
+        -9.8,
+        0.6,
+        0.0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "customColor": "#00e5ff",
+      "appLabel": "IIS / Web Front",
+      "vcpu": "4 vCPU",
+      "memory": "16 GB",
+      "disk": "200 GB"
+    },
+    {
+      "id": "web_fba08083",
+      "specId": "vm-windows-server",
+      "hostname": "FBA08083 (WEB-SRV-02)",
+      "ip": "10.30.192.143 • Front-End Web",
+      "position": [
+        -8.0,
+        0.6,
+        0.0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "customColor": "#00e5ff",
+      "appLabel": "IIS / Web Front",
+      "vcpu": "4 vCPU",
+      "memory": "16 GB",
+      "disk": "200 GB"
+    },
+    {
+      "id": "web_fba08086",
+      "specId": "vm-windows-server",
+      "hostname": "FBA08086 (WEB-SRV-03)",
+      "ip": "10.30.192.146 • Front-End Web",
+      "position": [
+        -6.2,
+        0.6,
+        0.0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "customColor": "#00e5ff",
+      "appLabel": "IIS / Web Front",
+      "vcpu": "4 vCPU",
+      "memory": "16 GB",
+      "disk": "200 GB"
+    },
+    {
+      "id": "tube_web_https",
+      "specId": "data-port-tube-tls",
+      "hostname": "TCP/443",
+      "ip": "HTTPS Internet & App Access",
+      "position": [
+        -8.0,
+        1.8,
+        0.0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "customColor": "#00e5ff"
+    },
+    {
+      "id": "esx1",
+      "specId": "hpe-dl380-gen11",
+      "hostname": "ESX1 (FB64111)",
+      "ip": "10.30.142.129 • VMware ESXi Cluster",
+      "position": [
+        -1.4,
+        0.5,
+        0.0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1.2,
+        1.2,
+        1.2
+      ]
+    },
+    {
+      "id": "esx2",
+      "specId": "hpe-dl380-gen11",
+      "hostname": "ESX2 (FB64112)",
+      "ip": "10.30.142.131 • VMware ESXi Cluster",
+      "position": [
+        1.4,
+        0.5,
+        0.0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1.2,
+        1.2,
+        1.2
+      ]
+    },
+    {
+      "id": "hyp_esx",
+      "specId": "hypervisor-layer",
+      "hostname": "VMWARE CLUSTER MR1130",
+      "ip": "Cluster Cómputo Alta Disponibilidad",
+      "position": [
+        0,
+        1.1,
+        0.0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1.2,
+        1.2,
+        1.2
+      ]
+    },
+    {
+      "id": "feis_xp1",
+      "specId": "vm-linux-redhat",
+      "hostname": "XPRESS SRV FBA06093",
+      "ip": "10.30.134.171 • express41_olb",
+      "position": [
+        5.8,
+        0.6,
+        -1.8
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        0.95,
+        0.95,
+        0.95
+      ],
+      "customColor": "#00c853",
+      "appLabel": "Xpress Service",
+      "vcpu": "4 vCPU",
+      "memory": "16 GB",
+      "disk": "150 GB"
+    },
+    {
+      "id": "feis_xp2",
+      "specId": "vm-linux-redhat",
+      "hostname": "XPRESS SRV FBA06094",
+      "ip": "10.30.134.172 • express41_olb",
+      "position": [
+        7.4,
+        0.6,
+        -1.8
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        0.95,
+        0.95,
+        0.95
+      ],
+      "customColor": "#00c853",
+      "appLabel": "Xpress Service",
+      "vcpu": "4 vCPU",
+      "memory": "16 GB",
+      "disk": "150 GB"
+    },
+    {
+      "id": "feis_xp3",
+      "specId": "vm-linux-redhat",
+      "hostname": "XPRESS SRV FBA06144",
+      "ip": "10.30.134.188 • express41_olb",
+      "position": [
+        9.0,
+        0.6,
+        -1.8
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        0.95,
+        0.95,
+        0.95
+      ],
+      "customColor": "#00c853",
+      "appLabel": "Xpress Service",
+      "vcpu": "4 vCPU",
+      "memory": "16 GB",
+      "disk": "150 GB"
+    },
+    {
+      "id": "feis_amq",
+      "specId": "vm-linux-redhat",
+      "hostname": "FEIS-AMQ FBA02149",
+      "ip": "10.30.134.181 • ActiveMQ Broker",
+      "position": [
+        10.6,
+        0.6,
+        -1.8
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        0.95,
+        0.95,
+        0.95
+      ],
+      "customColor": "#00c853",
+      "appLabel": "ActiveMQ",
+      "vcpu": "4 vCPU",
+      "memory": "16 GB",
+      "disk": "150 GB"
+    },
+    {
+      "id": "feis_log",
+      "specId": "vm-linux-redhat",
+      "hostname": "FEIS-LOG FBA02156",
+      "ip": "10.30.134.169 • Central Log",
+      "position": [
+        12.0,
+        0.6,
+        -1.8
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        0.95,
+        0.95,
+        0.95
+      ],
+      "customColor": "#00c853",
+      "appLabel": "Syslog / Audit",
+      "vcpu": "4 vCPU",
+      "memory": "16 GB",
+      "disk": "250 GB"
+    },
+    {
+      "id": "feis_mgmt",
+      "specId": "vm-linux-redhat",
+      "hostname": "FEIS-MGMT FBA02157",
+      "ip": "10.30.134.170 • Mgmt Server",
+      "position": [
+        12.0,
+        0.6,
+        0.0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        0.95,
+        0.95,
+        0.95
+      ],
+      "customColor": "#00c853",
+      "appLabel": "Management",
+      "vcpu": "4 vCPU",
+      "memory": "16 GB",
+      "disk": "150 GB"
+    },
+    {
+      "id": "feis_app01",
+      "specId": "vm-linux-redhat",
+      "hostname": "FEIS-APP01 (FBA02150)",
+      "ip": "10.30.134.113 :9000",
+      "position": [
+        5.8,
+        0.6,
+        0.0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        0.95,
+        0.95,
+        0.95
+      ],
+      "customColor": "#00c853",
+      "appLabel": "FEIS-APP :9000",
+      "vcpu": "8 vCPU",
+      "memory": "32 GB",
+      "disk": "200 GB"
+    },
+    {
+      "id": "feis_app02",
+      "specId": "vm-linux-redhat",
+      "hostname": "FEIS-APP02 (FBA02151)",
+      "ip": "10.30.134.164 :9000",
+      "position": [
+        7.4,
+        0.6,
+        0.0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        0.95,
+        0.95,
+        0.95
+      ],
+      "customColor": "#00c853",
+      "appLabel": "FEIS-APP :9000",
+      "vcpu": "8 vCPU",
+      "memory": "32 GB",
+      "disk": "200 GB"
+    },
+    {
+      "id": "feis_app03",
+      "specId": "vm-linux-redhat",
+      "hostname": "FEIS-APP03 (FBA02152)",
+      "ip": "10.30.134.165 :9000",
+      "position": [
+        9.0,
+        0.6,
+        0.0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        0.95,
+        0.95,
+        0.95
+      ],
+      "customColor": "#00c853",
+      "appLabel": "FEIS-APP :9000",
+      "vcpu": "8 vCPU",
+      "memory": "32 GB",
+      "disk": "200 GB"
+    },
+    {
+      "id": "feis_app04",
+      "specId": "vm-linux-redhat",
+      "hostname": "FEIS-APP04 (FBA02153)",
+      "ip": "10.30.134.166 :9000",
+      "position": [
+        5.8,
+        0.6,
+        1.8
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        0.95,
+        0.95,
+        0.95
+      ],
+      "customColor": "#00c853",
+      "appLabel": "FEIS-APP :9000",
+      "vcpu": "8 vCPU",
+      "memory": "32 GB",
+      "disk": "200 GB"
+    },
+    {
+      "id": "feis_app05",
+      "specId": "vm-linux-redhat",
+      "hostname": "FEIS-APP05 (FBA02154)",
+      "ip": "10.30.134.167 :9000",
+      "position": [
+        7.4,
+        0.6,
+        1.8
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        0.95,
+        0.95,
+        0.95
+      ],
+      "customColor": "#00c853",
+      "appLabel": "FEIS-APP :9000",
+      "vcpu": "8 vCPU",
+      "memory": "32 GB",
+      "disk": "200 GB"
+    },
+    {
+      "id": "feis_app06",
+      "specId": "vm-linux-redhat",
+      "hostname": "FEIS-APP06 (FBA02155)",
+      "ip": "10.30.134.168 :9000",
+      "position": [
+        9.0,
+        0.6,
+        1.8
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        0.95,
+        0.95,
+        0.95
+      ],
+      "customColor": "#00c853",
+      "appLabel": "FEIS-APP :9000",
+      "vcpu": "8 vCPU",
+      "memory": "32 GB",
+      "disk": "200 GB"
+    },
+    {
+      "id": "app_fba08081",
+      "specId": "vm-windows-server",
+      "hostname": "FBA08081 (BACK OFFICE)",
+      "ip": "10.30.137.188 • Operaciones BackOffice",
+      "position": [
+        -11.0,
+        0.6,
+        7.5
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "customColor": "#2979ff",
+      "appLabel": "BackOffice",
+      "vcpu": "4 vCPU",
+      "memory": "16 GB",
+      "disk": "250 GB"
+    },
+    {
+      "id": "app_fba02176",
+      "specId": "vm-windows-server",
+      "hostname": "FBA02176 (DIGITAL APP 1)",
+      "ip": "10.30.137.172 • Digital Banking App",
+      "position": [
+        -8.8,
+        0.6,
+        7.5
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "customColor": "#2979ff",
+      "appLabel": "Banking App",
+      "vcpu": "8 vCPU",
+      "memory": "32 GB",
+      "disk": "300 GB"
+    },
+    {
+      "id": "app_fba02177",
+      "specId": "vm-windows-server",
+      "hostname": "FBA02177 (DIGITAL APP 2)",
+      "ip": "10.30.137.173 • Digital Banking App",
+      "position": [
+        -6.8,
+        0.6,
+        7.5
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "customColor": "#2979ff",
+      "appLabel": "Banking App",
+      "vcpu": "8 vCPU",
+      "memory": "32 GB",
+      "disk": "300 GB"
+    },
+    {
+      "id": "app_fba02178",
+      "specId": "vm-windows-server",
+      "hostname": "FBA02178 (DIGITAL APP 3)",
+      "ip": "10.30.137.174 • Digital Banking App",
+      "position": [
+        -4.8,
+        0.6,
+        7.5
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "customColor": "#2979ff",
+      "appLabel": "Banking App",
+      "vcpu": "8 vCPU",
+      "memory": "32 GB",
+      "disk": "300 GB"
+    },
+    {
+      "id": "app_fba02133",
+      "specId": "vm-windows-server",
+      "hostname": "FBA02133 (SOURCE CODE ESCROW)",
+      "ip": "10.30.140.78 • Source Escrow",
+      "position": [
+        -2.6,
+        0.6,
+        7.5
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "customColor": "#2979ff",
+      "appLabel": "Escrow Repo",
+      "vcpu": "4 vCPU",
+      "memory": "16 GB",
+      "disk": "500 GB"
+    },
+    {
+      "id": "tube_sql_port",
+      "specId": "data-port-tube",
+      "hostname": "TCP/34250",
+      "ip": "Port 34250 SQL Query Channel",
+      "position": [
+        -0.2,
+        1.4,
+        7.5
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "customColor": "#ffab00"
+    },
+    {
+      "id": "tube_smtp_port",
+      "specId": "data-port-tube",
+      "hostname": "TCP/25",
+      "ip": "Port 25 Email Exchange SMTP",
+      "position": [
+        -6.8,
+        1.4,
+        4.0
+      ],
+      "rotation": [
+        0,
+        90,
+        0
+      ],
+      "scale": [
+        0.9,
+        0.9,
+        0.9
+      ],
+      "customColor": "#00e5ff"
+    },
+    {
+      "id": "sql_analyzer_cur",
+      "specId": "vm-windows-server",
+      "hostname": "FBA03095 (SQL ANALYZER)",
+      "ip": "10.30.130.119 • SQL Analyzer Virtual",
+      "position": [
+        4.2,
+        0.6,
+        7.2
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "customColor": "#ffab00",
+      "appLabel": "SQL Analyzer",
+      "vcpu": "8 vCPU",
+      "memory": "32 GB",
+      "disk": "500 GB"
+    },
+    {
+      "id": "sql_node1_cur",
+      "specId": "vm-windows-server",
+      "hostname": "FB64006 (SQL NODE 1)",
+      "ip": "10.30.130.103 • Active Node (FBA03069)",
+      "position": [
+        6.8,
+        0.6,
+        7.2
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "customColor": "#ffab00",
+      "appLabel": "SQL Enterprise",
+      "vcpu": "16 vCPU",
+      "memory": "128 GB",
+      "disk": "2000 GB"
+    },
+    {
+      "id": "sql_node2_cur",
+      "specId": "vm-windows-server",
+      "hostname": "FB64007 (SQL NODE 2)",
+      "ip": "10.30.130.104 • Passive Node (FBA03069)",
+      "position": [
+        9.4,
+        0.6,
+        7.2
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "customColor": "#ffab00",
+      "appLabel": "SQL Enterprise",
+      "vcpu": "16 vCPU",
+      "memory": "128 GB",
+      "disk": "2000 GB"
+    },
+    {
+      "id": "callout_sql_cur",
+      "specId": "text-panel-3d",
+      "hostname": "CLUSTER SQL PRODUCCIÓN (CDE)",
+      "ip": "Cluster Name: FBA03069 (IP: 10.30.130.105)\nInstance Name: FBA03091\\IC (IP: 10.30.130.109)\nPort: TCP/34250 • Cardholder Data Env",
+      "position": [
+        6.8,
+        2.0,
+        5.0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1.1,
+        1.1,
+        1.1
+      ],
+      "customColor": "#ffab00"
+    },
+    {
+      "id": "sql_analyzer_mig",
+      "specId": "vm-windows-server",
+      "hostname": "FB63944 (SQL ANALYZER 2016)",
+      "ip": "10.30.147.6 • Windows Server 2016",
+      "position": [
+        4.2,
+        0.6,
+        14.0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "customColor": "#ffd600",
+      "appLabel": "SQL 2016 Analyzer",
+      "vcpu": "8 vCPU",
+      "memory": "32 GB",
+      "disk": "500 GB"
+    },
+    {
+      "id": "sql_node1_mig",
+      "specId": "vm-windows-server",
+      "hostname": "FB63940 (NEW SQL NODE 1)",
+      "ip": "10.30.147.4 • Cluster FBA03059 (Node 1)",
+      "position": [
+        6.8,
+        0.6,
+        14.0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "customColor": "#ffd600",
+      "appLabel": "SQL 2016 Clustered",
+      "vcpu": "16 vCPU",
+      "memory": "128 GB",
+      "disk": "2500 GB"
+    },
+    {
+      "id": "sql_node2_mig",
+      "specId": "vm-windows-server",
+      "hostname": "FB63960 (NEW SQL NODE 2)",
+      "ip": "10.30.147.5 • Cluster FBA03059 (Node 2)",
+      "position": [
+        9.4,
+        0.6,
+        14.0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "customColor": "#ffd600",
+      "appLabel": "SQL 2016 Clustered",
+      "vcpu": "16 vCPU",
+      "memory": "128 GB",
+      "disk": "2500 GB"
+    },
+    {
+      "id": "callout_sql_mig",
+      "specId": "text-panel-3d",
+      "hostname": "PROPUESTA MIGRACIÓN (PCI-DB VLAN 519)",
+      "ip": "New IC Banking SQL Environment Migration\nCluster Name: FBA03059 (IP: 10.30.147.7)\nInstance Name: FBA03127 (IP: 10.30.147.26)\nWindows Server 2016 / PCI Compliant",
+      "position": [
+        6.8,
+        2.0,
+        11.6
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1.1,
+        1.1,
+        1.1
+      ],
+      "customColor": "#ffd600"
+    },
+    {
+      "id": "cam_1",
+      "specId": "camera-star",
+      "hostname": "1",
+      "ip": "Vista General Arquitectura PCI",
+      "position": [
+        0,
+        16.5,
+        23.5
+      ],
+      "rotation": [
+        -35,
+        0,
+        0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ]
+    },
+    {
+      "id": "cam_2",
+      "specId": "camera-star",
+      "hostname": "2",
+      "ip": "Enfoque KEMP & Web Tier",
+      "position": [
+        -9.0,
+        7.5,
+        4.5
+      ],
+      "rotation": [
+        -30,
+        -25,
+        0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ]
+    },
+    {
+      "id": "cam_3",
+      "specId": "camera-star",
+      "hostname": "3",
+      "ip": "Enfoque Cisco Nexus & Firewalls",
+      "position": [
+        0,
+        8.5,
+        -3.0
+      ],
+      "rotation": [
+        -40,
+        0,
+        0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ]
+    },
+    {
+      "id": "cam_4",
+      "specId": "camera-star",
+      "hostname": "4",
+      "ip": "Enfoque Clusters SQL & Migración CDE",
+      "position": [
+        6.8,
+        6.5,
+        18.5
+      ],
+      "rotation": [
+        -35,
+        15,
+        0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ]
+    }
+  ],
+  "links": [
+    {
+      "id": "link_ic_1",
+      "fromId": "n9k_1",
+      "toId": "fw_idp",
+      "fromPort": "Eth1/1",
+      "toPort": "X1-10G",
+      "cableType": "om4-aqua",
+      "routeStyle": "manhattan",
+      "label": "Dist 1 ↔ Firewall"
+    },
+    {
+      "id": "link_ic_2",
+      "fromId": "n9k_2",
+      "toId": "fw_idp",
+      "fromPort": "Eth1/1",
+      "toPort": "X2-10G",
+      "cableType": "om4-aqua",
+      "routeStyle": "manhattan",
+      "label": "Dist 2 ↔ Firewall"
+    },
+    {
+      "id": "link_ic_3",
+      "fromId": "fw_idp",
+      "toId": "n_aggr_1",
+      "fromPort": "X3-10G",
+      "toPort": "Eth1/1",
+      "cableType": "om4-aqua",
+      "routeStyle": "manhattan",
+      "label": "Firewall ↔ Aggr 1"
+    },
+    {
+      "id": "link_ic_4",
+      "fromId": "fw_idp",
+      "toId": "n_aggr_2",
+      "fromPort": "X4-10G",
+      "toPort": "Eth1/1",
+      "cableType": "om4-aqua",
+      "routeStyle": "manhattan",
+      "label": "Firewall ↔ Aggr 2"
+    },
+    {
+      "id": "link_ic_5",
+      "fromId": "n_aggr_1",
+      "toId": "n2148_pods",
+      "fromPort": "Eth1/49",
+      "toPort": "Uplink-1",
+      "cableType": "om4-aqua",
+      "routeStyle": "manhattan",
+      "label": "Aggr 1 ↔ PODs"
+    },
+    {
+      "id": "link_ic_6",
+      "fromId": "n_aggr_2",
+      "toId": "n2148_pods",
+      "fromPort": "Eth1/49",
+      "toPort": "Uplink-2",
+      "cableType": "om4-aqua",
+      "routeStyle": "manhattan",
+      "label": "Aggr 2 ↔ PODs"
+    },
+    {
+      "id": "link_ic_7",
+      "fromId": "usr_internal",
+      "toId": "n9k_1",
+      "fromPort": "LAN",
+      "toPort": "Gi1/0/1",
+      "cableType": "cat6a-blue",
+      "routeStyle": "overhead",
+      "label": "Users ↔ Dist 1"
+    },
+    {
+      "id": "link_ic_8",
+      "fromId": "usr_internal",
+      "toId": "n9k_2",
+      "fromPort": "LAN",
+      "toPort": "Gi1/0/1",
+      "cableType": "cat6a-blue",
+      "routeStyle": "overhead",
+      "label": "Users ↔ Dist 2"
+    },
+    {
+      "id": "link_ic_9",
+      "fromId": "kemp_dmz_act",
+      "toId": "n9k_1",
+      "fromPort": "eth0 (WAN/VIP)",
+      "toPort": "Eth1/5",
+      "cableType": "om4-aqua",
+      "routeStyle": "overhead",
+      "label": "DMZ LB Act ↔ Dist 1"
+    },
+    {
+      "id": "link_ic_10",
+      "fromId": "kemp_dmz_pas",
+      "toId": "n9k_2",
+      "fromPort": "eth0 (WAN/VIP)",
+      "toPort": "Eth1/5",
+      "cableType": "om4-aqua",
+      "routeStyle": "overhead",
+      "label": "DMZ LB Pas ↔ Dist 2"
+    },
+    {
+      "id": "link_ic_11",
+      "fromId": "kemp_dmz_act",
+      "toId": "kemp_dmz_pas",
+      "fromPort": "HA-Sync",
+      "toPort": "HA-Sync",
+      "cableType": "ha-red",
+      "routeStyle": "overhead",
+      "label": "DMZ HA Sync"
+    },
+    {
+      "id": "link_ic_12",
+      "fromId": "kemp_ent_act",
+      "toId": "n_aggr_1",
+      "fromPort": "eth0 (WAN/VIP)",
+      "toPort": "Eth1/10",
+      "cableType": "om4-aqua",
+      "routeStyle": "overhead",
+      "label": "Ent LB Act ↔ Aggr 1"
+    },
+    {
+      "id": "link_ic_13",
+      "fromId": "kemp_ent_pas",
+      "toId": "n_aggr_2",
+      "fromPort": "eth0 (WAN/VIP)",
+      "toPort": "Eth1/10",
+      "cableType": "om4-aqua",
+      "routeStyle": "overhead",
+      "label": "Ent LB Pas ↔ Aggr 2"
+    },
+    {
+      "id": "link_ic_14",
+      "fromId": "kemp_ent_act",
+      "toId": "kemp_ent_pas",
+      "fromPort": "HA-Sync",
+      "toPort": "HA-Sync",
+      "cableType": "ha-red",
+      "routeStyle": "overhead",
+      "label": "Enterprise HA Sync"
+    },
+    {
+      "id": "link_ic_15",
+      "fromId": "cloud_ndm",
+      "toId": "srv_ndm_win",
+      "fromPort": "Port-1",
+      "toPort": "vNIC-0",
+      "cableType": "om4-aqua",
+      "routeStyle": "manhattan",
+      "label": "tcp/1364"
+    },
+    {
+      "id": "link_ic_16",
+      "fromId": "srv_ndm_win",
+      "toId": "srv_ach_repo",
+      "fromPort": "vNIC-1",
+      "toPort": "vNIC-1",
+      "cableType": "cat6a-blue",
+      "routeStyle": "manhattan",
+      "label": "SMB / P2PACH"
+    },
+    {
+      "id": "link_ic_17",
+      "fromId": "srv_ach_repo",
+      "toId": "n_aggr_2",
+      "fromPort": "vNIC-0",
+      "toPort": "Eth1/20",
+      "cableType": "om4-aqua",
+      "routeStyle": "overhead",
+      "label": "ACH ↔ Aggr 2"
+    },
+    {
+      "id": "link_ic_18",
+      "fromId": "kemp_dmz_act",
+      "toId": "web_fba08082",
+      "fromPort": "eth2",
+      "toPort": "vNIC-0",
+      "cableType": "om4-aqua",
+      "routeStyle": "manhattan",
+      "label": "VIP 10.30.192.139"
+    },
+    {
+      "id": "link_ic_19",
+      "fromId": "kemp_dmz_act",
+      "toId": "web_fba08083",
+      "fromPort": "eth2",
+      "toPort": "vNIC-0",
+      "cableType": "om4-aqua",
+      "routeStyle": "manhattan",
+      "label": "VIP 10.30.192.139"
+    },
+    {
+      "id": "link_ic_20",
+      "fromId": "kemp_dmz_act",
+      "toId": "web_fba08086",
+      "fromPort": "eth2",
+      "toPort": "vNIC-0",
+      "cableType": "om4-aqua",
+      "routeStyle": "manhattan",
+      "label": "VIP 10.30.192.139"
+    },
+    {
+      "id": "link_ic_21",
+      "fromId": "esx1",
+      "toId": "n2148_pods",
+      "fromPort": "vmnic0",
+      "toPort": "Gi1/0/10",
+      "cableType": "om4-aqua",
+      "routeStyle": "overhead",
+      "label": "ESX1 Trunk"
+    },
+    {
+      "id": "link_ic_22",
+      "fromId": "esx2",
+      "toId": "n2148_pods",
+      "fromPort": "vmnic0",
+      "toPort": "Gi1/0/11",
+      "cableType": "om4-aqua",
+      "routeStyle": "overhead",
+      "label": "ESX2 Trunk"
+    },
+    {
+      "id": "link_ic_23",
+      "fromId": "kemp_ent_act",
+      "toId": "feis_app01",
+      "fromPort": "eth3",
+      "toPort": "vNIC-0",
+      "cableType": "om4-aqua",
+      "routeStyle": "overhead",
+      "label": "FEIS-SOAP :443"
+    },
+    {
+      "id": "link_ic_24",
+      "fromId": "kemp_ent_act",
+      "toId": "feis_app02",
+      "fromPort": "eth3",
+      "toPort": "vNIC-0",
+      "cableType": "om4-aqua",
+      "routeStyle": "overhead",
+      "label": "FEIS-SOAP :443"
+    },
+    {
+      "id": "link_ic_25",
+      "fromId": "kemp_ent_act",
+      "toId": "feis_xp1",
+      "fromPort": "eth1",
+      "toPort": "vNIC-0",
+      "cableType": "om4-aqua",
+      "routeStyle": "overhead",
+      "label": "XPRESS-PROD :80"
+    },
+    {
+      "id": "link_ic_26",
+      "fromId": "web_fba08083",
+      "toId": "app_fba02177",
+      "fromPort": "vNIC-1",
+      "toPort": "vNIC-0",
+      "cableType": "cat6a-blue",
+      "routeStyle": "manhattan",
+      "label": "tcp/443 Web ↔ App"
+    },
+    {
+      "id": "link_ic_27",
+      "fromId": "app_fba02176",
+      "toId": "sql_node1_cur",
+      "fromPort": "vNIC-1",
+      "toPort": "vNIC-0",
+      "cableType": "san-orange",
+      "routeStyle": "manhattan",
+      "label": "tcp/34250 SQL Query"
+    },
+    {
+      "id": "link_ic_28",
+      "fromId": "app_fba02177",
+      "toId": "sql_node1_cur",
+      "fromPort": "vNIC-1",
+      "toPort": "vNIC-0",
+      "cableType": "san-orange",
+      "routeStyle": "manhattan",
+      "label": "tcp/34250 SQL Query"
+    },
+    {
+      "id": "link_ic_29",
+      "fromId": "app_fba02178",
+      "toId": "sql_node1_cur",
+      "fromPort": "vNIC-1",
+      "toPort": "vNIC-0",
+      "cableType": "san-orange",
+      "routeStyle": "manhattan",
+      "label": "tcp/34250 SQL Query"
+    },
+    {
+      "id": "link_ic_30",
+      "fromId": "app_fba02177",
+      "toId": "kemp_smtp_act",
+      "fromPort": "vNIC-1",
+      "toPort": "eth0",
+      "cableType": "cat6a-blue",
+      "routeStyle": "overhead",
+      "label": "tcp/25 SMTP"
+    }
+  ]
+}
