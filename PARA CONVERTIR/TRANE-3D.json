@@ -1,0 +1,1094 @@
+{
+  "version": "1.1",
+  "exportedAt": "2026-11-02T18:57:14.890Z",
+  "diagramName": "SEGMENTACION DE UNIDADES DE AIRE TRANE MR-1130",
+  "customer": "Trane Technologies / Edificio MR-1130",
+  "nodes": [
+    {
+      "id": "title_trane_mr1130",
+      "specId": "title-3d-banner",
+      "hostname": "SEGMENTACION DE UNIDADES DE AIRE TRANE",
+      "ip": "Edificio MR-1130 • VLAN 334 (10.30.99.0/24) • Control BMS HVAC • Cisco & Fortinet",
+      "position": [
+        0,
+        8.8,
+        -17
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1.35,
+        1.35,
+        1.35
+      ],
+      "customColor": "#00e5ff"
+    },
+    {
+      "id": "core_nexus_9508",
+      "specId": "cisco-nexus-9508",
+      "hostname": "NEXUS 9508",
+      "ip": "Distribución & Concentrador Troncales VLAN 334",
+      "position": [
+        6.5,
+        2.2,
+        0
+      ],
+      "rotation": [
+        0,
+        -90,
+        0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ]
+    },
+    {
+      "id": "fw_interno_fortinet",
+      "specId": "fortigate-1800f",
+      "hostname": "FIREWALL INTERNO",
+      "ip": "Interface TDB: 10.30.99.1 (Default Gateway)",
+      "position": [
+        13.2,
+        2.2,
+        0
+      ],
+      "rotation": [
+        0,
+        -90,
+        0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ]
+    },
+    {
+      "id": "zone_piso_1",
+      "specId": "zone-platform",
+      "hostname": "PISO 1 — EDIFICIO MR-1130",
+      "ip": "Unidades Manejadoras de Aire & Switches TR-1A / TR-1B",
+      "position": [
+        -7,
+        4.5,
+        -12
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "customColor": "#0ea5e9"
+    },
+    {
+      "id": "tag_piso_1",
+      "specId": "text-panel-3d",
+      "hostname": "PISO 1",
+      "ip": "MR-1130 Nivel 1",
+      "position": [
+        -16,
+        5.3,
+        -12
+      ],
+      "rotation": [
+        0,
+        90,
+        0
+      ],
+      "scale": [
+        0.65,
+        0.65,
+        0.65
+      ],
+      "customColor": "#0284c7"
+    },
+    {
+      "id": "sw_tr_1a",
+      "specId": "cisco-catalyst-9300-24t",
+      "hostname": "Switch TR-1A",
+      "ip": "Piso 1 - TR A • VLAN 334",
+      "position": [
+        -11.5,
+        4.85,
+        -10.4
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ]
+    },
+    {
+      "id": "trane_ahu_1a_1",
+      "specId": "trane-ahu-unit",
+      "hostname": "AHU-101 (1-A)",
+      "ip": "10.30.99.50 (Port: 8/47)",
+      "position": [
+        -11.5,
+        5.05,
+        -13.5
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ]
+    },
+    {
+      "id": "sw_tr_1b",
+      "specId": "cisco-catalyst-9300-24t",
+      "hostname": "Switch TR-1B",
+      "ip": "Piso 1 - TR B • VLAN 334",
+      "position": [
+        -3.5,
+        4.85,
+        -10.4
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ]
+    },
+    {
+      "id": "trane_ahu_1b_1",
+      "specId": "trane-ahu-unit",
+      "hostname": "AHU-103 (1-B)",
+      "ip": "10.30.99.51 (Port: 7/4)",
+      "position": [
+        -6,
+        5.05,
+        -13.5
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ]
+    },
+    {
+      "id": "trane_ahu_1b_2",
+      "specId": "trane-ahu-unit",
+      "hostname": "AHU-104 (1-B)",
+      "ip": "10.30.99.52 (Port: 7/5)",
+      "position": [
+        -3.5,
+        5.05,
+        -13.5
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ]
+    },
+    {
+      "id": "trane_ahu_1b_3",
+      "specId": "trane-ahu-unit",
+      "hostname": "AHU-107 (1-B)",
+      "ip": "10.30.99.53 (Port: 7/6)",
+      "position": [
+        -1,
+        5.05,
+        -13.5
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ]
+    },
+    {
+      "id": "zone_piso_2",
+      "specId": "zone-platform",
+      "hostname": "PISO 2 — EDIFICIO MR-1130",
+      "ip": "Unidades Manejadoras de Aire & Switches TR-2A / TR-2B",
+      "position": [
+        -7,
+        3,
+        -4
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "customColor": "#0ea5e9"
+    },
+    {
+      "id": "tag_piso_2",
+      "specId": "text-panel-3d",
+      "hostname": "PISO 2",
+      "ip": "MR-1130 Nivel 2",
+      "position": [
+        -16,
+        3.8,
+        -4
+      ],
+      "rotation": [
+        0,
+        90,
+        0
+      ],
+      "scale": [
+        0.65,
+        0.65,
+        0.65
+      ],
+      "customColor": "#0284c7"
+    },
+    {
+      "id": "sw_tr_2a",
+      "specId": "cisco-catalyst-9300-24t",
+      "hostname": "Switch TR-2A",
+      "ip": "Piso 2 - TR A • VLAN 334",
+      "position": [
+        -11.5,
+        3.35,
+        -2.4
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ]
+    },
+    {
+      "id": "trane_ahu_2a_1",
+      "specId": "trane-ahu-unit",
+      "hostname": "AHU-201 (2-A)",
+      "ip": "10.30.99.54 (Port: 1/15)",
+      "position": [
+        -11.5,
+        3.55,
+        -5.5
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ]
+    },
+    {
+      "id": "sw_tr_2b",
+      "specId": "cisco-catalyst-9300-24t",
+      "hostname": "Switch TR-2B",
+      "ip": "Piso 2 - TR B • VLAN 334",
+      "position": [
+        -3.5,
+        3.35,
+        -2.4
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ]
+    },
+    {
+      "id": "trane_ahu_2b_1",
+      "specId": "trane-ahu-unit",
+      "hostname": "AHU-204 (2-B)",
+      "ip": "10.30.99.55 (Port: 7/13)",
+      "position": [
+        -4.8,
+        3.55,
+        -5.5
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ]
+    },
+    {
+      "id": "trane_ahu_2b_2",
+      "specId": "trane-ahu-unit",
+      "hostname": "Zona Carga (2-B)",
+      "ip": "10.30.99.56 (Port: 7/14)",
+      "position": [
+        -2,
+        3.55,
+        -5.5
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ]
+    },
+    {
+      "id": "zone_piso_3",
+      "specId": "zone-platform",
+      "hostname": "PISO 3 — EDIFICIO MR-1130",
+      "ip": "Unidades Manejadoras de Aire & Switches TR-3A / TR-3B",
+      "position": [
+        -7,
+        1.5,
+        4
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "customColor": "#0ea5e9"
+    },
+    {
+      "id": "tag_piso_3",
+      "specId": "text-panel-3d",
+      "hostname": "PISO 3",
+      "ip": "MR-1130 Nivel 3",
+      "position": [
+        -16,
+        2.3,
+        4
+      ],
+      "rotation": [
+        0,
+        90,
+        0
+      ],
+      "scale": [
+        0.65,
+        0.65,
+        0.65
+      ],
+      "customColor": "#0284c7"
+    },
+    {
+      "id": "sw_tr_3a",
+      "specId": "cisco-catalyst-9300-24t",
+      "hostname": "Switch TR-3A",
+      "ip": "Piso 3 - TR A • VLAN 334",
+      "position": [
+        -11.5,
+        1.85,
+        5.6
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ]
+    },
+    {
+      "id": "trane_ahu_3a_1",
+      "specId": "trane-ahu-unit",
+      "hostname": "AHU-301 (3-A)",
+      "ip": "10.30.99.57 (Port: 2/45)",
+      "position": [
+        -11.5,
+        2.05,
+        2.5
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ]
+    },
+    {
+      "id": "sw_tr_3b",
+      "specId": "cisco-catalyst-9300-24t",
+      "hostname": "Switch TR-3B",
+      "ip": "Piso 3 - TR B • VLAN 334",
+      "position": [
+        -3.5,
+        1.85,
+        5.6
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ]
+    },
+    {
+      "id": "trane_ahu_3b_1",
+      "specId": "trane-ahu-unit",
+      "hostname": "AHU-303 (3-B)",
+      "ip": "10.30.99.58 (Port: 7/6)",
+      "position": [
+        -4.8,
+        2.05,
+        2.5
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ]
+    },
+    {
+      "id": "trane_ahu_3b_2",
+      "specId": "trane-ahu-unit",
+      "hostname": "Zona Carga (8-8)",
+      "ip": "10.30.99.59 (Port: 4/30)",
+      "position": [
+        -2,
+        2.05,
+        2.5
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ]
+    },
+    {
+      "id": "zone_piso_4",
+      "specId": "zone-platform",
+      "hostname": "PISO 4 — EDIFICIO MR-1130",
+      "ip": "Unidades Manejadoras de Aire & Switches TR-4A / TR-4B",
+      "position": [
+        -7,
+        0,
+        12
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "customColor": "#0ea5e9"
+    },
+    {
+      "id": "tag_piso_4",
+      "specId": "text-panel-3d",
+      "hostname": "PISO 4",
+      "ip": "MR-1130 Nivel 4",
+      "position": [
+        -16,
+        0.8,
+        12
+      ],
+      "rotation": [
+        0,
+        90,
+        0
+      ],
+      "scale": [
+        0.65,
+        0.65,
+        0.65
+      ],
+      "customColor": "#0284c7"
+    },
+    {
+      "id": "sw_tr_4a",
+      "specId": "cisco-catalyst-9300-24t",
+      "hostname": "Switch TR-4A",
+      "ip": "Piso 4 - TR A • VLAN 334",
+      "position": [
+        -11.5,
+        0.35,
+        13.6
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ]
+    },
+    {
+      "id": "trane_ahu_4a_1",
+      "specId": "trane-ahu-unit",
+      "hostname": "AHU-401 (4-6)",
+      "ip": "10.30.99.60 (Port: 3/38)",
+      "position": [
+        -11.5,
+        0.55,
+        10.5
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ]
+    },
+    {
+      "id": "sw_tr_4b",
+      "specId": "cisco-catalyst-9300-24t",
+      "hostname": "Switch TR-4B",
+      "ip": "Piso 4 - TR B • VLAN 334",
+      "position": [
+        -3.5,
+        0.35,
+        13.6
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ]
+    },
+    {
+      "id": "trane_ahu_4b_1",
+      "specId": "trane-ahu-unit",
+      "hostname": "AHU-404 (4-B)",
+      "ip": "10.30.99.61 (Port: 2/7)",
+      "position": [
+        -3.5,
+        0.55,
+        10.5
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ]
+    },
+    {
+      "id": "panel_tablas_equipos",
+      "specId": "text-panel-3d",
+      "hostname": "LISTA DE EQUIPOS POR PISO (MR-1130)",
+      "ip": "PISO 1:\n• AHU-101 (8/47) 10.30.99.50 | AHU-103 (7/4) 10.30.99.51\n• AHU-104 (7/5) 10.30.99.52 | AHU-107 (7/6) 10.30.99.53\nPISO 2:\n• AHU-201 (1/15) 10.30.99.54 | AHU-204 (7/13) 10.30.99.55\n• Zona Carga (7/14) 10.30.99.56",
+      "position": [
+        8.5,
+        6.2,
+        -9
+      ],
+      "rotation": [
+        0,
+        -20,
+        0
+      ],
+      "scale": [
+        1.05,
+        1.05,
+        1.05
+      ],
+      "customColor": "#0284c7"
+    },
+    {
+      "id": "panel_tablas_p3_p4",
+      "specId": "text-panel-3d",
+      "hostname": "LISTA DE EQUIPOS PISOS 3 & 4",
+      "ip": "PISO 3:\n• AHU-301 (2/45) 10.30.99.57 | AHU-303 (7/6) 10.30.99.58\n• Zona Carga (4/30) 10.30.99.59\nPISO 4:\n• AHU-401 (3/38) 10.30.99.60 | AHU-404 (2/7) 10.30.99.61",
+      "position": [
+        8.5,
+        6.2,
+        -3.2
+      ],
+      "rotation": [
+        0,
+        -20,
+        0
+      ],
+      "scale": [
+        1.05,
+        1.05,
+        1.05
+      ],
+      "customColor": "#0284c7"
+    },
+    {
+      "id": "panel_segmentacion_red",
+      "specId": "text-panel-3d",
+      "hostname": "SEGMENTACIÓN DE RED & NOTAS",
+      "ip": "• Red de Control Trane (VLAN): 10.30.99.0/24\n• Rango de IPs (Devices): 10.30.99.50 en adelante\n• Default Gateway: 10.30.99.1\n• Interface Firewall (TDB): 10.30.99.1\n• Cada switch TR se conecta vía VLAN 334 al firewall interno.\n• Puertos de switch corresponden a documento MR-1130.",
+      "position": [
+        8.5,
+        6.2,
+        5
+      ],
+      "rotation": [
+        0,
+        -20,
+        0
+      ],
+      "scale": [
+        1.1,
+        1.1,
+        1.1
+      ],
+      "customColor": "#10b981"
+    },
+    {
+      "id": "panel_leyenda_3d",
+      "specId": "text-panel-3d",
+      "hostname": "LEYENDA & CONECTIVIDAD",
+      "ip": "🔵 Azul: Conexión Ethernet Cat6A (Switch TR - Unidad Trane)\n🟡 Amarillo: Troncal VLAN 334 hacia Nexus 9508\n🔴 Rojo: Interfaz TDB Gateway hacia Firewall Interno Fortinet\n🏢 Unidades Trane: Manejadoras de Aire (AHU) y Zona Carga BMS",
+      "position": [
+        -16.2,
+        3.8,
+        14
+      ],
+      "rotation": [
+        0,
+        45,
+        0
+      ],
+      "scale": [
+        0.95,
+        0.95,
+        0.95
+      ],
+      "customColor": "#f59e0b"
+    },
+    {
+      "id": "cam_star_1",
+      "specId": "camera-star",
+      "hostname": "1",
+      "ip": "Vista Panorámica del Edificio Trane MR-1130",
+      "position": [
+        3.5,
+        17.5,
+        26
+      ],
+      "rotation": [
+        -28,
+        6,
+        3
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ]
+    },
+    {
+      "id": "cam_star_2",
+      "specId": "camera-star",
+      "hostname": "2",
+      "ip": "PISO 1: Unidades AHU-101 a AHU-107 & Switches TR-1A/1B",
+      "position": [
+        -7,
+        8.8,
+        -4.5
+      ],
+      "rotation": [
+        -32,
+        0,
+        0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ]
+    },
+    {
+      "id": "cam_star_3",
+      "specId": "camera-star",
+      "hostname": "3",
+      "ip": "PISO 2: AHU-201, AHU-204 & Zona Carga",
+      "position": [
+        -7,
+        7.2,
+        3.5
+      ],
+      "rotation": [
+        -30,
+        0,
+        0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ]
+    },
+    {
+      "id": "cam_star_4",
+      "specId": "camera-star",
+      "hostname": "4",
+      "ip": "PISO 3: AHU-301, AHU-303 & Zona Carga",
+      "position": [
+        -7,
+        5.8,
+        11.5
+      ],
+      "rotation": [
+        -30,
+        0,
+        0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ]
+    },
+    {
+      "id": "cam_star_5",
+      "specId": "camera-star",
+      "hostname": "5",
+      "ip": "PISO 4: Unidades AHU-401 & AHU-404",
+      "position": [
+        -7,
+        4.4,
+        18.5
+      ],
+      "rotation": [
+        -28,
+        0,
+        0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ]
+    },
+    {
+      "id": "cam_star_6",
+      "specId": "camera-star",
+      "hostname": "6",
+      "ip": "Core Nexus 9508 & Firewall Fortinet (VLAN 334)",
+      "position": [
+        10,
+        5.5,
+        6.5
+      ],
+      "rotation": [
+        -20,
+        30,
+        10
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ]
+    }
+  ],
+  "links": [
+    {
+      "id": "link_trane_1",
+      "fromId": "core_nexus_9508",
+      "toId": "fw_interno_fortinet",
+      "fromPort": "ETH-1",
+      "toPort": "Uplink-Trunk",
+      "cableType": "ha-red",
+      "routeStyle": "manhattan",
+      "label": "VLAN 334 Gateway (Interface TDB)"
+    },
+    {
+      "id": "link_trane_2",
+      "fromId": "sw_tr_1a",
+      "toId": "core_nexus_9508",
+      "fromPort": "ETH-1",
+      "toPort": "Uplink-Trunk",
+      "cableType": "os2-yellow",
+      "routeStyle": "manhattan",
+      "label": "Trunk VLAN 334 (TR-1A)"
+    },
+    {
+      "id": "link_trane_3",
+      "fromId": "sw_tr_1a",
+      "toId": "trane_ahu_1a_1",
+      "fromPort": "ETH-1",
+      "toPort": "Uplink-Trunk",
+      "cableType": "cat6a-blue",
+      "routeStyle": "manhattan",
+      "label": "Port 8/47 (10.30.99.50)"
+    },
+    {
+      "id": "link_trane_4",
+      "fromId": "sw_tr_1b",
+      "toId": "core_nexus_9508",
+      "fromPort": "ETH-1",
+      "toPort": "Uplink-Trunk",
+      "cableType": "os2-yellow",
+      "routeStyle": "manhattan",
+      "label": "Trunk VLAN 334 (TR-1B)"
+    },
+    {
+      "id": "link_trane_5",
+      "fromId": "sw_tr_1b",
+      "toId": "trane_ahu_1b_1",
+      "fromPort": "ETH-1",
+      "toPort": "Uplink-Trunk",
+      "cableType": "cat6a-blue",
+      "routeStyle": "manhattan",
+      "label": "Port 7/4 (10.30.99.51)"
+    },
+    {
+      "id": "link_trane_6",
+      "fromId": "sw_tr_1b",
+      "toId": "trane_ahu_1b_2",
+      "fromPort": "ETH-1",
+      "toPort": "Uplink-Trunk",
+      "cableType": "cat6a-blue",
+      "routeStyle": "manhattan",
+      "label": "Port 7/5 (10.30.99.52)"
+    },
+    {
+      "id": "link_trane_7",
+      "fromId": "sw_tr_1b",
+      "toId": "trane_ahu_1b_3",
+      "fromPort": "ETH-1",
+      "toPort": "Uplink-Trunk",
+      "cableType": "cat6a-blue",
+      "routeStyle": "manhattan",
+      "label": "Port 7/6 (10.30.99.53)"
+    },
+    {
+      "id": "link_trane_8",
+      "fromId": "sw_tr_2a",
+      "toId": "core_nexus_9508",
+      "fromPort": "ETH-1",
+      "toPort": "Uplink-Trunk",
+      "cableType": "os2-yellow",
+      "routeStyle": "manhattan",
+      "label": "Trunk VLAN 334 (TR-2A)"
+    },
+    {
+      "id": "link_trane_9",
+      "fromId": "sw_tr_2a",
+      "toId": "trane_ahu_2a_1",
+      "fromPort": "ETH-1",
+      "toPort": "Uplink-Trunk",
+      "cableType": "cat6a-blue",
+      "routeStyle": "manhattan",
+      "label": "Port 1/15 (10.30.99.54)"
+    },
+    {
+      "id": "link_trane_10",
+      "fromId": "sw_tr_2b",
+      "toId": "core_nexus_9508",
+      "fromPort": "ETH-1",
+      "toPort": "Uplink-Trunk",
+      "cableType": "os2-yellow",
+      "routeStyle": "manhattan",
+      "label": "Trunk VLAN 334 (TR-2B)"
+    },
+    {
+      "id": "link_trane_11",
+      "fromId": "sw_tr_2b",
+      "toId": "trane_ahu_2b_1",
+      "fromPort": "ETH-1",
+      "toPort": "Uplink-Trunk",
+      "cableType": "cat6a-blue",
+      "routeStyle": "manhattan",
+      "label": "Port 7/13 (10.30.99.55)"
+    },
+    {
+      "id": "link_trane_12",
+      "fromId": "sw_tr_2b",
+      "toId": "trane_ahu_2b_2",
+      "fromPort": "ETH-1",
+      "toPort": "Uplink-Trunk",
+      "cableType": "cat6a-blue",
+      "routeStyle": "manhattan",
+      "label": "Port 7/14 (10.30.99.56)"
+    },
+    {
+      "id": "link_trane_13",
+      "fromId": "sw_tr_3a",
+      "toId": "core_nexus_9508",
+      "fromPort": "ETH-1",
+      "toPort": "Uplink-Trunk",
+      "cableType": "os2-yellow",
+      "routeStyle": "manhattan",
+      "label": "Trunk VLAN 334 (TR-3A)"
+    },
+    {
+      "id": "link_trane_14",
+      "fromId": "sw_tr_3a",
+      "toId": "trane_ahu_3a_1",
+      "fromPort": "ETH-1",
+      "toPort": "Uplink-Trunk",
+      "cableType": "cat6a-blue",
+      "routeStyle": "manhattan",
+      "label": "Port 2/45 (10.30.99.57)"
+    },
+    {
+      "id": "link_trane_15",
+      "fromId": "sw_tr_3b",
+      "toId": "core_nexus_9508",
+      "fromPort": "ETH-1",
+      "toPort": "Uplink-Trunk",
+      "cableType": "os2-yellow",
+      "routeStyle": "manhattan",
+      "label": "Trunk VLAN 334 (TR-3B)"
+    },
+    {
+      "id": "link_trane_16",
+      "fromId": "sw_tr_3b",
+      "toId": "trane_ahu_3b_1",
+      "fromPort": "ETH-1",
+      "toPort": "Uplink-Trunk",
+      "cableType": "cat6a-blue",
+      "routeStyle": "manhattan",
+      "label": "Port 7/6 (10.30.99.58)"
+    },
+    {
+      "id": "link_trane_17",
+      "fromId": "sw_tr_3b",
+      "toId": "trane_ahu_3b_2",
+      "fromPort": "ETH-1",
+      "toPort": "Uplink-Trunk",
+      "cableType": "cat6a-blue",
+      "routeStyle": "manhattan",
+      "label": "Port 4/30 (10.30.99.59)"
+    },
+    {
+      "id": "link_trane_18",
+      "fromId": "sw_tr_4a",
+      "toId": "core_nexus_9508",
+      "fromPort": "ETH-1",
+      "toPort": "Uplink-Trunk",
+      "cableType": "os2-yellow",
+      "routeStyle": "manhattan",
+      "label": "Trunk VLAN 334 (TR-4A)"
+    },
+    {
+      "id": "link_trane_19",
+      "fromId": "sw_tr_4a",
+      "toId": "trane_ahu_4a_1",
+      "fromPort": "ETH-1",
+      "toPort": "Uplink-Trunk",
+      "cableType": "cat6a-blue",
+      "routeStyle": "manhattan",
+      "label": "Port 3/38 (10.30.99.60)"
+    },
+    {
+      "id": "link_trane_20",
+      "fromId": "sw_tr_4b",
+      "toId": "core_nexus_9508",
+      "fromPort": "ETH-1",
+      "toPort": "Uplink-Trunk",
+      "cableType": "os2-yellow",
+      "routeStyle": "manhattan",
+      "label": "Trunk VLAN 334 (TR-4B)"
+    },
+    {
+      "id": "link_trane_21",
+      "fromId": "sw_tr_4b",
+      "toId": "trane_ahu_4b_1",
+      "fromPort": "ETH-1",
+      "toPort": "Uplink-Trunk",
+      "cableType": "cat6a-blue",
+      "routeStyle": "manhattan",
+      "label": "Port 2/7 (10.30.99.61)"
+    }
+  ]
+}

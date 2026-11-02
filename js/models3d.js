@@ -725,6 +725,104 @@ export function createDataPortTubeTexture(portText, descText, accentColor = '#00
   return tex;
 }
 
+// Front plate texture for Trane AHU / HVAC Unit with official Red logo, louvers & info
+export function createTraneUnitFrontTexture(hostname = 'AHU-101', ip = '10.30.99.50', port = '') {
+  const canvas = document.createElement('canvas');
+  canvas.width = 512;
+  canvas.height = 512;
+  const ctx = canvas.getContext('2d');
+
+  // Background industrial cabinet paint
+  const grad = ctx.createLinearGradient(0, 0, 0, 512);
+  grad.addColorStop(0, '#f1f5f9');
+  grad.addColorStop(0.5, '#e2e8f0');
+  grad.addColorStop(1, '#94a3b8');
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, 0, 512, 512);
+
+  // Outer border & panel seams
+  ctx.strokeStyle = '#334155';
+  ctx.lineWidth = 8;
+  ctx.strokeRect(8, 8, 496, 496);
+
+  // Corner hex bolts
+  ctx.fillStyle = '#1e293b';
+  [[26, 26], [486, 26], [26, 486], [486, 486]].forEach(([bx, by]) => {
+    ctx.beginPath();
+    ctx.arc(bx, by, 8, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = '#94a3b8';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+  });
+
+  // Access door outline
+  ctx.strokeStyle = '#64748b';
+  ctx.lineWidth = 3;
+  ctx.strokeRect(28, 28, 456, 456);
+
+  // TRANE Red Oval Logo
+  ctx.save();
+  ctx.fillStyle = '#dc2626';
+  ctx.shadowColor = 'rgba(0,0,0,0.45)';
+  ctx.shadowBlur = 12;
+  ctx.shadowOffsetY = 4;
+  ctx.beginPath();
+  ctx.ellipse(256, 105, 115, 46, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.strokeStyle = '#ffffff';
+  ctx.lineWidth = 3.5;
+  ctx.stroke();
+
+  // "TRANE" bold text
+  ctx.fillStyle = '#ffffff';
+  ctx.font = '900 46px system-ui, -apple-system, sans-serif';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.shadowColor = 'transparent';
+  ctx.fillText('TRANE', 256, 107);
+  ctx.restore();
+
+  // Unit Name (e.g. "AHU-101" or "Zona Carga")
+  ctx.fillStyle = '#0f172a';
+  ctx.font = '900 34px system-ui, -apple-system, sans-serif';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'alphabetic';
+  ctx.fillText(String(hostname || 'AHU-101').toUpperCase(), 256, 185);
+
+  // IP Address
+  ctx.fillStyle = '#1d4ed8';
+  ctx.font = '700 24px ui-monospace, SFMono-Regular, Menlo, monospace';
+  ctx.fillText(ip || '10.30.99.50', 256, 218);
+
+  if (port) {
+    ctx.fillStyle = '#475569';
+    ctx.font = '600 18px system-ui, sans-serif';
+    ctx.fillText(`Switch Port: ${port}`, 256, 244);
+  }
+
+  // Ventilation Louvers (Grille)
+  const louverYStart = port ? 265 : 245;
+  for (let y = louverYStart; y < 445; y += 15) {
+    ctx.fillStyle = '#0f172a';
+    ctx.fillRect(60, y, 392, 8);
+    ctx.fillStyle = '#cbd5e1';
+    ctx.fillRect(60, y + 8, 392, 2);
+  }
+
+  // Status LEDs at bottom
+  ctx.fillStyle = '#10b981'; // Green Run
+  ctx.beginPath(); ctx.arc(430, 465, 7, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = '#38bdf8'; // Blue BACnet
+  ctx.beginPath(); ctx.arc(454, 465, 7, 0, Math.PI * 2); ctx.fill();
+
+  const tex = new THREE.CanvasTexture(canvas);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  tex.needsUpdate = true;
+  return tex;
+}
+
 // Number badge shown on both faces of a Camera Star
 export function createCameraNumberTexture(num) {
   const canvas = document.createElement('canvas');
@@ -1219,6 +1317,64 @@ export function buildHardwareMesh(spec, instanceData = {}) {
       const m = new THREE.Mesh(new THREE.SphereGeometry(r, 24, 24), cloudMat);
       m.position.set(x, y, z);
       root.add(m);
+    });
+  } else if (id === 'trane-ahu-unit') {
+    // ================= TRANE AHU SMART HVAC UNIT =================
+    // 1. Main industrial chassis (metallic silver-gray)
+    const ahuBody = new THREE.Mesh(new THREE.BoxGeometry(w, h * 0.92, d), MAT.ciscoSilver);
+    ahuBody.position.y = h * 0.04;
+    ahuBody.castShadow = true;
+    ahuBody.receiveShadow = true;
+    root.add(ahuBody);
+
+    // 2. Base vibration damping plinth (4 dark charcoal corner feet)
+    const footW = 0.22, footH = 0.08, footD = 0.22;
+    const footY = -h / 2 + footH / 2;
+    const xOff = w / 2 - footW / 2 - 0.04;
+    const zOff = d / 2 - footD / 2 - 0.04;
+    [
+      [xOff, footY, zOff],
+      [-xOff, footY, zOff],
+      [xOff, footY, -zOff],
+      [-xOff, footY, -zOff]
+    ].forEach(([fx, fy, fz]) => {
+      const foot = new THREE.Mesh(new THREE.BoxGeometry(footW, footH, footD), MAT.darkChassis);
+      foot.position.set(fx, fy, fz);
+      root.add(foot);
+    });
+
+    // 3. Front Faceplate with Trane Logo, louvers, device info & RJ45 port
+    const frontTex = createTraneUnitFrontTexture(
+      instanceData.hostname || spec.defaultHostname,
+      instanceData.ip || spec.defaultIp,
+      instanceData.port
+    );
+    const frontFace = new THREE.Mesh(
+      new THREE.PlaneGeometry(w * 0.96, h * 0.88),
+      new THREE.MeshStandardMaterial({ map: frontTex, roughness: 0.35, metalness: 0.25 })
+    );
+    frontFace.name = 'traneFrontFace';
+    frontFace.position.set(0, h * 0.04, d / 2 + 0.005);
+    root.add(frontFace);
+
+    // 4. Top Roof Lid with recessed exhaust fan cowling
+    const roofLid = new THREE.Mesh(new THREE.BoxGeometry(w + 0.04, 0.05, d + 0.04), MAT.anthracite);
+    roofLid.position.set(0, h / 2 + 0.02, 0);
+    root.add(roofLid);
+
+    // Top Circular Exhaust Cowling
+    const fanCowl = new THREE.Mesh(new THREE.CylinderGeometry(w * 0.3, w * 0.33, 0.06, 24), MAT.darkChassis);
+    fanCowl.position.set(0, h / 2 + 0.06, 0);
+    const fanGrill = new THREE.Mesh(new THREE.CylinderGeometry(w * 0.28, w * 0.28, 0.07, 16), MAT.silverMetal);
+    fanGrill.position.set(0, h / 2 + 0.065, 0);
+    root.add(fanCowl, fanGrill);
+
+    // 5. Side service panel ventilation slots
+    [-1, 1].forEach((side) => {
+      const sideGrill = new THREE.Mesh(new THREE.PlaneGeometry(d * 0.65, h * 0.45), MAT.portDark);
+      sideGrill.rotation.y = (side * Math.PI) / 2;
+      sideGrill.position.set(side * (w / 2 + 0.003), h * 0.05, 0);
+      root.add(sideGrill);
     });
   } else if (id === 'atm-kiosk-24-7') {
     // ================= 3D ATM 24/7 KIOSK ("BANK YOUR WAY") =================

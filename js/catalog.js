@@ -207,7 +207,22 @@ export const HARDWARE_CATALOG = [
     ports: []
   },
 
-  // ================= ENDPOINTS, ATMS, KEMP LB & RACK SERVER =================
+  // ================= ENDPOINTS, ATMS, TRANE AHU, KEMP LB & RACK SERVER =================
+  {
+    id: 'trane-ahu-unit',
+    name: 'Unidad de Aire Trane (AHU / HVAC)',
+    vendor: 'Trane Technologies',
+    category: 'endpoints',
+    uHeight: 0,
+    width: 1.15,
+    height: 1.05,
+    depth: 1.15,
+    badgeColor: '#e53935',
+    defaultHostname: 'AHU-101',
+    defaultIp: '10.30.99.50',
+    specs: 'Manejadora de Aire Inteligente Trane | Control BMS • BACnet / IP • Ethernet RJ45 • VLAN 334',
+    ports: ['ETH-1/1 (RJ45)', 'BACnet-IP', 'RS-485-Modbus']
+  },
   {
     id: 'atm-kiosk-24-7',
     name: 'ATM 24/7 Kiosk (Bank Your Way)',
