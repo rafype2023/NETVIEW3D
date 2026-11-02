@@ -134,6 +134,44 @@
       <div id="connect-mode-banner" class="connect-banner" hidden></div>
       <div id="selection-hud-banner" class="selection-hud-banner" hidden></div>
 
+      <!-- Ventana Flotante de Vista Previa de Cámara (Viewfinder en Vivo para Blender) -->
+      <div id="camera-preview-hud" class="camera-preview-hud" hidden aria-label="Visor en vivo de cámara">
+        <div class="cam-preview-header">
+          <div class="cam-preview-title">
+            <span class="cam-live-indicator" aria-hidden="true"></span>
+            <span id="cam-preview-title-text">📷 Vista en Vivo: Cámara 1</span>
+          </div>
+          <div class="cam-preview-tools">
+            <button id="btn-cam-pip-aim" class="btn-mini" title="Apuntar la cámara al centro del diagrama">🎯 Centrar</button>
+            <button id="btn-cam-pip-pov" class="btn-mini" title="Alternar vista en pantalla completa a través de esta cámara">👁️ POV</button>
+            <button id="btn-cam-pip-close" class="btn-close-mini" title="Cerrar vista previa">✕</button>
+          </div>
+        </div>
+        <div class="cam-preview-body">
+          <canvas id="camera-preview-canvas" width="340" height="191"></canvas>
+          <div class="cam-preview-overlay" aria-hidden="true">
+            <div class="cam-viewfinder-corners">
+              <span class="cam-corner tl"></span>
+              <span class="cam-corner tr"></span>
+              <span class="cam-corner bl"></span>
+              <span class="cam-corner br"></span>
+            </div>
+            <div class="cam-viewfinder-crosshair"></div>
+            <div class="cam-viewfinder-grid"></div>
+            <div class="cam-viewfinder-tag">50mm • 16:9 • Blender</div>
+          </div>
+        </div>
+        <div class="cam-preview-footer">
+          <span id="cam-preview-coords">Pos: (0.0, 0.0, 0.0) | Rot: (0°, 0°, 0°)</span>
+        </div>
+      </div>
+
+      <!-- Banner de Modo POV (Viendo a través de la cámara) -->
+      <div id="camera-pov-banner" class="camera-pov-banner" hidden>
+        <span>👁️ Viendo a través de <strong id="camera-pov-name">Cámara 1</strong></span>
+        <button id="btn-exit-pov" class="btn-mini btn-exit-pov">Salir de POV (Vista Libre)</button>
+      </div>
+
       <!-- Vistas Rápidas de Cámara en los 3 Ejes + Captura Rápida PNG -->
       <div class="cam-presets-bar" role="group" aria-label="Vistas de cámara 3D">
         <button class="tool-btn" data-cam-preset="iso">Isométrica 3D</button>

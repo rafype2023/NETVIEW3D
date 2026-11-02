@@ -31,6 +31,10 @@ class NetVisio3DApp {
     this.autoRotateScene = false;
     this.snapToGrid = true;
 
+    this.cameraPreviewActive = false;
+    this.isPovMode = false;
+    this.savedOrbitPose = null;
+
     this.initScene();
     this.initUI();
     this.loadEnterpriseSampleArchitecture();
@@ -61,6 +65,24 @@ class NetVisio3DApp {
     this.renderer.shadowMap.enabled = true;
     this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     this.viewportEl.appendChild(this.renderer.domElement);
+
+    // Preview Camera and WebGLRenderer for Camera Star Viewfinder (Blender Camera PiP)
+    this.previewContainerEl = document.getElementById('camera-preview-hud');
+    this.previewCanvasEl = document.getElementById('camera-preview-canvas');
+    this.previewTitleEl = document.getElementById('cam-preview-title-text');
+    this.previewCoordsEl = document.getElementById('cam-preview-coords');
+    this.previewCamera = new THREE.PerspectiveCamera(50, 16 / 9, 0.1, 500);
+
+    if (this.previewCanvasEl) {
+      this.previewRenderer = new THREE.WebGLRenderer({
+        canvas: this.previewCanvasEl,
+        antialias: true,
+        alpha: false,
+        powerPreference: 'high-performance'
+      });
+      this.previewRenderer.setSize(340, 191, false);
+      this.previewRenderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+    }
 
     // OrbitControls allowing full 3-axis spherical freedom
     this.orbit = new OrbitControls(this.camera, this.renderer.domElement);
@@ -529,6 +551,10 @@ class NetVisio3DApp {
       Number(node.group.scale.z.toFixed(2))
     ];
 
+    if (node.spec.isCameraStar && this.cameraPreviewActive) {
+      this.updatePreviewCoords(node);
+    }
+
     if (node.spec.isRackContainer) {
       this.nodes.forEach((child) => {
         if (child.data.rackId === node.id) {
@@ -641,6 +667,7 @@ class NetVisio3DApp {
       this.transformControl.detach();
       this.selectionBox.visible = false;
       this.updateSelectionHudBanner();
+      this.hideCameraPreview();
       this.renderInspector();
       return;
     }
@@ -650,6 +677,13 @@ class NetVisio3DApp {
     this.selectionBox.setFromObject(node.group);
     this.selectionBox.visible = true;
     this.updateSelectionHudBanner();
+
+    if (node.spec.isCameraStar) {
+      this.showCameraPreview(node);
+    } else {
+      this.hideCameraPreview();
+    }
+
     this.renderInspector();
   }
 
@@ -659,6 +693,7 @@ class NetVisio3DApp {
     this.transformControl.detach();
     this.selectionBox.visible = false;
     this.updateSelectionHudBanner();
+    this.hideCameraPreview();
     this.renderInspector();
   }
 
@@ -1121,6 +1156,23 @@ class NetVisio3DApp {
 
     document.getElementById('btn-export-bom')?.addEventListener('click', () => this.exportBOMCSV());
     document.getElementById('btn-export-blender')?.addEventListener('click', () => this.exportBlenderGLB());
+
+    // Camera Live Viewfinder Controls
+    document.getElementById('btn-cam-pip-close')?.addEventListener('click', () => {
+      this.hideCameraPreview();
+    });
+    document.getElementById('btn-cam-pip-aim')?.addEventListener('click', () => {
+      if (this.selectedNodeId) {
+        const node = this.nodes.get(this.selectedNodeId);
+        if (node) this.aimCameraNodeAtDiagram(node);
+      }
+    });
+    document.getElementById('btn-cam-pip-pov')?.addEventListener('click', () => {
+      this.toggleCameraPovMode();
+    });
+    document.getElementById('btn-exit-pov')?.addEventListener('click', () => {
+      this.exitCameraPovMode();
+    });
   }
 
   // ================= BLENDER EXPORT (glTF binary con texturas embebidas) =================
@@ -1656,6 +1708,10 @@ class NetVisio3DApp {
               part.material.needsUpdate = true;
             }
           });
+          if (this.previewTitleEl) {
+            this.previewTitleEl.textContent = `📷 Vista en Vivo: Cámara ${node.data.hostname}`;
+          }
+          this.updatePreviewCoords(node);
         }
 
         const oldSprite = node.group.getObjectByName('deviceLabelSprite');
@@ -1672,24 +1728,7 @@ class NetVisio3DApp {
       };
 
       document.getElementById('btn-cam-aim')?.addEventListener('click', () => {
-        const box = new THREE.Box3();
-        this.nodes.forEach((n) => {
-          if (!n.spec.isCameraStar && !n.spec.isZone) box.expandByObject(n.group);
-        });
-        if (box.isEmpty()) {
-          this.showToast('No hay equipos a los cuales apuntar');
-          return;
-        }
-        const target = box.getCenter(new THREE.Vector3());
-        const tmp = new THREE.Object3D();
-        tmp.position.copy(node.group.position);
-        tmp.lookAt(target); // +Z hacia el objetivo
-        tmp.rotateY(Math.PI); // la cámara/pirámide mira hacia -Z
-        node.group.quaternion.copy(tmp.quaternion);
-        this.syncNodeDataFromTransform(node);
-        this.updateInspectorTransformInputs(node);
-        this.selectionBox.setFromObject(node.group);
-        this.showToast('Cámara apuntando al centro del diagrama');
+        this.aimCameraNodeAtDiagram(node);
       });
 
       if (spec.isVirtualCube) {
@@ -2480,6 +2519,136 @@ class NetVisio3DApp {
     this._toastTimer = setTimeout(() => toast.classList.remove('visible'), 3200);
   }
 
+  showCameraPreview(node) {
+    if (!node || !node.spec.isCameraStar || !this.previewContainerEl) return;
+    this.cameraPreviewActive = true;
+    this.previewContainerEl.hidden = false;
+    if (this.previewTitleEl) {
+      this.previewTitleEl.textContent = `📷 Vista en Vivo: Cámara ${node.data.hostname}`;
+    }
+    this.updatePreviewCoords(node);
+  }
+
+  hideCameraPreview() {
+    this.cameraPreviewActive = false;
+    if (this.previewContainerEl) {
+      this.previewContainerEl.hidden = true;
+    }
+    if (this.isPovMode) {
+      this.exitCameraPovMode();
+    }
+  }
+
+  updatePreviewCoords(node) {
+    if (!this.previewCoordsEl || !node) return;
+    const p = node.data.position || [0, 0, 0];
+    const r = node.data.rotation || [0, 0, 0];
+    this.previewCoordsEl.textContent = `Pos: (${p[0]}, ${p[1]}, ${p[2]}) | Pitch: ${r[0]}° Yaw: ${r[1]}°`;
+  }
+
+  aimCameraNodeAtDiagram(node) {
+    if (!node || !node.spec.isCameraStar) return;
+    const box = new THREE.Box3();
+    this.nodes.forEach((n) => {
+      if (!n.spec.isCameraStar && !n.spec.isZone) box.expandByObject(n.group);
+    });
+    if (box.isEmpty()) {
+      this.showToast('No hay equipos a los cuales apuntar');
+      return;
+    }
+    const target = box.getCenter(new THREE.Vector3());
+    const tmp = new THREE.Object3D();
+    tmp.position.copy(node.group.position);
+    tmp.lookAt(target); // +Z towards target
+    tmp.rotateY(Math.PI); // Viewing direction of Camera Star is local -Z
+    node.group.quaternion.copy(tmp.quaternion);
+
+    this.syncNodeDataFromTransform(node);
+    this.updateInspectorTransformInputs(node);
+    this.updatePreviewCoords(node);
+    this.selectionBox.setFromObject(node.group);
+    this.showToast(`Cámara ${node.data.hostname} apuntada al centro del diagrama`);
+  }
+
+  toggleCameraPovMode() {
+    if (this.isPovMode) {
+      this.exitCameraPovMode();
+    } else {
+      this.enterCameraPovMode();
+    }
+  }
+
+  enterCameraPovMode() {
+    if (!this.selectedNodeId) return;
+    const node = this.nodes.get(this.selectedNodeId);
+    if (!node || !node.spec.isCameraStar) return;
+
+    this.isPovMode = true;
+    this.savedOrbitPose = {
+      position: this.camera.position.clone(),
+      target: this.orbit.target.clone()
+    };
+    this.orbit.enabled = false;
+
+    this.camera.position.copy(node.group.position);
+    this.camera.quaternion.copy(node.group.quaternion);
+
+    const banner = document.getElementById('camera-pov-banner');
+    if (banner) {
+      banner.hidden = false;
+      const nameEl = document.getElementById('camera-pov-name');
+      if (nameEl) nameEl.textContent = `Cámara ${node.data.hostname}`;
+    }
+    this.showToast(`Modo POV activado — Viendo exactamente a través de Cámara ${node.data.hostname}`);
+  }
+
+  exitCameraPovMode() {
+    if (!this.isPovMode) return;
+    this.isPovMode = false;
+    this.orbit.enabled = true;
+
+    if (this.savedOrbitPose) {
+      this.camera.position.copy(this.savedOrbitPose.position);
+      this.orbit.target.copy(this.savedOrbitPose.target);
+      this.orbit.update();
+    }
+
+    const banner = document.getElementById('camera-pov-banner');
+    if (banner) banner.hidden = true;
+    this.showToast('Regresando a la vista libre orbital 3D');
+  }
+
+  renderCameraPreview() {
+    if (!this.previewRenderer || !this.selectedNodeId) return;
+    const node = this.nodes.get(this.selectedNodeId);
+    if (!node || !node.spec.isCameraStar) return;
+
+    // Sync preview camera position & rotation to the star's current transform
+    this.previewCamera.position.copy(node.group.position);
+    this.previewCamera.quaternion.copy(node.group.quaternion);
+
+    // Hide helpers and the star itself so it doesn't block its own camera lens
+    const starVis = node.group.visible;
+    const selVis = this.selectionBox.visible;
+    const gizmoVis = this.transformHelper ? this.transformHelper.visible : false;
+
+    node.group.visible = false;
+    this.selectionBox.visible = false;
+    if (this.transformHelper) this.transformHelper.visible = false;
+
+    this.previewRenderer.render(this.scene, this.previewCamera);
+
+    node.group.visible = starVis;
+    this.selectionBox.visible = selVis;
+    if (this.transformHelper) this.transformHelper.visible = gizmoVis;
+
+    // If POV mode is active, sync main camera as well!
+    if (this.isPovMode) {
+      this.camera.position.copy(node.group.position);
+      this.camera.quaternion.copy(node.group.quaternion);
+    }
+  }
+
   animate() {
     requestAnimationFrame(() => this.animate());
     this.orbit.update();
@@ -2496,6 +2665,10 @@ class NetVisio3DApp {
     }
 
     this.renderer.render(this.scene, this.camera);
+
+    if (this.cameraPreviewActive && this.previewRenderer && this.selectedNodeId) {
+      this.renderCameraPreview();
+    }
   }
 }
 
