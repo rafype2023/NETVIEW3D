@@ -35,6 +35,10 @@ class NetVisio3DApp {
     this.isPovMode = false;
     this.savedOrbitPose = null;
 
+    // Animated 3D Tour & Auto-Cameras State
+    this.tourState = null;
+    this.savedTourOrbitPose = null;
+
     this.initScene();
     this.initUI();
     this.loadEnterpriseSampleArchitecture();
@@ -341,6 +345,9 @@ class NetVisio3DApp {
       if (e.key === 'c' || e.key === 'C') this.toggleConnectMode();
       if (e.key === 'Delete' || e.key === 'Backspace') this.deleteSelected();
       if (e.key === 'Escape') {
+        if (this.tourState && this.tourState.active) {
+          this.stopTour3D();
+        }
         this.connectSourceNodeId = null;
         this.setInteractionMode('select');
       }
@@ -660,6 +667,9 @@ class NetVisio3DApp {
   }
 
   selectNode(nodeId) {
+    if (nodeId && this.tourState && this.tourState.active) {
+      this.stopTour3D();
+    }
     this.selectedLinkId = null;
     this.selectedNodeId = nodeId;
 
@@ -779,6 +789,26 @@ class NetVisio3DApp {
       this.updateStatsBar();
       this.showToast('Cable 3D eliminado');
     }
+  }
+
+  removeNode(id) {
+    const node = this.nodes.get(id);
+    if (!node) return;
+    if (this.selectedNodeId === id) {
+      this.transformControl.detach();
+      this.selectionBox.visible = false;
+      this.selectedNodeId = null;
+      this.hideCameraPreview();
+    }
+    this.scene.remove(node.group);
+    this.nodes.delete(id);
+    Array.from(this.links.values()).forEach((l) => {
+      if (l.fromId === id || l.toId === id) {
+        this.scene.remove(l.mesh);
+        l.pulses.forEach((p) => this.scene.remove(p.mesh));
+        this.links.delete(l.id);
+      }
+    });
   }
 
   duplicateSelectedNode() {
@@ -1172,6 +1202,26 @@ class NetVisio3DApp {
     });
     document.getElementById('btn-exit-pov')?.addEventListener('click', () => {
       this.exitCameraPovMode();
+    });
+
+    // Auto-Generate Cameras and Animated 3D Tour
+    document.getElementById('btn-auto-cameras')?.addEventListener('click', () => {
+      this.autoGenerateSectionCameras();
+    });
+    document.getElementById('btn-tour-3d')?.addEventListener('click', () => {
+      this.startTour3D();
+    });
+    document.getElementById('btn-tour-prev')?.addEventListener('click', () => {
+      this.prevTourStep();
+    });
+    document.getElementById('btn-tour-play-pause')?.addEventListener('click', () => {
+      this.toggleTourPlayPause();
+    });
+    document.getElementById('btn-tour-next')?.addEventListener('click', () => {
+      this.nextTourStep();
+    });
+    document.getElementById('btn-tour-stop')?.addEventListener('click', () => {
+      this.stopTour3D();
     });
   }
 
@@ -1943,6 +1993,9 @@ class NetVisio3DApp {
   }
 
   clearScene() {
+    if (this.tourState && this.tourState.active) {
+      this.stopTour3D();
+    }
     this.selectNode(null);
     this.nodes.forEach((n) => this.scene.remove(n.group));
     this.links.forEach((l) => {
@@ -2649,9 +2702,355 @@ class NetVisio3DApp {
     }
   }
 
+  // ================= AUTO-CÁMARAS & TOUR 3D ANIMADO POR SECCIONES =================
+
+  autoGenerateSectionCameras() {
+    const contentNodes = Array.from(this.nodes.values()).filter((n) => !n.spec.isCameraStar);
+    if (contentNodes.length === 0) {
+      this.showToast('El diagrama está vacío. Añade equipos o carga una arquitectura primero.');
+      return [];
+    }
+
+    // Limpiar cámaras anteriores si existían
+    const existingCameras = Array.from(this.nodes.values()).filter((n) => n.spec.isCameraStar);
+    existingCameras.forEach((c) => this.removeNode(c.id));
+
+    const sections = [];
+
+    // 1. Vista General de la Arquitectura Completa
+    const totalBox = new THREE.Box3();
+    contentNodes.forEach((n) => totalBox.expandByObject(n.group));
+    const totalCenter = totalBox.getCenter(new THREE.Vector3());
+    const totalSize = totalBox.getSize(new THREE.Vector3());
+    const maxDim = Math.max(totalSize.x, totalSize.z, totalSize.y * 1.5, 6.0);
+
+    sections.push({
+      title: 'Vista General de la Arquitectura',
+      target: new THREE.Vector3(totalCenter.x, Math.max(0.4, totalCenter.y * 0.4), totalCenter.z),
+      pos: new THREE.Vector3(
+        Number((totalCenter.x + maxDim * 0.12).toFixed(2)),
+        Number((Math.max(4.0, totalCenter.y + maxDim * 0.58 + 1.8)).toFixed(2)),
+        Number((totalCenter.z + maxDim * 1.12 + 2.5).toFixed(2))
+      )
+    });
+
+    // 2. Zonas / Perímetros de Red / VLANs (si existen)
+    const zones = contentNodes.filter((n) => n.spec.isZone);
+    zones.sort((a, b) => a.group.position.x - b.group.position.x);
+
+    zones.forEach((zone) => {
+      const zBox = new THREE.Box3().setFromObject(zone.group);
+      contentNodes.forEach((n) => {
+        if (!n.spec.isZone) {
+          const np = n.group.position;
+          if (
+            zBox.containsPoint(np) ||
+            (Math.abs(np.x - zone.group.position.x) < (zone.spec.width || 6) * 0.55 &&
+              Math.abs(np.z - zone.group.position.z) < (zone.spec.depth || 5) * 0.55)
+          ) {
+            zBox.expandByObject(n.group);
+          }
+        }
+      });
+      const zCenter = zBox.getCenter(new THREE.Vector3());
+      const zSize = zBox.getSize(new THREE.Vector3());
+      const zSpan = Math.max(zSize.x, zSize.z, 3.8);
+
+      const zoneTitle = zone.data.hostname || 'Zona de Red';
+      sections.push({
+        title: zoneTitle.length > 36 ? zoneTitle.slice(0, 34) + '...' : zoneTitle,
+        target: new THREE.Vector3(zCenter.x, Math.max(0.3, zCenter.y * 0.5), zCenter.z),
+        pos: new THREE.Vector3(
+          Number((zCenter.x).toFixed(2)),
+          Number((zCenter.y + zSpan * 0.52 + 1.4).toFixed(2)),
+          Number((zCenter.z + zSpan * 0.95 + 1.8).toFixed(2))
+        )
+      });
+    });
+
+    // 3. Paneles de Proceso / Etapas de Transacción 3D
+    const processPanels = contentNodes.filter((n) => n.spec.isProcessPanel || n.spec.id === 'text-panel-3d');
+    processPanels.sort((a, b) => a.group.position.x - b.group.position.x);
+    processPanels.forEach((panel) => {
+      const pPos = panel.group.position;
+      const titleText = panel.data.hostname || 'Flujo de Proceso';
+      sections.push({
+        title: titleText.length > 36 ? titleText.slice(0, 34) + '...' : titleText,
+        target: new THREE.Vector3(pPos.x, pPos.y, pPos.z),
+        pos: new THREE.Vector3(
+          Number((pPos.x + 0.15).toFixed(2)),
+          Number((pPos.y + 0.45).toFixed(2)),
+          Number((pPos.z + 3.2).toFixed(2))
+        )
+      });
+    });
+
+    // 4. Si no hay zonas, agrupar por Racks o por Categorías Funcionales
+    if (zones.length === 0) {
+      const racks = contentNodes.filter((n) => n.spec.isRackContainer);
+      if (racks.length > 0) {
+        racks.forEach((rack) => {
+          const rPos = rack.group.position;
+          sections.push({
+            title: `Rack: ${rack.data.hostname || 'Gabinete de Equipos'}`,
+            target: new THREE.Vector3(rPos.x, rPos.y + (rack.spec.height || 2) * 0.45, rPos.z),
+            pos: new THREE.Vector3(
+              Number((rPos.x).toFixed(2)),
+              Number((rPos.y + (rack.spec.height || 2) * 0.52 + 0.3).toFixed(2)),
+              Number((rPos.z + 3.8).toFixed(2))
+            )
+          });
+        });
+      }
+
+      const catOrder = [
+        { cat: 'security', name: 'Seguridad Perimetral & Firewalls' },
+        { cat: 'network', name: 'Conectividad de Red & Switches' },
+        { cat: 'compute', name: 'Servidores & Virtualización' },
+        { cat: 'storage', name: 'Almacenamiento SAN / NAS' }
+      ];
+
+      catOrder.forEach((entry) => {
+        const matching = contentNodes.filter(
+          (n) => n.spec.category === entry.cat && !n.spec.isRackContainer && !n.spec.isProcessPanel && !n.spec.isTitle3D
+        );
+        if (matching.length > 0) {
+          const catBox = new THREE.Box3();
+          matching.forEach((n) => catBox.expandByObject(n.group));
+          const catCenter = catBox.getCenter(new THREE.Vector3());
+          const catSize = catBox.getSize(new THREE.Vector3());
+          const catSpan = Math.max(catSize.x, catSize.z, 2.5);
+
+          sections.push({
+            title: entry.name,
+            target: new THREE.Vector3(catCenter.x, catCenter.y + 0.2, catCenter.z),
+            pos: new THREE.Vector3(
+              Number((catCenter.x).toFixed(2)),
+              Number((catCenter.y + catSpan * 0.55 + 1.2).toFixed(2)),
+              Number((catCenter.z + catSpan * 0.95 + 1.8).toFixed(2))
+            )
+          });
+        }
+      });
+    }
+
+    // Si aún solo hay 1 sección, añadir perspectiva isométrica
+    if (sections.length === 1) {
+      sections.push({
+        title: 'Perspectiva Isométrica Lateral',
+        target: sections[0].target.clone(),
+        pos: new THREE.Vector3(
+          Number((totalCenter.x - maxDim * 0.82).toFixed(2)),
+          Number((totalCenter.y + maxDim * 0.62).toFixed(2)),
+          Number((totalCenter.z + maxDim * 0.85).toFixed(2))
+        )
+      });
+    }
+
+    // Crear las estrellas de cámara numeradas y orientadas a cada sección
+    const createdStars = [];
+    sections.forEach((sec, idx) => {
+      const num = idx + 1;
+      const camNode = this.addHardwareNode('camera-star', {
+        hostname: String(num),
+        ip: sec.title,
+        position: [sec.pos.x, sec.pos.y, sec.pos.z]
+      });
+
+      // Orientar hacia el objetivo: dirección local -Z apuntando a sec.target
+      const tmp = new THREE.Object3D();
+      tmp.position.copy(camNode.group.position);
+      tmp.lookAt(sec.target);
+      tmp.rotateY(Math.PI);
+      camNode.group.quaternion.copy(tmp.quaternion);
+
+      camNode.data.tourTarget = [
+        Number(sec.target.x.toFixed(2)),
+        Number(sec.target.y.toFixed(2)),
+        Number(sec.target.z.toFixed(2))
+      ];
+
+      this.syncNodeDataFromTransform(camNode);
+      createdStars.push(camNode);
+    });
+
+    this.showToast(
+      `🎬 ${createdStars.length} Cámaras creadas automáticamente según las secciones. Listas para Blender y Tour 3D.`
+    );
+    return createdStars;
+  }
+
+  startTour3D() {
+    let cameraStars = Array.from(this.nodes.values())
+      .filter((n) => n.spec.isCameraStar)
+      .sort((a, b) => (parseInt(a.data.hostname, 10) || 0) - (parseInt(b.data.hostname, 10) || 0));
+
+    if (cameraStars.length === 0) {
+      this.autoGenerateSectionCameras();
+      cameraStars = Array.from(this.nodes.values())
+        .filter((n) => n.spec.isCameraStar)
+        .sort((a, b) => (parseInt(a.data.hostname, 10) || 0) - (parseInt(b.data.hostname, 10) || 0));
+      if (cameraStars.length === 0) return;
+    }
+
+    // Deseleccionar nodos para ocultar gizmos durante la animación
+    this.selectNode(null);
+
+    // Guardar postura previa de la cámara de navegación libre
+    this.savedTourOrbitPose = {
+      position: this.camera.position.clone(),
+      target: this.orbit.target.clone()
+    };
+    this.orbit.enabled = false;
+
+    // Mostrar el reproductor HUD en pantalla
+    const hud = document.getElementById('tour-hud-player');
+    if (hud) hud.hidden = false;
+
+    const playPauseBtn = document.getElementById('btn-tour-play-pause');
+    if (playPauseBtn) {
+      playPauseBtn.textContent = '⏸';
+      playPauseBtn.title = 'Pausar Tour';
+    }
+
+    this.tourState = {
+      active: true,
+      paused: false,
+      stepIndex: 0,
+      steps: cameraStars,
+      phase: 'transition',
+      timer: 0,
+      transitionDuration: 2.2,
+      holdDuration: 4.5,
+      startPos: this.camera.position.clone(),
+      endPos: new THREE.Vector3(),
+      startTarget: this.orbit.target.clone(),
+      endTarget: new THREE.Vector3()
+    };
+
+    this.setupTourStep(0);
+    this.showToast('▶ Iniciando Tour 3D por las secciones de la arquitectura');
+  }
+
+  setupTourStep(index) {
+    if (!this.tourState || !this.tourState.steps.length) return;
+    const count = this.tourState.steps.length;
+    const clampedIndex = (index + count) % count;
+    this.tourState.stepIndex = clampedIndex;
+    const camNode = this.tourState.steps[clampedIndex];
+
+    this.tourState.startPos = this.camera.position.clone();
+    this.tourState.endPos = camNode.group.position.clone();
+
+    this.tourState.startTarget = this.orbit.target.clone();
+    if (camNode.data.tourTarget) {
+      this.tourState.endTarget = new THREE.Vector3(...camNode.data.tourTarget);
+    } else {
+      const forward = new THREE.Vector3(0, 0, -1).applyQuaternion(camNode.group.quaternion).normalize();
+      this.tourState.endTarget = camNode.group.position.clone().addScaledVector(forward, 5.0);
+    }
+
+    this.tourState.phase = 'transition';
+    this.tourState.timer = 0;
+
+    const badge = document.getElementById('tour-step-badge');
+    if (badge) badge.textContent = `CÁMARA ${clampedIndex + 1} DE ${count}`;
+    const title = document.getElementById('tour-step-title');
+    if (title) title.textContent = camNode.data.ip || `Sección ${camNode.data.hostname}`;
+    const pbar = document.getElementById('tour-progress-bar');
+    if (pbar) pbar.style.width = '0%';
+  }
+
+  nextTourStep() {
+    if (!this.tourState) return;
+    this.setupTourStep(this.tourState.stepIndex + 1);
+  }
+
+  prevTourStep() {
+    if (!this.tourState) return;
+    this.setupTourStep(this.tourState.stepIndex - 1);
+  }
+
+  toggleTourPlayPause() {
+    if (!this.tourState) return;
+    this.tourState.paused = !this.tourState.paused;
+    const btn = document.getElementById('btn-tour-play-pause');
+    if (btn) {
+      btn.textContent = this.tourState.paused ? '▶' : '⏸';
+      btn.title = this.tourState.paused ? 'Reanudar Tour' : 'Pausar Tour';
+    }
+    this.showToast(this.tourState.paused ? 'Tour 3D pausado' : 'Tour 3D reanudado');
+  }
+
+  stopTour3D() {
+    if (!this.tourState || !this.tourState.active) return;
+    this.tourState.active = false;
+    this.tourState = null;
+
+    const hud = document.getElementById('tour-hud-player');
+    if (hud) hud.hidden = true;
+
+    this.orbit.enabled = true;
+    if (this.savedTourOrbitPose) {
+      this.camera.position.copy(this.savedTourOrbitPose.position);
+      this.orbit.target.copy(this.savedTourOrbitPose.target);
+      this.orbit.update();
+      this.savedTourOrbitPose = null;
+    }
+    this.showToast('Tour 3D finalizado — Modo de edición libre restaurado');
+  }
+
+  updateTourAnimation(delta = 0.016) {
+    if (!this.tourState || !this.tourState.active || this.tourState.paused) return;
+
+    this.tourState.timer += delta;
+    const pbar = document.getElementById('tour-progress-bar');
+
+    if (this.tourState.phase === 'transition') {
+      const dur = this.tourState.transitionDuration;
+      const progress = Math.min(1, this.tourState.timer / dur);
+      // Suavizado smoothstep
+      const ease = progress * progress * (3 - 2 * progress);
+
+      this.camera.position.lerpVectors(this.tourState.startPos, this.tourState.endPos, ease);
+      this.orbit.target.lerpVectors(this.tourState.startTarget, this.tourState.endTarget, ease);
+      this.camera.lookAt(this.orbit.target);
+
+      if (pbar) {
+        pbar.style.width = `${Math.round(ease * 30)}%`;
+      }
+
+      if (progress >= 1) {
+        this.tourState.phase = 'hold';
+        this.tourState.timer = 0;
+      }
+    } else if (this.tourState.phase === 'hold') {
+      const dur = this.tourState.holdDuration;
+      const progress = Math.min(1, this.tourState.timer / dur);
+
+      // Suave respiración orbital para dinamismo cinematográfico
+      const drift = Math.sin(this.tourState.timer * 0.9) * 0.035;
+      this.camera.position.y = this.tourState.endPos.y + drift;
+      this.camera.lookAt(this.tourState.endTarget);
+
+      if (pbar) {
+        pbar.style.width = `${Math.round(30 + progress * 70)}%`;
+      }
+
+      if (progress >= 1) {
+        this.nextTourStep();
+      }
+    }
+  }
+
   animate() {
     requestAnimationFrame(() => this.animate());
-    this.orbit.update();
+
+    if (this.tourState && this.tourState.active) {
+      this.updateTourAnimation(0.016);
+    } else {
+      this.orbit.update();
+    }
 
     if (this.animateTraffic) {
       this.links.forEach((link) => {

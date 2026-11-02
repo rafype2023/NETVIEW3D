@@ -77,6 +77,12 @@
       <button id="btn-add-camstar" class="tool-btn" title="Insertar Estrella de Cámara numerada (se exporta como cámara a Blender)">
         <span aria-hidden="true">⭐</span> + Cámara
       </button>
+      <button id="btn-auto-cameras" class="tool-btn btn-highlight-gold" title="Analizar el diagrama y generar automáticamente cámaras 3D para cada sección">
+        <span aria-hidden="true">🎬</span> Auto-Cámaras
+      </button>
+      <button id="btn-tour-3d" class="tool-btn btn-highlight-cyan" title="Reproducir animación guiada / recorrido 3D por todas las secciones del diagrama">
+        <span aria-hidden="true">▶</span> Tour 3D
+      </button>
       <button id="btn-add-porttube" class="tool-btn" title="Insertar Tubo 3D de Comunicación de Datos por Puerto (ej. RDP, UDP/49380)">
         <span aria-hidden="true">🧪</span> + Tubo Puerto
       </button>
@@ -170,6 +176,24 @@
       <div id="camera-pov-banner" class="camera-pov-banner" hidden>
         <span>👁️ Viendo a través de <strong id="camera-pov-name">Cámara 1</strong></span>
         <button id="btn-exit-pov" class="btn-mini btn-exit-pov">Salir de POV (Vista Libre)</button>
+      </div>
+
+      <!-- HUD de Animación / Recorrido 3D entre Secciones -->
+      <div id="tour-hud-player" class="tour-hud-player" hidden aria-label="Control de recorrido 3D animado">
+        <div class="tour-player-header">
+          <div class="tour-live-dot"></div>
+          <div class="tour-info">
+            <span class="tour-badge" id="tour-step-badge">ESCENA 1 DE 4</span>
+            <strong class="tour-section-title" id="tour-section-title">Vista General del Diagrama</strong>
+          </div>
+        </div>
+        <div class="tour-controls">
+          <button id="btn-tour-prev" class="btn-mini" title="Sección anterior">⏮ Ant</button>
+          <button id="btn-tour-play-pause" class="btn-mini" title="Pausar o reanudar animación">⏸ Pausa</button>
+          <button id="btn-tour-next" class="btn-mini" title="Siguiente sección">Sig ⏭</button>
+          <button id="btn-tour-stop" class="btn-mini btn-tour-stop" title="Detener y volver a vista libre">✕ Salir</button>
+        </div>
+        <div class="tour-progress-bar"><div class="tour-progress-fill" id="tour-progress-fill"></div></div>
       </div>
 
       <!-- Vistas Rápidas de Cámara en los 3 Ejes + Captura Rápida PNG -->
