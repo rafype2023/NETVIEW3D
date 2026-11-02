@@ -1,0 +1,1554 @@
+{
+  "version": "1.1",
+  "exportedAt": "2026-11-02T00:00:00Z",
+  "diagramName": "FEIS INFRASTRUCTURE ARCHITECTURE",
+  "customer": "FirstBank Corp / FIS",
+  "nodes": [
+    {
+      "id": "title_feis",
+      "specId": "title-3d-banner",
+      "hostname": "FEIS INFRASTRUCTURE ARCHITECTURE",
+      "ip": "FirstBank / FIS • KEMP Load Balancer, Proxy, ActiveMQ, Logic & Database Tier",
+      "position": [
+        0,
+        6.5,
+        -16.0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1.3,
+        1.3,
+        1.3
+      ],
+      "customColor": "#00e5ff"
+    },
+    {
+      "id": "panel_meta",
+      "specId": "text-panel-3d",
+      "hostname": "CONTROL DE DOCUMENTO",
+      "ip": "Document: FEIS INFRACTRUCTURE DIAGRAM\nCliente: FirstBank Corp / FIS (10/2/2018)\nDiseño: Edgardo Santiago Rivera\nConfidencial & Propietario",
+      "position": [
+        -15.0,
+        2.2,
+        -12.0
+      ],
+      "rotation": [
+        0,
+        25,
+        0
+      ],
+      "scale": [
+        1.1,
+        1.1,
+        1.1
+      ],
+      "customColor": "#38bdf8"
+    },
+    {
+      "id": "panel_ports",
+      "specId": "text-panel-3d",
+      "hostname": "PUERTOS & PROTOCOLOS FEIS",
+      "ip": "• 80 / 443 = HTTP / HTTPS Web Ingress\n• 9080/9081 = Express OLB App Services\n• 9090 = FEIS Proxy Endpoint\n• 61616 = ActiveMQ OpenWire Messaging\n• 1433 = Microsoft SQL Server\n• 50001 = IBM DB2 Database\n• 8443 / 8080 = EverPay / OLS Gateways",
+      "position": [
+        15.0,
+        2.2,
+        -12.0
+      ],
+      "rotation": [
+        0,
+        -25,
+        0
+      ],
+      "scale": [
+        1.1,
+        1.1,
+        1.1
+      ],
+      "customColor": "#ffd600"
+    },
+    {
+      "id": "zone_kemp",
+      "specId": "zone-platform-red",
+      "hostname": "ZONA ROJA — KEMP LOAD BALANCER CLUSTER",
+      "ip": "Cluster HA LoadMaster X3 • Distribución de Tráfico Port 80 & 443",
+      "position": [
+        0,
+        0.04,
+        -11.0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1.6,
+        1,
+        0.9
+      ],
+      "customColor": "#ee3124"
+    },
+    {
+      "id": "zone_rsa",
+      "specId": "zone-platform",
+      "hostname": "ZONA RSA SERVERS (VLAN 134)",
+      "ip": "FBA02098 & FBA02099 • Autenticación de Usuarios (Port 80)",
+      "position": [
+        -10.5,
+        0.04,
+        -5.5
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        0.95,
+        1,
+        0.95
+      ],
+      "customColor": "#2979ff"
+    },
+    {
+      "id": "zone_olb",
+      "specId": "zone-platform-green",
+      "hostname": "ZONA EXPRESS OLB (PORT 9080/9081)",
+      "ip": "XESP1 (FBA06093) & XESP2 (FBA06094) • Red Hat Enterprise Linux",
+      "position": [
+        -4.2,
+        0.04,
+        -5.5
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        0.95,
+        1,
+        0.95
+      ],
+      "customColor": "#00c853"
+    },
+    {
+      "id": "zone_proxy",
+      "specId": "zone-platform",
+      "hostname": "ZONA FEIS PROXY (PORT 9090)",
+      "ip": "PROXYP1 (FBA06097) & PROXYP2 (FBA06098) • Red Hat Enterprise Linux",
+      "position": [
+        4.5,
+        0.04,
+        -5.5
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        0.95,
+        1,
+        0.95
+      ],
+      "customColor": "#00e5ff"
+    },
+    {
+      "id": "zone_amq",
+      "specId": "zone-platform",
+      "hostname": "ZONA ACTIVEMQ MESSAGING (PORT 61616)",
+      "ip": "AMQP1 Active (FBA06099) & AMQP2 Passive (FBA06100) • Cluster Messaging",
+      "position": [
+        4.5,
+        0.04,
+        0.0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1.05,
+        1,
+        0.95
+      ],
+      "customColor": "#ffab00"
+    },
+    {
+      "id": "zone_logic",
+      "specId": "zone-platform",
+      "hostname": "ZONA LOGIC PROCESSING ENGINE",
+      "ip": "LOGIC1, LOGICP2, LOGICP3 (x2) • Procesamiento Transaccional Central",
+      "position": [
+        4.5,
+        0.04,
+        6.0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1.5,
+        1,
+        0.95
+      ],
+      "customColor": "#2979ff"
+    },
+    {
+      "id": "zone_data",
+      "specId": "zone-platform",
+      "hostname": "ZONA BASES DE DATOS & PASARELAS DE PAGO",
+      "ip": "IBM DB2, Debt Manager, FBMSP, SQL Clusters, EverPay, Fiserv, Egistis & OLS",
+      "position": [
+        4.5,
+        0.04,
+        12.5
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1.7,
+        1,
+        1.1
+      ],
+      "customColor": "#ffd600"
+    },
+    {
+      "id": "kemp_lb1",
+      "specId": "kemp-loadmaster-x3",
+      "hostname": "KEMP LOADMASTER HA (ACTIVO)",
+      "ip": "Cluster KEMP LoadMaster • VIP Ingress 80/443",
+      "position": [
+        -2.2,
+        0.6,
+        -11.0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1.15,
+        1.15,
+        1.15
+      ]
+    },
+    {
+      "id": "kemp_lb2",
+      "specId": "kemp-loadmaster-x3",
+      "hostname": "KEMP LOADMASTER HA (STANDBY)",
+      "ip": "Cluster KEMP LoadMaster • HA Sincronización",
+      "position": [
+        2.2,
+        0.6,
+        -11.0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1.15,
+        1.15,
+        1.15
+      ]
+    },
+    {
+      "id": "vip_rsa",
+      "specId": "text-panel-3d",
+      "hostname": "VIP FB-OLB-RSA-LB",
+      "ip": "VIP IP: 10.30.134.201\nPort: 80 (HTTP)",
+      "position": [
+        -10.5,
+        1.8,
+        -8.8
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        0.95,
+        0.95,
+        0.95
+      ],
+      "customColor": "#38bdf8"
+    },
+    {
+      "id": "vip_olb",
+      "specId": "text-panel-3d",
+      "hostname": "VIP EXPRESS41_OLB",
+      "ip": "VIP IP: 10.30.134.237\nPort: 9080 / 9081",
+      "position": [
+        -4.2,
+        1.8,
+        -8.8
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        0.95,
+        0.95,
+        0.95
+      ],
+      "customColor": "#00c853"
+    },
+    {
+      "id": "vip_feis",
+      "specId": "text-panel-3d",
+      "hostname": "VIP FEIS2SEC / FEIS2",
+      "ip": "Feis2sec: 10.30.134.198\nFeis2: 10.30.134.197\nPort: 443 (HTTPS) → Port: 9090",
+      "position": [
+        4.5,
+        1.8,
+        -8.8
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        0.95,
+        0.95,
+        0.95
+      ],
+      "customColor": "#00e5ff"
+    },
+    {
+      "id": "tube_kemp_80",
+      "specId": "data-port-tube",
+      "hostname": "TCP/80",
+      "ip": "HTTP Tráfico Ingress",
+      "position": [
+        -4.5,
+        1.2,
+        -10.2
+      ],
+      "rotation": [
+        0,
+        90,
+        0
+      ],
+      "scale": [
+        0.85,
+        0.85,
+        0.85
+      ],
+      "customColor": "#ee3124"
+    },
+    {
+      "id": "tube_kemp_443",
+      "specId": "data-port-tube-tls",
+      "hostname": "TCP/443",
+      "ip": "HTTPS Tráfico Cifrado",
+      "position": [
+        4.5,
+        1.2,
+        -10.2
+      ],
+      "rotation": [
+        0,
+        90,
+        0
+      ],
+      "scale": [
+        0.85,
+        0.85,
+        0.85
+      ],
+      "customColor": "#00e5ff"
+    },
+    {
+      "id": "rsa_fba02098",
+      "specId": "vm-windows-server",
+      "hostname": "FBA02098 (RSA SRV 1)",
+      "ip": "10.30.134.213 • RSA Authentication",
+      "position": [
+        -11.6,
+        0.6,
+        -5.5
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "customColor": "#38bdf8",
+      "appLabel": "RSA Auth Agent",
+      "vcpu": "4 vCPU",
+      "memory": "16 GB",
+      "disk": "200 GB"
+    },
+    {
+      "id": "rsa_fba02099",
+      "specId": "vm-windows-server",
+      "hostname": "FBA02099 (RSA SRV 2)",
+      "ip": "10.30.134.214 • RSA Authentication",
+      "position": [
+        -9.4,
+        0.6,
+        -5.5
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "customColor": "#38bdf8",
+      "appLabel": "RSA Auth Agent",
+      "vcpu": "4 vCPU",
+      "memory": "16 GB",
+      "disk": "200 GB"
+    },
+    {
+      "id": "tube_rsa_80",
+      "specId": "data-port-tube",
+      "hostname": "TCP/80",
+      "ip": "RSA Auth HTTP Channel",
+      "position": [
+        -10.5,
+        1.8,
+        -5.5
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        0.9,
+        0.9,
+        0.9
+      ],
+      "customColor": "#38bdf8"
+    },
+    {
+      "id": "olb_fba06093",
+      "specId": "vm-linux-redhat",
+      "hostname": "FBA06093 (XESP1)",
+      "ip": "10.30.134.171 • Express OLB",
+      "position": [
+        -5.3,
+        0.6,
+        -5.5
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "customColor": "#00c853",
+      "appLabel": "XESP1 OLB",
+      "vcpu": "4 vCPU",
+      "memory": "16 GB",
+      "disk": "250 GB"
+    },
+    {
+      "id": "olb_fba06094",
+      "specId": "vm-linux-redhat",
+      "hostname": "FBA06094 (XESP2)",
+      "ip": "10.30.134.172 • Express OLB",
+      "position": [
+        -3.1,
+        0.6,
+        -5.5
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "customColor": "#00c853",
+      "appLabel": "XESP2 OLB",
+      "vcpu": "4 vCPU",
+      "memory": "16 GB",
+      "disk": "250 GB"
+    },
+    {
+      "id": "tube_olb_9080",
+      "specId": "data-port-tube",
+      "hostname": "TCP/9080",
+      "ip": "Express OLB Application Port",
+      "position": [
+        -4.2,
+        1.8,
+        -5.5
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        0.9,
+        0.9,
+        0.9
+      ],
+      "customColor": "#00c853"
+    },
+    {
+      "id": "prx_fba06097",
+      "specId": "vm-linux-redhat",
+      "hostname": "FBA06097 (PROXYP1)",
+      "ip": "10.30.134.175 • FEIS Proxy",
+      "position": [
+        3.4,
+        0.6,
+        -5.5
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "customColor": "#00e5ff",
+      "appLabel": "FEIS-Proxy 1",
+      "vcpu": "4 vCPU",
+      "memory": "16 GB",
+      "disk": "200 GB"
+    },
+    {
+      "id": "prx_fba06098",
+      "specId": "vm-linux-redhat",
+      "hostname": "FBA06098 (PROXYP2)",
+      "ip": "10.30.134.176 • FEIS Proxy",
+      "position": [
+        5.6,
+        0.6,
+        -5.5
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "customColor": "#00e5ff",
+      "appLabel": "FEIS-Proxy 2",
+      "vcpu": "4 vCPU",
+      "memory": "16 GB",
+      "disk": "200 GB"
+    },
+    {
+      "id": "tube_prx_9090",
+      "specId": "data-port-tube",
+      "hostname": "TCP/9090",
+      "ip": "FEIS Proxy Ingress Channel",
+      "position": [
+        4.5,
+        1.8,
+        -5.5
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        0.9,
+        0.9,
+        0.9
+      ],
+      "customColor": "#00e5ff"
+    },
+    {
+      "id": "arrow_to_amq",
+      "specId": "arrow-3d-straight",
+      "hostname": "SEND REQUEST TO ACTIVE",
+      "ip": "Port 61616 ActiveMQ",
+      "position": [
+        4.5,
+        1.4,
+        -2.8
+      ],
+      "rotation": [
+        90,
+        0,
+        0
+      ],
+      "scale": [
+        1.1,
+        1.1,
+        1.1
+      ],
+      "customColor": "#ffab00"
+    },
+    {
+      "id": "amq_fba06099",
+      "specId": "vm-linux-redhat",
+      "hostname": "FBA06099 (AMQP1 ACTIVE)",
+      "ip": "10.30.134.177 • ActiveMQ Master",
+      "position": [
+        3.4,
+        0.6,
+        0.0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "customColor": "#ffab00",
+      "appLabel": "ActiveMQ Master",
+      "vcpu": "8 vCPU",
+      "memory": "32 GB",
+      "disk": "300 GB"
+    },
+    {
+      "id": "amq_fba06100",
+      "specId": "vm-linux-redhat",
+      "hostname": "FBA06100 (AMQP2 PASSIVE)",
+      "ip": "10.30.134.178 • ActiveMQ Slave",
+      "position": [
+        5.6,
+        0.6,
+        0.0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "customColor": "#ffab00",
+      "appLabel": "ActiveMQ Standby",
+      "vcpu": "8 vCPU",
+      "memory": "32 GB",
+      "disk": "300 GB"
+    },
+    {
+      "id": "tube_amq_61616",
+      "specId": "data-port-tube",
+      "hostname": "TCP/61616",
+      "ip": "OpenWire Messaging Protocol",
+      "position": [
+        4.5,
+        1.8,
+        0.0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "customColor": "#ffab00"
+    },
+    {
+      "id": "db_amq_sql",
+      "specId": "vm-windows-server",
+      "hostname": "FBA03009\\SQLCLUSTERMTG",
+      "ip": "Database AMQ Cluster • Port 1433",
+      "position": [
+        9.5,
+        0.6,
+        0.0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "customColor": "#ffd600",
+      "appLabel": "AMQ SQL Store",
+      "vcpu": "8 vCPU",
+      "memory": "64 GB",
+      "disk": "1000 GB"
+    },
+    {
+      "id": "arrow_to_logic",
+      "specId": "arrow-3d-straight",
+      "hostname": "RECEIVE REQUEST FROM ACTIVE",
+      "ip": "Port 61616 to Logic Tier",
+      "position": [
+        4.5,
+        1.4,
+        3.0
+      ],
+      "rotation": [
+        90,
+        0,
+        0
+      ],
+      "scale": [
+        1.1,
+        1.1,
+        1.1
+      ],
+      "customColor": "#2979ff"
+    },
+    {
+      "id": "lg_fba06101",
+      "specId": "vm-linux-redhat",
+      "hostname": "FBA06101 (LOGIC1)",
+      "ip": "10.30.134.179 • Transaction Engine",
+      "position": [
+        1.8,
+        0.6,
+        6.0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "customColor": "#2979ff",
+      "appLabel": "FEIS Logic 1",
+      "vcpu": "8 vCPU",
+      "memory": "32 GB",
+      "disk": "250 GB"
+    },
+    {
+      "id": "lg_fba06102",
+      "specId": "vm-linux-redhat",
+      "hostname": "FBA06102 (LOGICP2)",
+      "ip": "10.30.134.180 • Transaction Engine",
+      "position": [
+        3.6,
+        0.6,
+        6.0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "customColor": "#2979ff",
+      "appLabel": "FEIS Logic 2",
+      "vcpu": "8 vCPU",
+      "memory": "32 GB",
+      "disk": "250 GB"
+    },
+    {
+      "id": "lg_fba06136",
+      "specId": "vm-linux-redhat",
+      "hostname": "FBA06136 (LOGICP3)",
+      "ip": "10.30.134.136 • Transaction Engine",
+      "position": [
+        5.4,
+        0.6,
+        6.0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "customColor": "#2979ff",
+      "appLabel": "FEIS Logic 3A",
+      "vcpu": "8 vCPU",
+      "memory": "32 GB",
+      "disk": "250 GB"
+    },
+    {
+      "id": "lg_fba06137",
+      "specId": "vm-linux-redhat",
+      "hostname": "FBA06137 (LOGICP3 - B)",
+      "ip": "10.30.134.137 • Transaction Engine",
+      "position": [
+        7.2,
+        0.6,
+        6.0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "customColor": "#2979ff",
+      "appLabel": "FEIS Logic 3B",
+      "vcpu": "8 vCPU",
+      "memory": "32 GB",
+      "disk": "250 GB"
+    },
+    {
+      "id": "tube_kemp_direct_80",
+      "specId": "data-port-tube",
+      "hostname": "TCP/80",
+      "ip": "Direct HTTP to Logic Tier",
+      "position": [
+        -1.0,
+        1.5,
+        -2.5
+      ],
+      "rotation": [
+        0,
+        90,
+        0
+      ],
+      "scale": [
+        0.9,
+        0.9,
+        0.9
+      ],
+      "customColor": "#00c853"
+    },
+    {
+      "id": "db_xpdb2",
+      "specId": "vm-linux-redhat",
+      "hostname": "FBA06103 (XPDB2 - DB2)",
+      "ip": "10.30.134.181 • IBM DB2 Database",
+      "position": [
+        0.0,
+        0.6,
+        12.0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1.05,
+        1.05,
+        1.05
+      ],
+      "customColor": "#ffd600",
+      "appLabel": "IBM DB2 Core",
+      "vcpu": "16 vCPU",
+      "memory": "64 GB",
+      "disk": "1500 GB"
+    },
+    {
+      "id": "db_debt_mgr",
+      "specId": "vm-windows-server",
+      "hostname": "DEBT MANAGER (FBA03015)",
+      "ip": "10.30.134.x • Port 1433 SQL",
+      "position": [
+        2.4,
+        0.6,
+        12.0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "customColor": "#ffd600",
+      "appLabel": "Debt Manager",
+      "vcpu": "8 vCPU",
+      "memory": "32 GB",
+      "disk": "800 GB"
+    },
+    {
+      "id": "db_fbmsp",
+      "specId": "vm-windows-server",
+      "hostname": "FBMSP (FBA03016\\FBSQLTNA)",
+      "ip": "Database FBMSP • Port 8090",
+      "position": [
+        4.8,
+        0.6,
+        12.0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "customColor": "#ffd600",
+      "appLabel": "FBMSP SQL",
+      "vcpu": "8 vCPU",
+      "memory": "32 GB",
+      "disk": "800 GB"
+    },
+    {
+      "id": "db_plis",
+      "specId": "vm-windows-server",
+      "hostname": "FBA03009\\SQLCLUSTERMTG (PLIS)",
+      "ip": "PLIS Database • Port 1433",
+      "position": [
+        7.2,
+        0.6,
+        10.5
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        0.95,
+        0.95,
+        0.95
+      ],
+      "customColor": "#ffd600",
+      "appLabel": "PLIS DB",
+      "vcpu": "8 vCPU",
+      "memory": "32 GB",
+      "disk": "500 GB"
+    },
+    {
+      "id": "db_olb_sql",
+      "specId": "vm-windows-server",
+      "hostname": "FBA03053 (OLB SQL)",
+      "ip": "OLB Database • Port 1433",
+      "position": [
+        9.2,
+        0.6,
+        10.5
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        0.95,
+        0.95,
+        0.95
+      ],
+      "customColor": "#ffd600",
+      "appLabel": "OLB DB",
+      "vcpu": "8 vCPU",
+      "memory": "32 GB",
+      "disk": "500 GB"
+    },
+    {
+      "id": "db_pbp",
+      "specId": "vm-windows-server",
+      "hostname": "FBA03009\\SQLCLUSTERMTG (PAY BY PHONE)",
+      "ip": "Pay By Phone DB • Port 1433",
+      "position": [
+        11.2,
+        0.6,
+        10.5
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        0.95,
+        0.95,
+        0.95
+      ],
+      "customColor": "#ffd600",
+      "appLabel": "PBP DB",
+      "vcpu": "8 vCPU",
+      "memory": "32 GB",
+      "disk": "500 GB"
+    },
+    {
+      "id": "gw_everpay",
+      "specId": "cloud-wan",
+      "hostname": "EVERPAY GATEWAY",
+      "ip": "Pasarela EverPay • Port 8443 (HTTPS)",
+      "position": [
+        7.2,
+        1.8,
+        13.5
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ]
+    },
+    {
+      "id": "gw_fiserv",
+      "specId": "cloud-wan",
+      "hostname": "FISERV SERVICES",
+      "ip": "Servicios Fiserv Core • Port 443",
+      "position": [
+        9.2,
+        1.8,
+        13.5
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ]
+    },
+    {
+      "id": "gw_egistis",
+      "specId": "cloud-wan",
+      "hostname": "EGISTIS GATEWAY",
+      "ip": "Pasarela Egistis • Port 443",
+      "position": [
+        11.2,
+        1.8,
+        13.5
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ]
+    },
+    {
+      "id": "gw_ols",
+      "specId": "cloud-wan",
+      "hostname": "OLS SERVICE",
+      "ip": "Servicio OLS • Port 8080",
+      "position": [
+        13.2,
+        1.8,
+        13.5
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ]
+    },
+    {
+      "id": "tube_db2_50001",
+      "specId": "data-port-tube",
+      "hostname": "TCP/50001",
+      "ip": "IBM DB2 Communication Port",
+      "position": [
+        0.9,
+        1.4,
+        9.0
+      ],
+      "rotation": [
+        0,
+        45,
+        0
+      ],
+      "scale": [
+        0.85,
+        0.85,
+        0.85
+      ],
+      "customColor": "#ffd600"
+    },
+    {
+      "id": "tube_sql_1433",
+      "specId": "data-port-tube",
+      "hostname": "TCP/1433",
+      "ip": "Microsoft SQL Default Port",
+      "position": [
+        3.0,
+        1.4,
+        9.0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        0.85,
+        0.85,
+        0.85
+      ],
+      "customColor": "#ffd600"
+    },
+    {
+      "id": "tube_everpay_8443",
+      "specId": "data-port-tube-tls",
+      "hostname": "TCP/8443",
+      "ip": "EverPay Secure API Channel",
+      "position": [
+        7.2,
+        1.4,
+        8.2
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        0.85,
+        0.85,
+        0.85
+      ],
+      "customColor": "#00e5ff"
+    },
+    {
+      "id": "cam_feis_1",
+      "specId": "camera-star",
+      "hostname": "1",
+      "ip": "Vista General Arquitectura FEIS",
+      "position": [
+        0,
+        16.0,
+        21.0
+      ],
+      "rotation": [
+        -38,
+        0,
+        0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ]
+    },
+    {
+      "id": "cam_feis_2",
+      "specId": "camera-star",
+      "hostname": "2",
+      "ip": "KEMP Ingress & Proxy Tier",
+      "position": [
+        4.5,
+        7.5,
+        -1.0
+      ],
+      "rotation": [
+        -35,
+        0,
+        0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ]
+    },
+    {
+      "id": "cam_feis_3",
+      "specId": "camera-star",
+      "hostname": "3",
+      "ip": "ActiveMQ Messaging & Logic Tier",
+      "position": [
+        4.5,
+        6.0,
+        8.5
+      ],
+      "rotation": [
+        -30,
+        0,
+        0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ]
+    },
+    {
+      "id": "cam_feis_4",
+      "specId": "camera-star",
+      "hostname": "4",
+      "ip": "Databases IBM DB2 & Payment Gateways",
+      "position": [
+        5.5,
+        5.0,
+        15.5
+      ],
+      "rotation": [
+        -25,
+        -20,
+        0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ]
+    }
+  ],
+  "links": [
+    {
+      "id": "link_feis_1",
+      "fromId": "kemp_lb1",
+      "toId": "kemp_lb2",
+      "fromPort": "HA-Sync",
+      "toPort": "HA-Sync",
+      "cableType": "ha-red",
+      "routeStyle": "overhead",
+      "label": "KEMP HA Heartbeat"
+    },
+    {
+      "id": "link_feis_2",
+      "fromId": "kemp_lb1",
+      "toId": "vip_rsa",
+      "fromPort": "eth0 (WAN/VIP)",
+      "toPort": "Anchor",
+      "cableType": "om4-aqua",
+      "routeStyle": "overhead",
+      "label": "Port 80 to RSA VIP"
+    },
+    {
+      "id": "link_feis_3",
+      "fromId": "kemp_lb1",
+      "toId": "vip_olb",
+      "fromPort": "eth0 (WAN/VIP)",
+      "toPort": "Anchor",
+      "cableType": "om4-aqua",
+      "routeStyle": "overhead",
+      "label": "Port 80 to OLB VIP"
+    },
+    {
+      "id": "link_feis_4",
+      "fromId": "kemp_lb2",
+      "toId": "vip_feis",
+      "fromPort": "eth0 (WAN/VIP)",
+      "toPort": "Anchor",
+      "cableType": "om4-aqua",
+      "routeStyle": "overhead",
+      "label": "Port 443 to FEIS VIP"
+    },
+    {
+      "id": "link_feis_5",
+      "fromId": "vip_rsa",
+      "toId": "rsa_fba02098",
+      "fromPort": "Anchor",
+      "toPort": "vNIC-0 (VLAN 50)",
+      "cableType": "cat6a-blue",
+      "routeStyle": "manhattan",
+      "label": "Port 80 HTTP"
+    },
+    {
+      "id": "link_feis_6",
+      "fromId": "vip_rsa",
+      "toId": "rsa_fba02099",
+      "fromPort": "Anchor",
+      "toPort": "vNIC-0 (VLAN 50)",
+      "cableType": "cat6a-blue",
+      "routeStyle": "manhattan",
+      "label": "Port 80 HTTP"
+    },
+    {
+      "id": "link_feis_7",
+      "fromId": "vip_olb",
+      "toId": "olb_fba06093",
+      "fromPort": "Anchor",
+      "toPort": "vNIC-0 (VLAN 50)",
+      "cableType": "cat6a-blue",
+      "routeStyle": "manhattan",
+      "label": "Port 9080/9081"
+    },
+    {
+      "id": "link_feis_8",
+      "fromId": "vip_olb",
+      "toId": "olb_fba06094",
+      "fromPort": "Anchor",
+      "toPort": "vNIC-0 (VLAN 50)",
+      "cableType": "cat6a-blue",
+      "routeStyle": "manhattan",
+      "label": "Port 9080/9081"
+    },
+    {
+      "id": "link_feis_9",
+      "fromId": "vip_feis",
+      "toId": "prx_fba06097",
+      "fromPort": "Anchor",
+      "toPort": "vNIC-0 (VLAN 50)",
+      "cableType": "om4-aqua",
+      "routeStyle": "manhattan",
+      "label": "Port 9090 Proxy"
+    },
+    {
+      "id": "link_feis_10",
+      "fromId": "vip_feis",
+      "toId": "prx_fba06098",
+      "fromPort": "Anchor",
+      "toPort": "vNIC-0 (VLAN 50)",
+      "cableType": "om4-aqua",
+      "routeStyle": "manhattan",
+      "label": "Port 9090 Proxy"
+    },
+    {
+      "id": "link_feis_11",
+      "fromId": "prx_fba06097",
+      "toId": "amq_fba06099",
+      "fromPort": "vNIC-1 (Mgmt)",
+      "toPort": "vNIC-0 (VLAN 50)",
+      "cableType": "om4-aqua",
+      "routeStyle": "manhattan",
+      "label": "Send Request 61616"
+    },
+    {
+      "id": "link_feis_12",
+      "fromId": "prx_fba06098",
+      "toId": "amq_fba06099",
+      "fromPort": "vNIC-1 (Mgmt)",
+      "toPort": "vNIC-0 (VLAN 50)",
+      "cableType": "om4-aqua",
+      "routeStyle": "manhattan",
+      "label": "Send Request 61616"
+    },
+    {
+      "id": "link_feis_13",
+      "fromId": "amq_fba06099",
+      "toId": "amq_fba06100",
+      "fromPort": "vHBA-SAN",
+      "toPort": "vHBA-SAN",
+      "cableType": "ha-red",
+      "routeStyle": "overhead",
+      "label": "ActiveMQ Cluster Replication"
+    },
+    {
+      "id": "link_feis_14",
+      "fromId": "amq_fba06099",
+      "toId": "db_amq_sql",
+      "fromPort": "vNIC-1 (Mgmt)",
+      "toPort": "vNIC-0 (VLAN 50)",
+      "cableType": "san-orange",
+      "routeStyle": "overhead",
+      "label": "Port 1433 SQL"
+    },
+    {
+      "id": "link_feis_15",
+      "fromId": "amq_fba06099",
+      "toId": "lg_fba06101",
+      "fromPort": "vNIC-0 (VLAN 50)",
+      "toPort": "vNIC-0 (VLAN 50)",
+      "cableType": "om4-aqua",
+      "routeStyle": "manhattan",
+      "label": "Receive Request 61616"
+    },
+    {
+      "id": "link_feis_16",
+      "fromId": "amq_fba06099",
+      "toId": "lg_fba06102",
+      "fromPort": "vNIC-0 (VLAN 50)",
+      "toPort": "vNIC-0 (VLAN 50)",
+      "cableType": "om4-aqua",
+      "routeStyle": "manhattan",
+      "label": "Receive Request 61616"
+    },
+    {
+      "id": "link_feis_17",
+      "fromId": "amq_fba06099",
+      "toId": "lg_fba06136",
+      "fromPort": "vNIC-0 (VLAN 50)",
+      "toPort": "vNIC-0 (VLAN 50)",
+      "cableType": "om4-aqua",
+      "routeStyle": "manhattan",
+      "label": "Receive Request 61616"
+    },
+    {
+      "id": "link_feis_18",
+      "fromId": "amq_fba06099",
+      "toId": "lg_fba06137",
+      "fromPort": "vNIC-0 (VLAN 50)",
+      "toPort": "vNIC-0 (VLAN 50)",
+      "cableType": "om4-aqua",
+      "routeStyle": "manhattan",
+      "label": "Receive Request 61616"
+    },
+    {
+      "id": "link_feis_19",
+      "fromId": "kemp_lb1",
+      "toId": "lg_fba06102",
+      "fromPort": "eth1 (DMZ)",
+      "toPort": "vNIC-1 (Mgmt)",
+      "cableType": "om4-aqua",
+      "routeStyle": "overhead",
+      "label": "Direct Port 80 HTTP"
+    },
+    {
+      "id": "link_feis_20",
+      "fromId": "lg_fba06101",
+      "toId": "db_xpdb2",
+      "fromPort": "vNIC-1 (Mgmt)",
+      "toPort": "vNIC-0 (VLAN 50)",
+      "cableType": "san-orange",
+      "routeStyle": "manhattan",
+      "label": "Port 50001 DB2"
+    },
+    {
+      "id": "link_feis_21",
+      "fromId": "lg_fba06102",
+      "toId": "db_debt_mgr",
+      "fromPort": "vNIC-1 (Mgmt)",
+      "toPort": "vNIC-0 (VLAN 50)",
+      "cableType": "san-orange",
+      "routeStyle": "manhattan",
+      "label": "Port 1433 SQL"
+    },
+    {
+      "id": "link_feis_22",
+      "fromId": "lg_fba06136",
+      "toId": "db_fbmsp",
+      "fromPort": "vNIC-1 (Mgmt)",
+      "toPort": "vNIC-0 (VLAN 50)",
+      "cableType": "san-orange",
+      "routeStyle": "manhattan",
+      "label": "Port 8090 FBMSP"
+    },
+    {
+      "id": "link_feis_23",
+      "fromId": "lg_fba06137",
+      "toId": "db_plis",
+      "fromPort": "vNIC-1 (Mgmt)",
+      "toPort": "vNIC-0 (VLAN 50)",
+      "cableType": "san-orange",
+      "routeStyle": "overhead",
+      "label": "Port 1433 PLIS"
+    },
+    {
+      "id": "link_feis_24",
+      "fromId": "lg_fba06137",
+      "toId": "db_olb_sql",
+      "fromPort": "vNIC-1 (Mgmt)",
+      "toPort": "vNIC-0 (VLAN 50)",
+      "cableType": "san-orange",
+      "routeStyle": "overhead",
+      "label": "Port 1433 OLB"
+    },
+    {
+      "id": "link_feis_25",
+      "fromId": "lg_fba06137",
+      "toId": "db_pbp",
+      "fromPort": "vNIC-1 (Mgmt)",
+      "toPort": "vNIC-0 (VLAN 50)",
+      "cableType": "san-orange",
+      "routeStyle": "overhead",
+      "label": "Port 1433 PBP"
+    },
+    {
+      "id": "link_feis_26",
+      "fromId": "lg_fba06137",
+      "toId": "gw_everpay",
+      "fromPort": "vNIC-1 (Mgmt)",
+      "toPort": "Port-1",
+      "cableType": "om4-aqua",
+      "routeStyle": "manhattan",
+      "label": "Port 8443 EverPay"
+    },
+    {
+      "id": "link_feis_27",
+      "fromId": "lg_fba06137",
+      "toId": "gw_fiserv",
+      "fromPort": "vNIC-1 (Mgmt)",
+      "toPort": "Port-1",
+      "cableType": "om4-aqua",
+      "routeStyle": "manhattan",
+      "label": "Port 443 Fiserv"
+    },
+    {
+      "id": "link_feis_28",
+      "fromId": "lg_fba06137",
+      "toId": "gw_egistis",
+      "fromPort": "vNIC-1 (Mgmt)",
+      "toPort": "Port-1",
+      "cableType": "om4-aqua",
+      "routeStyle": "manhattan",
+      "label": "Port 443 Egistis"
+    },
+    {
+      "id": "link_feis_29",
+      "fromId": "lg_fba06137",
+      "toId": "gw_ols",
+      "fromPort": "vNIC-1 (Mgmt)",
+      "toPort": "Port-1",
+      "cableType": "om4-aqua",
+      "routeStyle": "manhattan",
+      "label": "Port 8080 OLS"
+    }
+  ]
+}
