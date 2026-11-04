@@ -210,17 +210,17 @@ export const HARDWARE_CATALOG = [
   // ================= ENDPOINTS, ATMS, TRANE AHU, KEMP LB & RACK SERVER =================
   {
     id: 'trane-ahu-unit',
-    name: 'Unidad de Aire Trane (AHU / HVAC)',
+    name: 'Unidad de Aire Trane (Packaged AC / AHU)',
     vendor: 'Trane Technologies',
     category: 'endpoints',
     uHeight: 0,
-    width: 1.15,
+    width: 1.35,
     height: 1.05,
-    depth: 1.15,
+    depth: 1.25,
     badgeColor: '#e53935',
     defaultHostname: 'AHU-101',
     defaultIp: '10.30.99.50',
-    specs: 'Manejadora de Aire Inteligente Trane | Control BMS • BACnet / IP • Ethernet RJ45 • VLAN 334',
+    specs: 'Unidad Manejadora / Packaged AC Trane (de trane AC.webp) | Chasis WeatherGuard • Ventilador Superior • Control BMS BACnet/IP • VLAN 334',
     ports: ['ETH-1/1 (RJ45)', 'BACnet-IP', 'RS-485-Modbus']
   },
   {

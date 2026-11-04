@@ -31,7 +31,9 @@ const MAT = {
   ledGreen: new THREE.MeshBasicMaterial({ color: 0x00e676 }),
   ledAmber: new THREE.MeshBasicMaterial({ color: 0xffab00 }),
   ledCyan: new THREE.MeshBasicMaterial({ color: 0x00e5ff }),
-  psuHandle: new THREE.MeshStandardMaterial({ color: 0x37474f, roughness: 0.4, metalness: 0.6 })
+  psuHandle: new THREE.MeshStandardMaterial({ color: 0x37474f, roughness: 0.4, metalness: 0.6 }),
+  traneSlate: new THREE.MeshStandardMaterial({ color: 0x8e9286, roughness: 0.42, metalness: 0.25 }),
+  traneDarkTrim: new THREE.MeshStandardMaterial({ color: 0x4a4d46, roughness: 0.5, metalness: 0.35 })
 };
 
 // Fortinet branded white top lid using the official logo (assets/textures/fortinet_logo.png)
@@ -823,6 +825,50 @@ export function createTraneUnitFrontTexture(hostname = 'AHU-101', ip = '10.30.99
   return tex;
 }
 
+// Digital status & identification tag plate for Trane AC
+export function createTraneTagTexture(hostname = 'AHU-101', ip = '10.30.99.50') {
+  const canvas = document.createElement('canvas');
+  canvas.width = 384;
+  canvas.height = 160;
+  const ctx = canvas.getContext('2d');
+
+  // Background plate (dark anodized brushed aluminum with border)
+  ctx.fillStyle = '#1c211d';
+  ctx.fillRect(4, 4, 376, 152);
+
+  ctx.strokeStyle = '#3e4740';
+  ctx.lineWidth = 4;
+  ctx.strokeRect(4, 4, 376, 152);
+
+  // Status LED circle
+  ctx.fillStyle = '#00e676';
+  ctx.beginPath();
+  ctx.arc(32, 42, 9, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Unit Name (e.g. "AHU-101" or "Zona Carga")
+  ctx.fillStyle = '#ffffff';
+  ctx.font = '900 36px system-ui, -apple-system, sans-serif';
+  ctx.textAlign = 'left';
+  ctx.textBaseline = 'middle';
+  ctx.fillText((hostname || 'AHU-101').toUpperCase().slice(0, 16), 56, 42);
+
+  // IP Address
+  ctx.fillStyle = '#38bdf8';
+  ctx.font = '700 24px ui-monospace, SFMono-Regular, monospace';
+  ctx.fillText(ip || '10.30.99.50', 56, 88);
+
+  // BACnet / BMS Tag
+  ctx.fillStyle = '#94a3b8';
+  ctx.font = '600 18px system-ui, sans-serif';
+  ctx.fillText('BACnet/IP • VLAN 334', 56, 124);
+
+  const tex = new THREE.CanvasTexture(canvas);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  tex.needsUpdate = true;
+  return tex;
+}
+
 // Number badge shown on both faces of a Camera Star
 export function createCameraNumberTexture(num) {
   const canvas = document.createElement('canvas');
@@ -1319,63 +1365,110 @@ export function buildHardwareMesh(spec, instanceData = {}) {
       root.add(m);
     });
   } else if (id === 'trane-ahu-unit') {
-    // ================= TRANE AHU SMART HVAC UNIT =================
-    // 1. Main industrial chassis (metallic silver-gray)
-    const ahuBody = new THREE.Mesh(new THREE.BoxGeometry(w, h * 0.92, d), MAT.ciscoSilver);
-    ahuBody.position.y = h * 0.04;
+    // ================= TRANE PACKAGED AC / AHU UNIT (from trane AC.webp) =================
+    // 1. Main WeatherGuard Industrial Cabinet (warm slate gray)
+    const ahuBody = new THREE.Mesh(new THREE.BoxGeometry(w * 0.98, h * 0.94, d * 0.98), MAT.traneSlate);
+    ahuBody.position.y = h * 0.03;
     ahuBody.castShadow = true;
     ahuBody.receiveShadow = true;
     root.add(ahuBody);
 
-    // 2. Base vibration damping plinth (4 dark charcoal corner feet)
-    const footW = 0.22, footH = 0.08, footD = 0.22;
-    const footY = -h / 2 + footH / 2;
-    const xOff = w / 2 - footW / 2 - 0.04;
-    const zOff = d / 2 - footD / 2 - 0.04;
-    [
-      [xOff, footY, zOff],
-      [-xOff, footY, zOff],
-      [xOff, footY, -zOff],
-      [-xOff, footY, -zOff]
-    ].forEach(([fx, fy, fz]) => {
-      const foot = new THREE.Mesh(new THREE.BoxGeometry(footW, footH, footD), MAT.darkChassis);
-      foot.position.set(fx, fy, fz);
-      root.add(foot);
+    // 2. Base Curb Mounting Rails (2 industrial channel beams along the bottom)
+    const railW = 0.16, railH = 0.08, railD = d * 1.02;
+    const railY = -h / 2 + railH / 2;
+    [-w * 0.36, w * 0.36].forEach((rx) => {
+      const rail = new THREE.Mesh(new THREE.BoxGeometry(railW, railH, railD), MAT.traneDarkTrim);
+      rail.position.set(rx, railY, 0);
+      rail.castShadow = true;
+      root.add(rail);
     });
 
-    // 3. Front Faceplate with Trane Logo, louvers, device info & RJ45 port
-    const frontTex = createTraneUnitFrontTexture(
-      instanceData.hostname || spec.defaultHostname,
-      instanceData.ip || spec.defaultIp,
-      instanceData.port
-    );
+    // 3. Front Faceplate with High-Res Texture from trane AC.webp (Louvers + Dual Doors + Red TRANE Emblem)
+    const traneFrontTex = loadProductTexture('./assets/textures/trane_ac_front.jpg');
     const frontFace = new THREE.Mesh(
-      new THREE.PlaneGeometry(w * 0.96, h * 0.88),
-      new THREE.MeshStandardMaterial({ map: frontTex, roughness: 0.35, metalness: 0.25 })
+      new THREE.PlaneGeometry(w * 0.98, h * 0.94),
+      new THREE.MeshStandardMaterial({
+        map: traneFrontTex,
+        roughness: 0.42,
+        metalness: 0.22
+      })
     );
     frontFace.name = 'traneFrontFace';
-    frontFace.position.set(0, h * 0.04, d / 2 + 0.005);
+    frontFace.position.set(0, h * 0.03, d * 0.49 + 0.005);
     root.add(frontFace);
 
-    // 4. Top Roof Lid with recessed exhaust fan cowling
-    const roofLid = new THREE.Mesh(new THREE.BoxGeometry(w + 0.04, 0.05, d + 0.04), MAT.anthracite);
-    roofLid.position.set(0, h / 2 + 0.02, 0);
-    root.add(roofLid);
+    // Dynamic Device Tag Plate on lower right access door
+    const tagTex = createTraneTagTexture(
+      instanceData.hostname || spec.defaultHostname,
+      instanceData.ip || spec.defaultIp
+    );
+    const tagPlate = new THREE.Mesh(
+      new THREE.PlaneGeometry(w * 0.34, h * 0.14),
+      new THREE.MeshBasicMaterial({ map: tagTex, transparent: true })
+    );
+    tagPlate.name = 'traneTagPlate';
+    tagPlate.position.set(w * 0.22, -h * 0.22, d * 0.49 + 0.012);
+    root.add(tagPlate);
 
-    // Top Circular Exhaust Cowling
-    const fanCowl = new THREE.Mesh(new THREE.CylinderGeometry(w * 0.3, w * 0.33, 0.06, 24), MAT.darkChassis);
-    fanCowl.position.set(0, h / 2 + 0.06, 0);
-    const fanGrill = new THREE.Mesh(new THREE.CylinderGeometry(w * 0.28, w * 0.28, 0.07, 16), MAT.silverMetal);
-    fanGrill.position.set(0, h / 2 + 0.065, 0);
-    root.add(fanCowl, fanGrill);
-
-    // 5. Side service panel ventilation slots
+    // 4. Side Faces with High-Res Louver & Service Panel Texture from trane AC.webp
+    const traneSideTex = loadProductTexture('./assets/textures/trane_ac_side.jpg');
     [-1, 1].forEach((side) => {
-      const sideGrill = new THREE.Mesh(new THREE.PlaneGeometry(d * 0.65, h * 0.45), MAT.portDark);
-      sideGrill.rotation.y = (side * Math.PI) / 2;
-      sideGrill.position.set(side * (w / 2 + 0.003), h * 0.05, 0);
-      root.add(sideGrill);
+      const sideFace = new THREE.Mesh(
+        new THREE.PlaneGeometry(d * 0.98, h * 0.94),
+        new THREE.MeshStandardMaterial({
+          map: traneSideTex,
+          roughness: 0.45,
+          metalness: 0.2
+        })
+      );
+      sideFace.rotation.y = (side * Math.PI) / 2;
+      sideFace.position.set(side * (w * 0.49 + 0.005), h * 0.03, 0);
+      root.add(sideFace);
     });
+
+    // 5. Rear Face (Louvered ventilation intake)
+    const rearFace = new THREE.Mesh(
+      new THREE.PlaneGeometry(w * 0.98, h * 0.94),
+      new THREE.MeshStandardMaterial({
+        map: traneFrontTex,
+        roughness: 0.45,
+        metalness: 0.2
+      })
+    );
+    rearFace.rotation.y = Math.PI;
+    rearFace.position.set(0, h * 0.03, -d * 0.49 - 0.005);
+    root.add(rearFace);
+
+    // 6. Top Roof Lid with High-Res Spiral Fan & Water Drainage Texture from trane AC.webp
+    const traneTopTex = loadProductTexture('./assets/textures/trane_ac_top.jpg');
+    const topPlate = new THREE.Mesh(
+      new THREE.PlaneGeometry(w * 0.98, d * 0.98),
+      new THREE.MeshStandardMaterial({
+        map: traneTopTex,
+        roughness: 0.4,
+        metalness: 0.25
+      })
+    );
+    topPlate.rotation.x = -Math.PI / 2;
+    topPlate.position.set(0, h / 2 + 0.005, 0);
+    root.add(topPlate);
+
+    // Extruded circular cowl rim around the top fan
+    const cowlRim = new THREE.Mesh(
+      new THREE.CylinderGeometry(w * 0.34, w * 0.35, 0.035, 32, 1, true),
+      MAT.traneDarkTrim
+    );
+    cowlRim.position.set(0, h / 2 + 0.02, 0);
+    root.add(cowlRim);
+
+    // 7. Ethernet RJ45 Connection Port on Service Panel (Right side)
+    const portCage = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.035, 0.04), MAT.silverMetal);
+    portCage.position.set(w * 0.49 + 0.015, -h * 0.18, d * 0.32);
+    const portJack = new THREE.Mesh(new THREE.BoxGeometry(0.02, 0.02, 0.02), MAT.portDark);
+    portJack.position.set(w * 0.49 + 0.028, -h * 0.18, d * 0.32);
+    const ethLed = new THREE.Mesh(new THREE.BoxGeometry(0.01, 0.01, 0.01), MAT.ledCyan);
+    ethLed.position.set(w * 0.49 + 0.028, -h * 0.155, d * 0.32);
+    root.add(portCage, portJack, ethLed);
   } else if (id === 'atm-kiosk-24-7') {
     // ================= 3D ATM 24/7 KIOSK ("BANK YOUR WAY") =================
     const atmGreenMat = new THREE.MeshStandardMaterial({

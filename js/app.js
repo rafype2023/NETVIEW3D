@@ -10,7 +10,8 @@ import {
   createDataPortTubeTexture,
   createVirtualServerFrontTexture,
   createCameraNumberTexture,
-  createTraneUnitFrontTexture
+  createTraneUnitFrontTexture,
+  createTraneTagTexture
 } from './models3d.js';
 
 const RAD2DEG = 180 / Math.PI;
@@ -1867,14 +1868,13 @@ class NetVisio3DApp {
         }
 
         if (spec.id === 'trane-ahu-unit') {
-          const frontMesh = node.group.getObjectByName('traneFrontFace');
-          if (frontMesh && frontMesh.material) {
-            frontMesh.material.map = createTraneUnitFrontTexture(
+          const tagPlate = node.group.getObjectByName('traneTagPlate');
+          if (tagPlate && tagPlate.material) {
+            tagPlate.material.map = createTraneTagTexture(
               node.data.hostname,
-              node.data.ip,
-              node.data.port
+              node.data.ip
             );
-            frontMesh.material.needsUpdate = true;
+            tagPlate.material.needsUpdate = true;
           }
         }
 
